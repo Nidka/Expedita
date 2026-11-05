@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input'
 import { useContenedor, useDatos } from '../contexto'
 import { Campo } from './base'
+import { exito } from '../notificar'
 
 export function AgregarExpediente({ abierto, cerrar }: { abierto: boolean; cerrar: () => void }) {
   const c = useContenedor()
@@ -33,7 +34,7 @@ export function AgregarExpediente({ abierto, cerrar }: { abierto: boolean; cerra
     setGuardando(true)
     try {
       const e = await agregarExpediente(c, { numero, codigo, cliente, materia })
-      toast.success('Expediente agregado', { description: e.numero })
+      exito('Expediente agregado', { descripcion: e.numero, pose: 'libros' })
       cerrar()
       navegar(`/expedientes/${e.id}`)
     } catch (e) {

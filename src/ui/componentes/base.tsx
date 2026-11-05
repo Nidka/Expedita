@@ -121,7 +121,7 @@ export function Seccion({
 /** Lista agrupada con separadores (inset grouped). */
 export function Lista({ children, className, etiqueta }: { children: ReactNode; className?: string; etiqueta?: string }) {
   return (
-    <ul aria-label={etiqueta} className={cn('overflow-hidden rounded-xl bg-card shadow-[0_0_0_1px_var(--border)]', className)}>
+    <ul aria-label={etiqueta} className={cn('escalonar overflow-hidden rounded-xl bg-card shadow-[0_0_0_1px_var(--border)]', className)}>
       {children}
     </ul>
   )
@@ -154,7 +154,7 @@ export function Fila({
         {detalle && <span className="text-sm text-foreground/80">{detalle}</span>}
       </span>
       {fin && <span className="flex shrink-0 items-center gap-2">{fin}</span>}
-      {a && <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground/60" aria-hidden />}
+      {a && <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground/60 transition-transform duration-200 ease-(--ease-apple) group-hover:translate-x-0.5 group-hover:text-muted-foreground" aria-hidden />}
     </>
   )
   const base = 'flex min-h-12 items-center gap-4 px-5 py-3.5'
@@ -163,7 +163,7 @@ export function Fila({
       {a ? (
         <Link
           to={a}
-          className={cn(base, 'outline-none transition-colors hover:bg-muted/60 focus-visible:bg-muted focus-visible:outline-none active:bg-muted')}
+          className={cn(base, 'group outline-none transition-colors duration-150 hover:bg-muted/60 focus-visible:bg-muted focus-visible:outline-none active:bg-muted')}
         >
           {contenido}
         </Link>

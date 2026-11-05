@@ -1,34 +1,65 @@
 import { useState, type FormEvent } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { useContenedor } from '../contexto'
 import { Campo } from '../componentes/base'
 import { Michi } from '../componentes/marca'
 
+const BENEFICIOS: { icono: string; titulo: string; texto: string }[] = [
+  { icono: 'icono-balanza', titulo: 'Plazos en días hábiles', texto: 'Feriados, inhábiles y efecto de la casilla electrónica incluidos.' },
+  { icono: 'icono-pergamino', titulo: 'Notificaciones con su plazo', texto: 'Pega el aviso del SINOE y el vencimiento queda en la agenda.' },
+  { icono: 'icono-libro', titulo: 'Todo el expediente en un lugar', texto: 'Acciones, audiencias, visitas y el historial del impulso.' },
+]
+
+const ILUSTRACIONES = import.meta.glob<string>('../../assets/michi/icono-*.webp', { eager: true, import: 'default', query: '?url' })
+
 function Marco({ titulo, descripcion, children }: { titulo: string; descripcion: string; children: React.ReactNode }) {
   return (
-    <main className="grid min-h-dvh place-items-center bg-background px-4 py-10">
-      <div className="w-full max-w-sm">
-        <div className="mb-8 flex flex-col items-center gap-3 text-center">
-          <Michi pose="saludando" className="size-32" />
-          <div>
-            <p className="text-2xl font-bold tracking-tight">Expedita</p>
-            <p className="text-sm text-muted-foreground">Ningún plazo del Poder Judicial se te pasa</p>
-          </div>
+    <div className="grid min-h-dvh bg-background lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
+      {/* Panel de marca (escritorio) */}
+      <aside className="relative hidden overflow-hidden bg-primary text-primary-foreground lg:flex lg:flex-col lg:justify-between lg:p-14" aria-label="Expedita">
+        <div className="flex items-center gap-2.5">
+          <Michi pose="sentado" className="size-10 [filter:drop-shadow(0_0_1px_rgb(255_255_255/0.6))]" />
+          <span className="text-lg font-bold tracking-tight">Expedita</span>
         </div>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl font-bold">
-              <h1>{titulo}</h1>
-            </CardTitle>
-            <CardDescription>{descripcion}</CardDescription>
-          </CardHeader>
-          <CardContent>{children}</CardContent>
-        </Card>
-      </div>
-    </main>
+        <div className="grid max-w-md gap-10">
+          <div className="animate-entrar">
+            <p className="text-[2.5rem] leading-[1.1] font-bold tracking-tight">Ningún plazo del Poder Judicial se te pasa.</p>
+            <p className="mt-4 text-[1.0625rem] text-primary-foreground/75">Procuración judicial para estudios que litigan en el Perú.</p>
+          </div>
+          <ul className="escalonar grid gap-6">
+            {BENEFICIOS.map((b) => (
+              <li key={b.titulo} className="flex items-start gap-4">
+                <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-white/10">
+                  <img src={ILUSTRACIONES[`../../assets/michi/${b.icono}.webp`]} alt="" className="size-9 object-contain" />
+                </span>
+                <span>
+                  <span className="block font-semibold">{b.titulo}</span>
+                  <span className="block text-sm text-primary-foreground/70">{b.texto}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <Michi pose="leyendo" className="pointer-events-none absolute -right-6 bottom-6 size-56 opacity-95 [filter:drop-shadow(0_0_1px_rgb(255_255_255/0.5))]" />
+      </aside>
+
+      {/* Formulario */}
+      <main className="grid place-items-center px-6 py-12">
+        <div className="w-full max-w-sm animate-entrar">
+          <div className="mb-8 flex flex-col items-center gap-2 text-center lg:items-start lg:text-left">
+            <Michi pose="saludando" className="size-24 lg:hidden" />
+            <h1 className="text-[1.75rem] font-bold tracking-tight">{titulo}</h1>
+            <p className="text-[0.9375rem] text-muted-foreground">{descripcion}</p>
+          </div>
+          {children}
+          <p className="mt-10 text-center text-xs text-muted-foreground lg:text-left">
+            Tus datos y los de tus clientes quedan solo en el espacio de tu estudio.
+          </p>
+        </div>
+      </main>
+    </div>
   )
 }
 

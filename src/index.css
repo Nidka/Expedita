@@ -208,7 +208,46 @@
   }
 }
 
+/* ---------- Movimiento ----------
+ * Curvas tipo Apple: salida rápida y asentamiento suave. Duraciones cortas (180–320 ms).
+ * Todo se anula con prefers-reduced-motion (ver @layer base).
+ */
+@theme {
+  --ease-apple: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-entrar: entrar 320ms var(--ease-apple) both;
+  --animate-flotar: flotar 4s ease-in-out infinite;
+  --animate-brillo: brillo 1.6s linear infinite;
+  @keyframes entrar {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes flotar {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+  @keyframes brillo {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+  }
+}
+
 @layer utilities {
+  /* Entrada escalonada de los hijos directos (listas): 40 ms entre cada uno, máximo 12. */
+  .escalonar > * { animation: entrar 320ms var(--ease-apple) both; }
+  .escalonar > :nth-child(2) { animation-delay: 40ms; }
+  .escalonar > :nth-child(3) { animation-delay: 80ms; }
+  .escalonar > :nth-child(4) { animation-delay: 120ms; }
+  .escalonar > :nth-child(5) { animation-delay: 160ms; }
+  .escalonar > :nth-child(6) { animation-delay: 200ms; }
+  .escalonar > :nth-child(7) { animation-delay: 240ms; }
+  .escalonar > :nth-child(8) { animation-delay: 280ms; }
+  .escalonar > :nth-child(n + 9) { animation-delay: 320ms; }
+  /* Esqueleto de carga con brillo que recorre */
+  .brillo {
+    background: linear-gradient(90deg, var(--muted) 25%, color-mix(in oklab, var(--muted) 60%, var(--card)) 50%, var(--muted) 75%);
+    background-size: 200% 100%;
+    animation: var(--animate-brillo);
+  }
   /* Espacio para la barra de pestañas inferior en celular + zona segura del iPhone */
   .pb-tabbar { padding-bottom: calc(5rem + env(safe-area-inset-bottom)); }
   .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
@@ -221,4 +260,11 @@
   @media (prefers-reduced-transparency: reduce) {
     .material { background: var(--background); backdrop-filter: none; -webkit-backdrop-filter: none; }
   }
+}
+
+/* Notificaciones con Michi: el ícono puede ser más grande que el estándar de 16 px */
+[data-sonner-toast] [data-icon]:has(img) {
+  width: auto;
+  height: auto;
+  margin-inline-end: 0.25rem;
 }

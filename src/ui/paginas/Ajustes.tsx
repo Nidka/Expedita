@@ -15,6 +15,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useContenedor, useDatos } from '../contexto'
 import { Campo, EncabezadoPagina, EstadoVacio, SelectNativo } from '../componentes/base'
 import { etiquetaExp, fecha, plural } from '../formato'
+import { exito } from '../notificar'
 
 function Equipo() {
   const c = useContenedor()
@@ -227,8 +228,9 @@ function Importar() {
     setTrabajando(true)
     try {
       const r = await importarExpedientes(c, resultado.expedientes)
-      toast.success(`${plural(r.creados, 'expediente importado', 'expedientes importados')}`, {
-        description: r.omitidos.length ? `${r.omitidos.length} ya existían y no se tocaron.` : undefined,
+      exito(`${plural(r.creados, 'expediente importado', 'expedientes importados')}`, {
+        pose: 'libros',
+        descripcion: r.omitidos.length ? `${r.omitidos.length} ya existían y no se tocaron.` : undefined,
       })
       setResultado(null)
     } catch (e) {

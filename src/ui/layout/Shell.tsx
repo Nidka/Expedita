@@ -95,7 +95,7 @@ function BarraLateral() {
                   <SidebarMenuButton
                     isActive={activo(a)}
                     tooltip={texto}
-                    className="h-9 rounded-lg text-[0.9375rem] data-active:bg-sidebar-accent data-active:font-semibold data-active:text-sidebar-accent-foreground"
+                    className="h-9 rounded-lg text-[0.9375rem] transition-colors duration-150 data-active:bg-sidebar-accent data-active:font-semibold data-active:text-sidebar-accent-foreground"
                     render={<NavLink to={a} end={a === '/'} />}
                   >
                     <Icono aria-hidden className={cn(activo(a) && 'text-sidebar-primary')} />
@@ -236,7 +236,9 @@ export function Shell() {
           </div>
         </header>
         <main id="contenido" tabIndex={-1} className="pb-tabbar mx-auto w-full max-w-6xl px-5 pt-8 outline-none sm:px-8 md:pb-16 lg:px-12 lg:pt-14">
-          <Outlet />
+          <div key={pathname} className="animate-entrar">
+            <Outlet />
+          </div>
         </main>
       </SidebarInset>
       <BarraPestanas abrirMas={() => setMas(true)} />

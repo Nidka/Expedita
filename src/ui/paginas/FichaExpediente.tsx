@@ -315,7 +315,7 @@ export function FichaExpediente() {
               Historial
             </h2>
             {historial.length === 0 ? (
-              <EstadoVacio titulo="Sin movimientos registrados">Registra la primera acción de impulso.</EstadoVacio>
+              <EstadoVacio pose="martillo" titulo="Sin movimientos registrados">Registra la primera acción de impulso.</EstadoVacio>
             ) : (
               <ol className="relative grid gap-4 border-l pl-5">
                 {historial.map((h) => (

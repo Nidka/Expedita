@@ -16,6 +16,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useContenedor, useDatos } from '../contexto'
 import { BotonEnlace, Campo, DiasRestantes, EncabezadoPagina, EstadoVacio, Lista, Mono, SelectNativo } from '../componentes/base'
 import { etiquetaExp, fecha } from '../formato'
+import { exito } from '../notificar'
 
 function NuevaNotificacion({ abierto, cerrar }: { abierto: boolean; cerrar: () => void }) {
   const c = useContenedor()
@@ -84,7 +85,7 @@ function NuevaNotificacion({ abierto, cerrar }: { abierto: boolean; cerrar: () =
         resumen: resumen || undefined,
         texto: texto || undefined,
       })
-      toast.success(r.expedienteCreado ? 'Notificación guardada y expediente creado' : 'Notificación guardada')
+      exito(r.expedienteCreado ? 'Notificación guardada y expediente creado' : 'Notificación guardada', { pose: 'documento' })
       cerrar()
     } catch (e) {
       toast.error((e as Error).message)

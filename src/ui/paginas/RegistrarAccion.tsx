@@ -12,6 +12,7 @@ import { useContenedor, useDatos } from '../contexto'
 import { Campo, EncabezadoPagina, SelectNativo } from '../componentes/base'
 import { SelectorExpediente } from '../componentes/SelectorExpediente'
 import { etiquetaExp, fecha as fmtFecha } from '../formato'
+import { exito } from '../notificar'
 
 const CLAVE_RESPONSABLE = 'expedita.responsable'
 
@@ -83,7 +84,7 @@ export function RegistrarAccion() {
       } catch {
         /* sin almacenamiento */
       }
-      toast.success('Acción registrada', { description: etiquetaExp(exp) })
+      exito('Acción registrada', { descripcion: etiquetaExp(exp), pose: 'martillo' })
       navegar(`/expedientes/${exp!.id}`)
     } catch (e) {
       toast.error((e as Error).message)

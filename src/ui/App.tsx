@@ -7,6 +7,7 @@ import { Shell } from './layout/Shell'
 import { CrearEstudio, IniciarSesion } from './paginas/Acceso'
 import { Inicio } from './paginas/Inicio'
 import { EstadoVacio } from './componentes/base'
+import { Michi } from './componentes/marca'
 
 const Expedientes = lazy(() => import('./paginas/Expedientes').then((m) => ({ default: m.Expedientes })))
 const FichaExpediente = lazy(() => import('./paginas/FichaExpediente').then((m) => ({ default: m.FichaExpediente })))
@@ -51,8 +52,11 @@ export function App() {
 
   if (estado.tipo === 'cargando')
     return (
-      <div className="p-8">
-        <Cargando />
+      <div className="grid min-h-dvh place-items-center bg-background" role="status" aria-label="Cargando Expedita">
+        <div className="flex flex-col items-center gap-3 animate-entrar">
+          <Michi pose="corriendo" className="size-28" />
+          <p className="text-sm text-muted-foreground">Abriendo tu estudio…</p>
+        </div>
       </div>
     )
   if (estado.tipo === 'anonimo') return <IniciarSesion alEntrar={comprobar} />

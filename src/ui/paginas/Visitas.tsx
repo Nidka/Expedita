@@ -6,6 +6,7 @@ import { guardarResultadosVisita, programarVisitas } from '@/application/casos-u
 import type { Visita } from '@/domain/entidades'
 import { agruparPorJuzgado, DISTRITOS_LIMA, esSoloImpulso, hojaDeRuta, motivoVisita } from '@/domain/visitas/juzgados'
 import { Button } from '@/components/ui/button'
+import { exito } from '../notificar'
 
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
@@ -74,7 +75,7 @@ function Planificar() {
         responsable,
         sedes,
       })
-      toast.success(`${plural(v.length, 'visita programada', 'visitas programadas')} para el ${fecha(fechaVisita)}`)
+      exito(`${plural(v.length, 'visita programada', 'visitas programadas')} para el ${fecha(fechaVisita)}`, { pose: 'caminando' })
       setSel(new Set())
     } catch (e) {
       toast.error((e as Error).message)
@@ -261,7 +262,7 @@ function VisitaProgramada({ visita }: { visita: Visita }) {
     setGuardando(true)
     try {
       const n = await guardarResultadosVisita(c, visita, borrador)
-      toast.success(n ? `${plural(n, 'acción registrada', 'acciones registradas')} en los historiales` : 'Resultados guardados')
+      exito(n ? `${plural(n, 'acción registrada', 'acciones registradas')} en los historiales` : 'Resultados guardados', { pose: 'feliz' })
     } catch (e) {
       toast.error((e as Error).message)
     } finally {

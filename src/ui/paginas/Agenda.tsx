@@ -16,6 +16,7 @@ import { useContenedor, useDatos, type Datos } from '../contexto'
 import { Campo, EncabezadoPagina, EstadoVacio, SelectNativo } from '../componentes/base'
 import { SelectorExpediente } from '../componentes/SelectorExpediente'
 import { etiquetaExp, fecha, fechaLarga, mes } from '../formato'
+import { exito } from '../notificar'
 
 type Clase = 'plazo' | 'vencido' | 'audiencia' | 'visita' | 'proxima'
 interface ItemDia extends EventoAgenda {
@@ -239,7 +240,7 @@ function DialogoAudiencia({ inicial, id, cerrar }: { inicial: FormAudiencia; id?
     try {
       if (id) await c.audiencias.actualizar(id, f)
       else await c.audiencias.crear(f)
-      toast.success(id ? 'Audiencia actualizada' : 'Audiencia programada')
+      exito(id ? 'Audiencia actualizada' : 'Audiencia programada', { pose: 'balanza' })
       cerrar()
     } catch (e) {
       toast.error((e as Error).message)
@@ -359,7 +360,7 @@ export function Agenda() {
             Próximas audiencias
           </h2>
           {proximas.length === 0 ? (
-            <EstadoVacio titulo="No hay audiencias programadas" />
+            <EstadoVacio pose="balanza" titulo="No hay audiencias programadas">Prográmalas desde aquí o desde la ficha del expediente.</EstadoVacio>
           ) : (
             <ul className="divide-y overflow-hidden rounded-xl border bg-card">
               {proximas.map((a) => {
