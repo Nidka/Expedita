@@ -1,0 +1,40 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Secretos y datos de clientes: nunca al repositorio
+.env
+.env.*
+!.env.example
+*.xlsx
+*.xls
+*.csv
+*.ics
+supabase/.temp
+supabase/.branches
+
+# Contiene datos reales de clientes: solo local mientras el repo sea público
+docs/traspaso.md
+# Prototipo de claude.ai (contiene datos de la cuenta): solo local
+prototipo/
