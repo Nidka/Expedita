@@ -1,0 +1,47 @@
+# Respaldo nocturno de la base de datos de Supabase.
+# - Corre todos los días a las 03:00 de Lima (08:00 UTC) y también a mano (Actions → Run workflow).
+# - El volcado se CIFRA (AES-256) antes de guardarse: contiene datos personales (Ley 29733).
+# - Se guarda como artefacto del flujo durante 30 días. El repositorio debe ser PRIVADO.
+# - Además mantiene activo el proyecto gratuito de Supabase (que se pausa tras 7 días sin uso).
+# Secretos necesarios (Settings → Secrets and variables → Actions):
+#   SUPABASE_DB_URL  cadena de conexión «Session pooler» de Supabase (incluye la contraseña)
+#   RESPALDO_CLAVE   frase larga para cifrar; guárdala también fuera de GitHub
+name: Respaldo nocturno
+
+on:
+  schedule:
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  respaldo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Volcar y cifrar la base de datos
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          RESPALDO_CLAVE: ${{ secrets.RESPALDO_CLAVE }}
+        run: |
+          set -euo pipefail
+          if [ -z "$SUPABASE_DB_URL" ] || [ -z "$RESPALDO_CLAVE" ]; then
+            echo "Faltan los secretos SUPABASE_DB_URL o RESPALDO_CLAVE"; exit 1
+          fi
+          fecha=$(date -u +%Y-%m-%d)
+          docker run --rm -e URL="$SUPABASE_DB_URL" postgres:17 \
+            sh -c 'pg_dump "$URL" --schema=public --no-owner --no-privileges --format=custom' > respaldo.dump
+          test -s respaldo.dump
+          openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt -pass env:RESPALDO_CLAVE \
+            -in respaldo.dump -out "expedita-$fecha.dump.enc"
+          rm respaldo.dump
+          ls -lh "expedita-$fecha.dump.enc"
+
+      - name: Guardar el respaldo cifrado
+        uses: actions/upload-artifact@v4
+        with:
+          name: respaldo-expedita-${{ github.run_number }}
+          path: expedita-*.dump.enc
+          retention-days: 30
