@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { EllipsisIcon, LogOutIcon, PenLineIcon, SearchIcon } from '@/ui/iconos'
 import {
@@ -77,10 +77,38 @@ function Usuario({ compacto = false }: { compacto?: boolean }) {
 }
 
 /** Barra lateral de escritorio (un solo nivel). */
+/** Insignia con un pequeño «salto» cada vez que cambia el número. */
+function Insignia({ n, className }: { n: number; className?: string }) {
+  return (
+    <span key={n} className={cn('inline-block animate-[saltar_360ms_var(--ease-apple)]', className)}>
+      {n}
+    </span>
+  )
+}
+
 function BarraLateral() {
   const pendientes = usePendientes()
   const activo = useActivo()
   const items = useVisibles()
+  const { pathname } = useLocation()
+  const menu = useRef<HTMLUListElement>(null)
+  const [marca, setMarca] = useState<{ top: number; height: number } | null>(null)
+
+  // Un solo resaltado que se desliza hasta el ítem activo
+  useLayoutEffect(() => {
+    const medir = () => {
+      const lista = menu.current
+      const el = lista?.querySelector<HTMLElement>('[aria-current="page"]')
+      if (!lista || !el) return setMarca(null)
+      // Posición relativa al menú (offsetTop sería relativo al <li>, que también es «relative»)
+      const r = el.getBoundingClientRect()
+      setMarca({ top: r.top - lista.getBoundingClientRect().top + lista.offsetTop, height: r.height })
+    }
+    medir()
+    window.addEventListener('resize', medir)
+    return () => window.removeEventListener('resize', medir)
+  }, [pathname, items.length])
+
   return (
     <Sidebar collapsible="icon" aria-label="Navegación principal" className="border-r-0">
       <SidebarHeader className="px-3 pt-5 pb-3">
@@ -88,22 +116,31 @@ function BarraLateral() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu className="gap-0.5">
+          <SidebarGroupContent className="relative">
+            {marca && (
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 rounded-md bg-sidebar-accent/70 transition-[top,height] duration-300 ease-(--ease-apple)"
+                style={{ top: marca.top, height: marca.height }}
+              >
+                <span className="absolute inset-y-1.5 left-0 w-[3px] rounded-full bg-ocre group-data-[collapsible=icon]:hidden" />
+              </span>
+            )}
+            <SidebarMenu ref={menu} className="relative gap-0.5">
               {items.map(({ a, texto, icono: Icono, insignia }) => (
                 <SidebarMenuItem key={a}>
                   <SidebarMenuButton
                     isActive={activo(a)}
                     tooltip={texto}
-                    className="relative h-9 rounded-md pl-3 text-[0.9375rem] transition-colors duration-150 data-active:bg-sidebar-accent/70 data-active:font-semibold data-active:text-sidebar-accent-foreground data-active:before:absolute data-active:before:inset-y-1.5 data-active:before:left-0 data-active:before:w-[3px] data-active:before:rounded-full data-active:before:bg-ocre group-data-[collapsible=icon]:data-active:before:hidden"
+                    className="h-9 rounded-md pl-3 text-[0.9375rem] transition-colors duration-150 hover:bg-sidebar-accent/40 data-active:bg-transparent data-active:font-semibold data-active:text-sidebar-accent-foreground data-active:hover:bg-transparent"
                     render={<NavLink to={a} end={a === '/'} />}
                   >
-                    <Icono aria-hidden weight={activo(a) ? 'fill' : 'regular'} className={cn('size-[1.125rem]', activo(a) && 'text-sidebar-primary')} />
+                    <Icono aria-hidden weight={activo(a) ? 'fill' : 'regular'} className={cn('size-[1.125rem] transition-colors', activo(a) && 'text-sidebar-primary')} />
                     <span>{texto}</span>
                   </SidebarMenuButton>
                   {insignia && pendientes > 0 && (
                     <SidebarMenuBadge className="rounded-full bg-berry px-1.5 text-[0.6875rem] font-semibold text-white" aria-label={`${pendientes} pendientes`}>
-                      {pendientes}
+                      <Insignia n={pendientes} />
                     </SidebarMenuBadge>
                   )}
                 </SidebarMenuItem>
@@ -191,11 +228,24 @@ function HojaMas({ abierta, cerrar }: { abierta: boolean; cerrar: () => void }) 
   )
 }
 
+/** true cuando la página se ha desplazado: el encabezado muestra su borde y fondo solo entonces (como en macOS). */
+function useDesplazado() {
+  const [d, setD] = useState(false)
+  useLayoutEffect(() => {
+    const f = () => setD(window.scrollY > 8)
+    f()
+    window.addEventListener('scroll', f, { passive: true })
+    return () => window.removeEventListener('scroll', f)
+  }, [])
+  return d
+}
+
 export function Shell() {
   const [buscar, setBuscar] = useState(false)
   const [mas, setMas] = useState(false)
   const { pathname } = useLocation()
   // En Registrar y en la ficha (que tiene su botón contextual) no se repite la acción global.
+  const desplazado = useDesplazado()
   const enRegistrar = pathname.startsWith('/registrar') || /^\/expedientes\/[^/]+/.test(pathname)
 
   return (
@@ -208,7 +258,7 @@ export function Shell() {
       </a>
       <BarraLateral />
       <SidebarInset className="bg-background">
-        <header className="material sticky top-0 z-30 border-b border-separator">
+        <header className={cn("material sticky top-0 z-30 border-b transition-[border-color,background-color] duration-200", desplazado ? "border-separator" : "border-transparent bg-transparent backdrop-blur-none")}>
           <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-5 sm:px-8 lg:px-12">
             <span className="flex items-center gap-2 md:hidden">
               <Michi pose="sentado" className="size-8" />

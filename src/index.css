@@ -233,6 +233,14 @@
     from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: none; }
   }
+  @keyframes saltar {
+    0% { transform: scale(0.6); }
+    60% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+  @keyframes llenar {
+    from { transform: scaleX(0); }
+  }
   @keyframes flotar {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-4px); }

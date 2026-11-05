@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import { useDatos } from '../contexto'
 import { BotonEnlace, EstadoVacio, Fila, Lista, Seccion, Vence, fechaCorta } from '../componentes/base'
 import { Contador } from '../componentes/Contador'
+import { Semana } from '../componentes/Semana'
 import { Michi, type Pose } from '../componentes/marca'
 import { etiquetaExp, fecha, fechaLarga, plural } from '../formato'
 
@@ -123,7 +124,7 @@ export function Inicio() {
       {/* Resumen en una sola banda */}
       <nav
         aria-label="Resumen"
-        className="mb-12 grid grid-cols-2 overflow-hidden rounded-xl bg-card shadow-[0_0_0_1px_var(--border)] lg:grid-cols-4"
+        className="mb-10 grid grid-cols-2 overflow-hidden rounded-xl bg-card shadow-[0_0_0_1px_var(--border)] lg:grid-cols-4"
       >
         {resumen.map((v, i) => (
           <Link
@@ -149,6 +150,26 @@ export function Inicio() {
         ))}
       </nav>
 
+      <section aria-labelledby="titulo-semana" className="mb-12 grid gap-3">
+        <div className="flex items-baseline justify-between gap-2 px-1">
+          <h2 id="titulo-semana" className="text-[1.0625rem] font-semibold">
+            Próximos 7 días
+          </h2>
+          <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground" aria-hidden>
+            <span className="flex items-center gap-1.5">
+              <span className="size-1.5 rounded-full bg-ocre" /> Plazos
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="size-1.5 rounded-full bg-azul-pj" /> Audiencias
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="size-1.5 rounded-full bg-success" /> Visitas
+            </span>
+          </span>
+        </div>
+        <Semana />
+      </section>
+
       <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_21rem]">
         <div className="grid content-start gap-10">
           {d.cargando ? (
@@ -164,7 +185,7 @@ export function Inicio() {
           ) : (
             <>
               <Bloque titulo="Vencidos" items={vencidos} />
-              <Bloque titulo="Esta semana" items={semana} />
+              <Bloque titulo="Por vencer" items={semana} />
               <Bloque
                 titulo="Seguimiento"
                 items={seguimiento}
