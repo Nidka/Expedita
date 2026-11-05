@@ -73,7 +73,7 @@ export function App() {
               <Route path="visitas" element={<Visitas />} />
               <Route path="asistente" element={<Asistente />} />
               <Route path="ajustes" element={<Ajustes />} />
-              <Route path="*" element={<EstadoVacio titulo="Página no encontrada" />} />
+              <Route path="*" element={<EstadoVacio pose="espaldas" titulo="Esta página no existe">Revisa el enlace o vuelve a Hoy.</EstadoVacio>} />
             </Route>
           </Routes>
         </Suspense>

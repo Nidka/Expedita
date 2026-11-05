@@ -352,7 +352,7 @@ export function Agenda() {
           </>
         }
       />
-      <div className="grid gap-6">
+      <div className="grid gap-10">
         <Calendario items={items} />
         <section aria-labelledby="titulo-audiencias">
           <h2 id="titulo-audiencias" className="mb-3 text-lg font-semibold">

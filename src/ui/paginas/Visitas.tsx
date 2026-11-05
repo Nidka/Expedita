@@ -178,7 +178,7 @@ function Planificar() {
       )}
 
       {sel.size > 0 && (
-        <div className="material fixed inset-x-0 bottom-[calc(3.75rem+env(safe-area-inset-bottom))] z-30 border-t p-3 shadow-lg md:bottom-0 md:left-(--sidebar-width)">
+        <div className="material fixed inset-x-0 bottom-[calc(3.75rem+env(safe-area-inset-bottom))] z-30 border-t p-3 md:bottom-0 md:left-(--sidebar-width)">
           <div className="mx-auto flex max-w-6xl flex-wrap items-end gap-3">
             <Campo etiqueta="Fecha de visita">
               {(p) => <Input {...p} type="date" value={fechaVisita} min={d.hoy} onChange={(e) => setFechaVisita(e.target.value)} />}
@@ -321,7 +321,7 @@ function Programadas() {
 
   if (!porFecha.length) return <EstadoVacio titulo="No hay visitas programadas">Marca expedientes en «Planificar» y elige la fecha.</EstadoVacio>
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-10">
       {porFecha.map(([f, visitas]) => (
         <section key={f} aria-labelledby={`dia-${f}`} className="grid gap-3">
           <div className="flex flex-wrap items-center justify-between gap-2">

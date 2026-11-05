@@ -5,7 +5,7 @@ import type { Severidad } from '@/domain/agenda/que-toca-hoy'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
-import { Michi } from './marca'
+import { Michi, type Pose } from './marca'
 
 /** Campo de formulario accesible: etiqueta, ayuda y error asociados al control. */
 export function Campo({
@@ -81,7 +81,7 @@ export function EncabezadoPagina({
   antetitulo?: ReactNode
 }) {
   return (
-    <header className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
+    <header className="mb-8 flex flex-col gap-5 sm:mb-12 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
         {antetitulo && <div className="mb-1 text-sm text-muted-foreground">{antetitulo}</div>}
         <h1 className="text-[1.75rem] leading-tight font-bold sm:text-[2rem]">{titulo}</h1>
@@ -106,7 +106,7 @@ export function Seccion({
 }) {
   const id = useId()
   return (
-    <section aria-labelledby={id} className={cn('grid content-start gap-2.5', className)}>
+    <section aria-labelledby={id} className={cn('grid content-start gap-3', className)}>
       <div className="flex items-center justify-between gap-2 px-1">
         <h2 id={id} className="text-[0.8125rem] font-semibold tracking-wide text-muted-foreground uppercase">
           {titulo}
@@ -121,7 +121,7 @@ export function Seccion({
 /** Lista agrupada con separadores (inset grouped). */
 export function Lista({ children, className, etiqueta }: { children: ReactNode; className?: string; etiqueta?: string }) {
   return (
-    <ul aria-label={etiqueta} className={cn('overflow-hidden rounded-2xl bg-card shadow-[0_0_0_1px_var(--border)]', className)}>
+    <ul aria-label={etiqueta} className={cn('overflow-hidden rounded-xl bg-card shadow-[0_0_0_1px_var(--border)]', className)}>
       {children}
     </ul>
   )
@@ -157,7 +157,7 @@ export function Fila({
       {a && <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground/60" aria-hidden />}
     </>
   )
-  const base = 'flex min-h-11 items-center gap-3 px-4 py-3'
+  const base = 'flex min-h-12 items-center gap-4 px-5 py-3.5'
   return (
     <li className={cn('border-b border-separator last:border-b-0', className)}>
       {a ? (
@@ -174,10 +174,10 @@ export function Fila({
   )
 }
 
-export function EstadoVacio({ titulo, children, accion }: { titulo: string; children?: ReactNode; accion?: ReactNode }) {
+export function EstadoVacio({ titulo, children, accion, pose = 'durmiendo' }: { titulo: string; children?: ReactNode; accion?: ReactNode; pose?: Pose }) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-2xl bg-card px-6 py-12 text-center shadow-[0_0_0_1px_var(--border)]">
-      <Michi className="size-16 text-muted-foreground/50" />
+    <div className="flex flex-col items-center gap-4 rounded-xl bg-card px-8 py-16 text-center shadow-[0_0_0_1px_var(--border)]">
+      <Michi pose={pose} className="size-28" />
       <div className="grid gap-1">
         <p className="font-semibold">{titulo}</p>
         {children && <div className="mx-auto max-w-sm text-sm text-muted-foreground">{children}</div>}

@@ -49,7 +49,7 @@ function Equipo() {
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
+    <div className="grid gap-8 lg:grid-cols-2">
       <Card>
         <CardHeader>
           <CardTitle className="text-[1.0625rem] font-semibold">Miembros</CardTitle>
@@ -151,7 +151,7 @@ function Plazos() {
   const anioActual = hoy.slice(0, 4)
   const ultimoAnio = feriados.at(-1)?.fecha.slice(0, 4)
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
+    <div className="grid gap-8 lg:grid-cols-2">
       <Card>
         <CardHeader>
           <CardTitle className="text-[1.0625rem] font-semibold">Cómputo y alertas</CardTitle>

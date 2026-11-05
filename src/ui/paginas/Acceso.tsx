@@ -12,9 +12,7 @@ function Marco({ titulo, descripcion, children }: { titulo: string; descripcion:
     <main className="grid min-h-dvh place-items-center bg-background px-4 py-10">
       <div className="w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
-          <span className="grid size-16 place-items-center rounded-2xl bg-primary shadow-md">
-            <Michi className="size-12 text-primary-foreground" />
-          </span>
+          <Michi pose="saludando" className="size-32" />
           <div>
             <p className="text-2xl font-bold tracking-tight">Expedita</p>
             <p className="text-sm text-muted-foreground">Ningún plazo del Poder Judicial se te pasa</p>

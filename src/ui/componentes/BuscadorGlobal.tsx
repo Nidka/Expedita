@@ -4,6 +4,7 @@ import { BellPlusIcon, FolderPlusIcon, PenLineIcon } from 'lucide-react'
 import { CommandDialog, Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from '@/components/ui/command'
 import { useDatos } from '../contexto'
 import { NAVEGACION } from '../layout/navegacion'
+import { Michi } from './marca'
 
 /** Búsqueda global (Ctrl/⌘ + K): expedientes, secciones y acciones rápidas. */
 export function BuscadorGlobal({ abierto, setAbierto }: { abierto: boolean; setAbierto: (v: boolean) => void }) {
@@ -33,7 +34,12 @@ export function BuscadorGlobal({ abierto, setAbierto }: { abierto: boolean; setA
       >
         <CommandInput placeholder="Código, número, cliente o sección…" />
         <CommandList className="max-h-[60dvh]">
-          <CommandEmpty>Michi no encontró nada con ese texto.</CommandEmpty>
+          <CommandEmpty>
+            <span className="flex flex-col items-center gap-2">
+              <Michi pose="pensando" className="size-20" />
+              No hay coincidencias.
+            </span>
+          </CommandEmpty>
           <CommandGroup heading="Acciones">
             <CommandItem value="registrar acción impulso" onSelect={() => ir('/registrar')}>
               <PenLineIcon aria-hidden /> Registrar acción

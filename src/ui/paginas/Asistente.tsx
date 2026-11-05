@@ -38,6 +38,15 @@ function Resultado({ texto, etiqueta }: { texto: string; etiqueta: string }) {
   )
 }
 
+function Trabajando({ texto }: { texto: string }) {
+  return (
+    <div className="flex items-center gap-4 py-2">
+      <Michi pose="laptop" className="size-16" />
+      <p className="text-sm text-muted-foreground">{texto}</p>
+    </div>
+  )
+}
+
 function Sugerencias() {
   const c = useContenedor()
   const d = useDatos()
@@ -83,7 +92,7 @@ function Sugerencias() {
         <Button onClick={pedir} disabled={cargando} className="justify-self-start">
           <SparklesIcon aria-hidden /> {cargando ? 'Revisando expedientes…' : 'Pedir sugerencias'}
         </Button>
-        <div aria-live="polite">{texto && <Resultado texto={texto} etiqueta="Sugerencias" />}</div>
+        <div aria-live="polite">{cargando ? <Trabajando texto="Revisando etapas, plazos y días sin movimiento…" /> : texto && <Resultado texto={texto} etiqueta="Sugerencias" />}</div>
       </CardContent>
     </Card>
   )
@@ -138,7 +147,7 @@ function Redactar() {
         <Button onClick={redactar} disabled={cargando} className="justify-self-start">
           <FileTextIcon aria-hidden /> {cargando ? 'Redactando…' : 'Redactar borrador'}
         </Button>
-        <div aria-live="polite">{texto && <Resultado texto={texto} etiqueta="Escrito" />}</div>
+        <div aria-live="polite">{cargando ? <Trabajando texto="Redactando el borrador…" /> : texto && <Resultado texto={texto} etiqueta="Escrito" />}</div>
       </CardContent>
     </Card>
   )
@@ -149,13 +158,9 @@ export function Asistente() {
     <>
       <EncabezadoPagina
         titulo="Asistente"
-        descripcion={
-          <span className="flex items-center gap-2">
-            <Michi className="size-6 text-primary" /> Michi propone; un abogado revisa y decide. Nada se presenta ni se guarda solo.
-          </span>
-        }
+        descripcion="Claude propone; un abogado revisa y decide. Nada se presenta ni se guarda solo."
       />
-      <div className="grid gap-6">
+      <div className="grid gap-10">
         <Sugerencias />
         <Redactar />
       </div>

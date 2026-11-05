@@ -190,6 +190,7 @@ export function Bandeja() {
     if (!items.length)
       return estado === 'pendiente' ? (
         <EstadoVacio
+          pose="documento"
           titulo="No hay notificaciones pendientes"
           accion={
             <Button variant="outline" onClick={() => setNueva(true)}>

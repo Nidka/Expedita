@@ -31,13 +31,13 @@ function saludo() {
 
 function Resumen({ valores }: { valores: { etiqueta: string; valor: number; a: string; tono?: 'rojo' | 'ambar' }[] }) {
   return (
-    <nav aria-label="Resumen" className="mb-8 grid grid-cols-2 overflow-hidden rounded-2xl bg-card shadow-[0_0_0_1px_var(--border)] sm:grid-cols-4">
+    <nav aria-label="Resumen" className="mb-12 grid grid-cols-2 overflow-hidden rounded-xl bg-card shadow-[0_0_0_1px_var(--border)] sm:grid-cols-4">
       {valores.map((v, i) => (
         <Link
           key={v.etiqueta}
           to={v.a}
           className={cn(
-            'flex flex-col gap-1 px-5 py-4 outline-none transition-colors hover:bg-muted/60 focus-visible:bg-muted',
+            'flex flex-col gap-1.5 px-6 py-5 outline-none transition-colors hover:bg-muted/60 focus-visible:bg-muted',
             i % 2 === 1 && 'border-l border-separator',
             i >= 2 && 'border-t border-separator sm:border-t-0',
             i === 2 && 'sm:border-l',
@@ -132,12 +132,12 @@ export function Inicio() {
         ]}
       />
 
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
-        <div className="grid content-start gap-8">
+      <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <div className="grid content-start gap-10">
           {d.cargando ? (
             <div className="grid gap-2">
               {Array.from({ length: 4 }, (_, i) => (
-                <Skeleton key={i} className="h-18 rounded-2xl" />
+                <Skeleton key={i} className="h-18 rounded-xl" />
               ))}
             </div>
           ) : pendientes.length === 0 ? (
@@ -187,7 +187,7 @@ export function Inicio() {
           )}
         </div>
 
-        <aside className="grid content-start gap-8">
+        <aside className="grid content-start gap-10">
           <Seccion
             titulo="Audiencias"
             accion={
@@ -197,7 +197,7 @@ export function Inicio() {
             }
           >
             {audiencias.length === 0 ? (
-              <p className="rounded-2xl bg-card px-4 py-5 text-sm text-muted-foreground shadow-[0_0_0_1px_var(--border)]">Sin audiencias programadas.</p>
+              <p className="rounded-xl bg-card px-4 py-5 text-sm text-muted-foreground shadow-[0_0_0_1px_var(--border)]">Sin audiencias programadas.</p>
             ) : (
               <Lista>
                 {audiencias.map((a) => (
@@ -215,7 +215,7 @@ export function Inicio() {
 
           <Seccion titulo="Últimas acciones">
             {ultimas.length === 0 ? (
-              <p className="rounded-2xl bg-card px-4 py-5 text-sm text-muted-foreground shadow-[0_0_0_1px_var(--border)]">Aún no hay acciones registradas.</p>
+              <p className="rounded-xl bg-card px-4 py-5 text-sm text-muted-foreground shadow-[0_0_0_1px_var(--border)]">Aún no hay acciones registradas.</p>
             ) : (
               <Lista>
                 {ultimas.map((a) => (

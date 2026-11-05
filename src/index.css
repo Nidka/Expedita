@@ -10,7 +10,7 @@
  * Paleta de marca: ciruela #41164B · baya #901D64 · celeste #5BA0D1 · lavanda #E4D4EA · gris #F3F3F3
  * Tipografía: Plus Jakarta Sans (variable, empaquetada; sin servicios externos).
  * Contrastes medidos (texto/fondo):
- *   claro  · foreground #24122A/#FFF 17.0:1 · muted #685A6E/#FFF 6.4:1 · primary #41164B/#FFF 13.9:1
+ *   claro  · foreground #1D1D1F/#FFF 16.8:1 · muted #6E6E73/#FFF 5.0:1 (4.6:1 sobre #F3F3F3) · primary #41164B/#FFF 13.9:1
  *          · baya #901D64/#FFF 8.3:1 · secondary-fg #41164B/#E4D4EA 10.7:1 · info-fg #1D5C88/#E3F0F9 6.3:1
  *          · destructive #B42318/#FFF 6.6:1 · warning-fg #8A4B00/#FFF3DC 6.2:1 · success #19713F/#FFF 5.9:1
  *   oscuro · foreground #F3EEF5/#1E1422 15.5:1 · muted #B4A8BA/#1E1422 7.8:1 · primary #D9C2E3/#1E1422 10.8:1
@@ -74,17 +74,17 @@
 
 :root {
     --background: #F3F3F3;
-    --foreground: #24122A;
+    --foreground: #1D1D1F;
     --card: #FFFFFF;
-    --card-foreground: #24122A;
+    --card-foreground: #1D1D1F;
     --popover: #FFFFFF;
-    --popover-foreground: #24122A;
+    --popover-foreground: #1D1D1F;
     --primary: #41164B;
     --primary-foreground: #FFFFFF;
     --secondary: #E4D4EA;
     --secondary-foreground: #41164B;
     --muted: #EFEBF0;
-    --muted-foreground: #685A6E;
+    --muted-foreground: #6E6E73;
     --accent: #F1E8F4;
     --accent-foreground: #901D64;
     --berry: #901D64;
@@ -109,9 +109,9 @@
     --chart-3: #5BA0D1;
     --chart-4: #E4D4EA;
     --chart-5: #B42318;
-    --radius: 0.75rem;
-    --sidebar: #FFFFFF;
-    --sidebar-foreground: #24122A;
+    --radius: 0.5rem;
+    --sidebar: #F7F6F8;
+    --sidebar-foreground: #1D1D1F;
     --sidebar-primary: #901D64;
     --sidebar-primary-foreground: #FFFFFF;
     --sidebar-accent: #E4D4EA;

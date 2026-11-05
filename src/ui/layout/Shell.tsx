@@ -165,11 +165,11 @@ function HojaMas({ abierta, cerrar }: { abierta: boolean; cerrar: () => void }) 
   const items = useVisibles().filter((n) => !n.pestana)
   return (
     <Sheet open={abierta} onOpenChange={(o) => !o && cerrar()}>
-      <SheetContent side="bottom" className="safe-bottom rounded-t-3xl px-3 pb-4">
+      <SheetContent side="bottom" className="safe-bottom rounded-t-xl px-3 pb-4">
         <SheetHeader className="px-2">
           <SheetTitle>Más</SheetTitle>
         </SheetHeader>
-        <ul className="overflow-hidden rounded-2xl bg-muted/60">
+        <ul className="overflow-hidden rounded-xl bg-muted/60">
           {items.map(({ a, texto, icono: Icono }) => (
             <li key={a} className="border-b border-separator last:border-b-0">
               <NavLink
@@ -183,7 +183,7 @@ function HojaMas({ abierta, cerrar }: { abierta: boolean; cerrar: () => void }) 
             </li>
           ))}
         </ul>
-        <div className="mt-3 rounded-2xl bg-muted/60">
+        <div className="mt-3 rounded-xl bg-muted/60">
           <Usuario />
         </div>
       </SheetContent>
@@ -208,9 +208,9 @@ export function Shell() {
       <BarraLateral />
       <SidebarInset className="bg-background">
         <header className="material sticky top-0 z-30 border-b border-separator">
-          <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-5 sm:px-8 lg:px-12">
             <span className="flex items-center gap-2 md:hidden">
-              <Michi className="size-7 text-primary" />
+              <Michi pose="sentado" className="size-8" />
               <span className="text-[1.0625rem] font-semibold">Expedita</span>
             </span>
             <button
@@ -234,7 +234,7 @@ export function Shell() {
             )}
           </div>
         </header>
-        <main id="contenido" tabIndex={-1} className="pb-tabbar mx-auto w-full max-w-6xl px-4 pt-6 outline-none sm:px-6 md:pb-12 lg:px-8 lg:pt-10">
+        <main id="contenido" tabIndex={-1} className="pb-tabbar mx-auto w-full max-w-6xl px-5 pt-8 outline-none sm:px-8 md:pb-16 lg:px-12 lg:pt-14">
           <Outlet />
         </main>
       </SidebarInset>

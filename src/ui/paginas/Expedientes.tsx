@@ -133,6 +133,7 @@ export function Expedientes() {
           </p>
           {lista.length === 0 ? (
             <EstadoVacio
+              pose={expedientes.length ? 'pensando' : 'libros'}
               titulo={expedientes.length ? 'No hay expedientes con estos filtros' : 'Aún no hay expedientes'}
               accion={
                 !expedientes.length && (
