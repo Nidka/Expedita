@@ -1,7 +1,7 @@
 -- Expedita · esquema inicial
 -- Multiinquilino: toda fila de negocio lleva org_id y la protege RLS.
 
-create extension if not exists pgcrypto;
+-- Solo funciones nativas de PostgreSQL (gen_random_uuid): no depende de extensiones.
 
 -- ============ Organizaciones y miembros ============
 create table organizaciones (
@@ -90,7 +90,7 @@ create table config_org (
   dias_inhabiles date[] not null default '{}',
   equipo_whatsapp jsonb not null default '[]',
   -- secreto para webhooks (Gmail/Apps Script, iCal). Solo lo leen administradores.
-  token_integracion text not null default encode(gen_random_bytes(24), 'hex')
+  token_integracion text not null default (replace(gen_random_uuid()::text, '-', '') || replace(gen_random_uuid()::text, '-', ''))
 );
 
 -- ============ Negocio ============
