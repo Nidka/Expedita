@@ -22,6 +22,7 @@ Tiempo estimado: 45 a 60 minutos la primera vez.
 1. Entra a https://supabase.com con la cuenta de GitHub → **New project**.
    - Nombre: `expedita`
    - Región: **South America (São Paulo)**
+   - Security: **Enable Data API** activado · **Automatically expose new tables** desactivado (el esquema otorga los permisos exactos) · **Enable automatic RLS** activado
    - Contraseña de la base de datos: genera una larga y **guárdala** (se usa para los respaldos).
 2. Cuando termine de crearse, abre **SQL Editor** → **New query**, pega todo el contenido de
    `supabase/migrations/20261105000000_esquema_inicial.sql` y pulsa **Run**.

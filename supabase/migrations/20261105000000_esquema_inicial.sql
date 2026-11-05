@@ -340,3 +340,18 @@ insert into feriados (fecha, nombre) values
   ('2027-07-28','Fiestas Patrias'),('2027-07-29','Fiestas Patrias'),('2027-08-06','Batalla de Junín'),('2027-08-30','Santa Rosa de Lima'),
   ('2027-10-08','Combate de Angamos'),('2027-11-01','Todos los Santos'),('2027-12-08','Inmaculada Concepción'),
   ('2027-12-09','Batalla de Ayacucho'),('2027-12-25','Navidad');
+
+-- ============ Permisos explícitos de la API ============
+-- El proyecto se crea con «Automatically expose new tables» desactivado: nada es visible
+-- por defecto. Aquí se otorga solo lo necesario; RLS decide además qué filas ve cada usuario.
+grant usage on schema public to anon, authenticated;
+grant select, insert, update, delete on
+  organizaciones, miembros, invitaciones,
+  expedientes, notificaciones, mensajes_whatsapp, visitas, acciones, visita_items, audiencias, juzgados
+  to authenticated;
+grant select on feriados, auditoria to authenticated;
+-- config_org ya tiene permisos por columna (sin token_integracion) más arriba.
+
+revoke execute on all functions in schema public from public, anon;
+grant execute on function public.mis_orgs(), public.es_admin(uuid), public.crear_organizacion(text, text),
+  public.aceptar_invitaciones(), public.token_integracion(uuid) to authenticated;
