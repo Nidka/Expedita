@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BellPlusIcon, FolderPlusIcon, PenLineIcon } from 'lucide-react'
+import { BellPlusIcon, FolderPlusIcon, PenLineIcon } from '@/ui/iconos'
 import { CommandDialog, Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from '@/components/ui/command'
 import { useDatos } from '../contexto'
 import { NAVEGACION } from '../layout/navegacion'

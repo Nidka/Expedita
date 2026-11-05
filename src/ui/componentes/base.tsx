@@ -1,6 +1,6 @@
 import { useId, type ComponentProps, type ReactNode, type SelectHTMLAttributes } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronDownIcon, ChevronRightIcon } from 'lucide-react'
+import { ChevronDownIcon, ChevronRightIcon } from '@/ui/iconos'
 import type { Severidad } from '@/domain/agenda/que-toca-hoy'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'

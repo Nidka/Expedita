@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { HourglassIcon, TriangleAlertIcon } from 'lucide-react'
+import { HourglassIcon, TriangleAlertIcon } from '@/ui/iconos'
 import { calcularPendientes, type Pendiente } from '@/domain/agenda/que-toca-hoy'
 import { aDate } from '@/domain/shared/fecha'
 import { Skeleton } from '@/components/ui/skeleton'

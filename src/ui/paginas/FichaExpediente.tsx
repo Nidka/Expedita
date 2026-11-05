@@ -1,7 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { ArchiveIcon, ArchiveRestoreIcon, CalendarPlusIcon, CheckIcon, CopyIcon, ExternalLinkIcon, PencilIcon, PenLineIcon, SearchCheckIcon } from 'lucide-react'
+import { ArchiveIcon, ArchiveRestoreIcon, CalendarPlusIcon, CheckIcon, CopyIcon, ExternalLinkIcon, PencilIcon, PenLineIcon, SearchCheckIcon } from '@/ui/iconos'
 import type { Expediente } from '@/domain/entidades'
 import { parsearNumeroExpediente, ESPECIALIDADES, INSTANCIAS } from '@/domain/expediente/numero-expediente'
 import { estadoMovimiento } from '@/domain/agenda/que-toca-hoy'

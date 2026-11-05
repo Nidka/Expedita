@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { CopyIcon } from 'lucide-react'
+import { CopyIcon } from '@/ui/iconos'
 import type { ResumenExpedienteIA } from '@/application/ports'
 import { calcularPendientes, estadoMovimiento } from '@/domain/agenda/que-toca-hoy'
 import { TIPOS_ESCRITO } from '@/domain/entidades'

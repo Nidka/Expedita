@@ -1,7 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { CheckCircle2Icon } from 'lucide-react'
+import { CheckCircle2Icon } from '@/ui/iconos'
 import { agregarExpediente, distritoConocido } from '@/application/casos-uso/expedientes'
 import { ESPECIALIDADES, INSTANCIAS, parsearNumeroExpediente } from '@/domain/expediente/numero-expediente'
 import { VIAS, viaPorEspecialidad } from '@/domain/plazos/catalogo'

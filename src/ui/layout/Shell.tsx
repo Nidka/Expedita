@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { EllipsisIcon, LogOutIcon, PenLineIcon, SearchIcon } from 'lucide-react'
+import { EllipsisIcon, LogOutIcon, PenLineIcon, SearchIcon } from '@/ui/iconos'
 import {
   Sidebar,
   SidebarContent,
@@ -95,10 +95,10 @@ function BarraLateral() {
                   <SidebarMenuButton
                     isActive={activo(a)}
                     tooltip={texto}
-                    className="h-9 rounded-lg text-[0.9375rem] transition-colors duration-150 data-active:bg-sidebar-accent data-active:font-semibold data-active:text-sidebar-accent-foreground"
+                    className="relative h-9 rounded-md pl-3 text-[0.9375rem] transition-colors duration-150 data-active:bg-sidebar-accent/70 data-active:font-semibold data-active:text-sidebar-accent-foreground data-active:before:absolute data-active:before:inset-y-1.5 data-active:before:left-0 data-active:before:w-[3px] data-active:before:rounded-full data-active:before:bg-ocre group-data-[collapsible=icon]:data-active:before:hidden"
                     render={<NavLink to={a} end={a === '/'} />}
                   >
-                    <Icono aria-hidden className={cn(activo(a) && 'text-sidebar-primary')} />
+                    <Icono aria-hidden weight={activo(a) ? 'fill' : 'regular'} className={cn('size-[1.125rem]', activo(a) && 'text-sidebar-primary')} />
                     <span>{texto}</span>
                   </SidebarMenuButton>
                   {insignia && pendientes > 0 && (
@@ -137,7 +137,7 @@ function BarraPestanas({ abrirMas }: { abrirMas: () => void }) {
           <li key={a} className="flex flex-1">
             <NavLink to={a} end={a === '/'} className={clase(activo(a))} aria-current={activo(a) ? 'page' : undefined}>
               <span className="relative">
-                <Icono className="size-6" aria-hidden strokeWidth={activo(a) ? 2.25 : 1.75} />
+                <Icono className="size-6" aria-hidden weight={activo(a) ? 'fill' : 'regular'} />
                 {insignia && pendientes > 0 && (
                   <span className="absolute -top-1 -right-2.5 min-w-4 rounded-full bg-berry px-1 text-center text-[0.625rem] leading-4 font-bold text-white">
                     {pendientes}
@@ -151,7 +151,7 @@ function BarraPestanas({ abrirMas }: { abrirMas: () => void }) {
         ))}
         <li className="flex flex-1">
           <button type="button" onClick={abrirMas} className={clase(enMas)} aria-haspopup="dialog">
-            <EllipsisIcon className="size-6" aria-hidden strokeWidth={enMas ? 2.25 : 1.75} />
+            <EllipsisIcon className="size-6" aria-hidden weight={enMas ? 'fill' : 'regular'} />
             Más
           </button>
         </li>

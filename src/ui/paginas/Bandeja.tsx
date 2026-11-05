@@ -1,7 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { InboxIcon, PlusIcon, RotateCcwIcon } from 'lucide-react'
+import { InboxIcon, PlusIcon, RotateCcwIcon } from '@/ui/iconos'
 import { previsualizarPlazo, registrarNotificacion } from '@/application/casos-uso/notificaciones'
 import { extraerDeCorreo } from '@/domain/notificaciones/extraer'
 import { parsearNumeroExpediente } from '@/domain/expediente/numero-expediente'

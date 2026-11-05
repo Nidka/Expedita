@@ -18,7 +18,7 @@ function Marco({ titulo, descripcion, children }: { titulo: string; descripcion:
   return (
     <div className="grid min-h-dvh bg-background lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
       {/* Panel de marca (escritorio) */}
-      <aside className="relative hidden overflow-hidden bg-primary text-primary-foreground lg:flex lg:flex-col lg:justify-between lg:p-14" aria-label="Expedita">
+      <aside className="relative hidden overflow-hidden bg-[#1F3B57] text-white lg:flex lg:flex-col lg:justify-between lg:p-14" aria-label="Expedita">
         <div className="flex items-center gap-2.5">
           <Michi pose="sentado" className="size-10 [filter:drop-shadow(0_0_1px_rgb(255_255_255/0.6))]" />
           <span className="text-lg font-bold tracking-tight">Expedita</span>
@@ -26,7 +26,7 @@ function Marco({ titulo, descripcion, children }: { titulo: string; descripcion:
         <div className="grid max-w-md gap-10">
           <div className="animate-entrar">
             <p className="text-[2.5rem] leading-[1.1] font-bold tracking-tight">Ningún plazo del Poder Judicial se te pasa.</p>
-            <p className="mt-4 text-[1.0625rem] text-primary-foreground/75">Procuración judicial para estudios que litigan en el Perú.</p>
+            <p className="mt-4 text-[1.0625rem] text-white/75">Procuración judicial para estudios que litigan en el Perú.</p>
           </div>
           <ul className="escalonar grid gap-6">
             {BENEFICIOS.map((b) => (
@@ -36,7 +36,7 @@ function Marco({ titulo, descripcion, children }: { titulo: string; descripcion:
                 </span>
                 <span>
                   <span className="block font-semibold">{b.titulo}</span>
-                  <span className="block text-sm text-primary-foreground/70">{b.texto}</span>
+                  <span className="block text-sm text-white/70">{b.texto}</span>
                 </span>
               </li>
             ))}

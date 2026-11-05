@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { toast } from 'sonner'
-import { DownloadIcon, FileSpreadsheetIcon, Trash2Icon, UserPlusIcon } from 'lucide-react'
+import { DownloadIcon, FileSpreadsheetIcon, Trash2Icon, UserPlusIcon } from '@/ui/iconos'
 import { importarExpedientes } from '@/application/casos-uso/importar'
 import { descargar, generarCSV } from '@/application/exportar'
 import type { Invitacion } from '@/application/ports'

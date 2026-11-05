@@ -1,11 +1,11 @@
-import { BellIcon, BotIcon, CalendarDaysIcon, FolderIcon, MapIcon, PenLineIcon, SettingsIcon, SunriseIcon, type LucideIcon } from 'lucide-react'
+import { BellIcon, BotIcon, CalendarDaysIcon, FolderIcon, MapIcon, PenLineIcon, SettingsIcon, SunriseIcon, type Icono } from '@/ui/iconos'
 
 export interface ItemNavegacion {
   a: string
   texto: string
   /** Texto corto para la barra de pestañas */
   corto?: string
-  icono: LucideIcon
+  icono: Icono
   /** Aparece en la barra de pestañas del celular */
   pestana?: boolean
   insignia?: 'notificaciones'

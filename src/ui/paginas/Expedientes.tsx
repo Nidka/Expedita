@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { FolderIcon, FolderPlusIcon, SearchIcon } from 'lucide-react'
+import { FolderIcon, FolderPlusIcon, SearchIcon } from '@/ui/iconos'
 import type { Expediente } from '@/domain/entidades'
 import { estadoMovimiento } from '@/domain/agenda/que-toca-hoy'
 import { Button } from '@/components/ui/button'

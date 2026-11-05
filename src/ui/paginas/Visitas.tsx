@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
-import { ClipboardCopyIcon, MapPinIcon } from 'lucide-react'
+import { ClipboardCopyIcon, MapPinIcon } from '@/ui/iconos'
 import { guardarResultadosVisita, programarVisitas } from '@/application/casos-uso/visitas'
 import type { Visita } from '@/domain/entidades'
 import { agruparPorJuzgado, DISTRITOS_LIMA, esSoloImpulso, hojaDeRuta, motivoVisita } from '@/domain/visitas/juzgados'

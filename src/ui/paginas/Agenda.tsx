@@ -1,7 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { CalendarPlusIcon, ChevronLeftIcon, ChevronRightIcon, DownloadIcon, ExternalLinkIcon, PencilIcon } from 'lucide-react'
+import { CalendarPlusIcon, ChevronLeftIcon, ChevronRightIcon, DownloadIcon, ExternalLinkIcon, PencilIcon } from '@/ui/iconos'
 import { descargar, enlaceGoogleCalendar, generarICS, type EventoAgenda } from '@/application/exportar'
 import { TIPOS_AUDIENCIA, type Audiencia, type EstadoAudiencia, type ModalidadAudiencia, type TipoAudiencia } from '@/domain/entidades'
 import { aDate, aISO, diaSemana, sumarDias, type FechaISO } from '@/domain/shared/fecha'
