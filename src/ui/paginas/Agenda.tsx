@@ -28,7 +28,7 @@ const ESTILO: Record<Clase, string> = {
   plazo: 'bg-warning/30 text-warning-foreground dark:text-warning',
   proxima: 'bg-secondary text-secondary-foreground',
   audiencia: 'bg-primary text-primary-foreground',
-  visita: 'bg-success/20 text-success dark:text-success',
+  visita: 'bg-info-soft text-info-foreground',
 }
 const LEYENDA: [Clase, string][] = [
   ['vencido', 'Plazo vencido'],
@@ -110,7 +110,7 @@ function Calendario({ items }: { items: ItemDia[] }) {
     <Card>
       <CardContent className="grid gap-4">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-lg font-semibold capitalize" aria-live="polite">
+          <h2 className="text-lg font-semibold" aria-live="polite">
             {mes(primero)}
           </h2>
           <div className="flex gap-1">
@@ -156,7 +156,7 @@ function Calendario({ items }: { items: ItemDia[] }) {
                     <span
                       className={cn(
                         'grid size-6 place-items-center rounded-full tabular-nums',
-                        f === d.hoy && 'bg-brand-gold font-semibold text-primary',
+                        f === d.hoy && 'bg-primary font-semibold text-primary-foreground',
                       )}
                     >
                       {Number(f.slice(8))}
@@ -189,7 +189,7 @@ function Calendario({ items }: { items: ItemDia[] }) {
           {delMes.length === 0 && <li className="text-sm text-muted-foreground">Sin eventos este mes.</li>}
           {delMes.map((f) => (
             <li key={f}>
-              <p className={cn('text-sm font-medium capitalize', f === d.hoy && 'text-primary')}>
+              <p className={cn('text-sm font-medium', f === d.hoy && 'text-primary')}>
                 {fechaLarga(f)}
                 {d.calendario.motivoInhabil(f) && <span className="ml-2 text-xs text-muted-foreground">({d.calendario.motivoInhabil(f)})</span>}
               </p>

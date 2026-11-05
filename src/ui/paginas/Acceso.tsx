@@ -9,16 +9,20 @@ import { Michi } from '../componentes/marca'
 
 function Marco({ titulo, descripcion, children }: { titulo: string; descripcion: string; children: React.ReactNode }) {
   return (
-    <main className="grid min-h-dvh place-items-center bg-sidebar px-4 py-10">
+    <main className="grid min-h-dvh place-items-center bg-background px-4 py-10">
       <div className="w-full max-w-sm">
-        <div className="mb-6 flex flex-col items-center gap-2 text-sidebar-foreground">
-          <Michi className="size-16 text-sidebar-primary" />
-          <p className="font-heading text-3xl font-semibold">Expedita</p>
-          <p className="text-sm opacity-80">Procuración judicial sin plazos perdidos</p>
+        <div className="mb-8 flex flex-col items-center gap-3 text-center">
+          <span className="grid size-16 place-items-center rounded-2xl bg-primary shadow-md">
+            <Michi className="size-12 text-primary-foreground" />
+          </span>
+          <div>
+            <p className="text-2xl font-bold tracking-tight">Expedita</p>
+            <p className="text-sm text-muted-foreground">Ningún plazo del Poder Judicial se te pasa</p>
+          </div>
         </div>
         <Card>
           <CardHeader>
-            <CardTitle className="font-heading text-xl">
+            <CardTitle className="text-xl font-bold">
               <h1>{titulo}</h1>
             </CardTitle>
             <CardDescription>{descripcion}</CardDescription>

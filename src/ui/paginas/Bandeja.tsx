@@ -1,5 +1,5 @@
 import { useMemo, useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { InboxIcon, PlusIcon, RotateCcwIcon, SparklesIcon, WandIcon } from 'lucide-react'
 import { previsualizarPlazo, registrarNotificacion } from '@/application/casos-uso/notificaciones'
@@ -13,9 +13,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
-import { cn } from '@/lib/utils'
 import { useContenedor, useDatos } from '../contexto'
-import { BotonEnlace, Campo, EncabezadoPagina, EstadoVacio, FRANJA_SEVERIDAD, Mono, SelectNativo, Severo } from '../componentes/base'
+import { BotonEnlace, Campo, DiasRestantes, EncabezadoPagina, EstadoVacio, Lista, Mono, SelectNativo } from '../componentes/base'
 import { etiquetaExp, fecha } from '../formato'
 
 function NuevaNotificacion({ abierto, cerrar }: { abierto: boolean; cerrar: () => void }) {
@@ -144,7 +143,7 @@ function NuevaNotificacion({ abierto, cerrar }: { abierto: boolean; cerrar: () =
             )}
           </Campo>
           {computo && (
-            <p className="rounded-lg bg-accent/60 px-3 py-2 text-sm text-accent-foreground sm:col-span-2" aria-live="polite">
+            <p className="rounded-xl bg-secondary px-3.5 py-2.5 text-sm text-secondary-foreground sm:col-span-2" aria-live="polite">
               {computo.detalle}
             </p>
           )}
@@ -171,77 +170,90 @@ function NuevaNotificacion({ abierto, cerrar }: { abierto: boolean; cerrar: () =
 export function Bandeja() {
   const c = useContenedor()
   const d = useDatos()
-  const [nueva, setNueva] = useState(false)
+  const [params, setParams] = useSearchParams()
+  const nueva = params.get('nueva') === '1'
+  const setNueva = (v: boolean) => setParams(v ? { nueva: '1' } : {}, { replace: true })
   const ordenadas = useMemo(
     () => [...d.notificaciones].sort((a, b) => (a.vencimiento ?? '9999').localeCompare(b.vencimiento ?? '9999')),
     [d.notificaciones],
   )
 
+  const marcarAtendida = async (id: string) => {
+    await c.notificaciones.actualizar(id, { estado: 'atendida', atendidaEn: d.hoy })
+    toast.success('Marcada como atendida', {
+      action: { label: 'Deshacer', onClick: () => void c.notificaciones.actualizar(id, { estado: 'pendiente', atendidaEn: undefined }) },
+    })
+  }
+
   const lista = (estado: 'pendiente' | 'atendida') => {
     const items = ordenadas.filter((n) => n.estado === estado)
     if (!items.length)
-      return (
-        <EstadoVacio titulo={estado === 'pendiente' ? 'No hay notificaciones pendientes' : 'Aún no hay notificaciones atendidas'} />
+      return estado === 'pendiente' ? (
+        <EstadoVacio
+          titulo="No hay notificaciones pendientes"
+          accion={
+            <Button variant="outline" onClick={() => setNueva(true)}>
+              <PlusIcon aria-hidden /> Registrar una notificación
+            </Button>
+          }
+        >
+          Cuando llegue un aviso del SINOE, pégalo aquí y calculamos el plazo.
+        </EstadoVacio>
+      ) : (
+        <EstadoVacio titulo="Aún no hay notificaciones atendidas" />
       )
     return (
-      <ul className="grid gap-2">
+      <Lista>
         {items.map((n) => {
           const restantes = n.vencimiento ? d.calendario.habilesEntre(d.hoy, n.vencimiento) : undefined
-          const sev = estado === 'atendida' ? 'info' : restantes === undefined ? 'proximo' : restantes < 0 ? 'vencido' : restantes <= 3 ? 'urgente' : 'proximo'
           const exp = n.expedienteId ? d.expPorId.get(n.expedienteId) : undefined
           return (
-            <li key={n.id} className="flex overflow-hidden rounded-xl border bg-card">
-              <span className={cn('w-1.5 shrink-0', FRANJA_SEVERIDAD[sev])} aria-hidden />
-              <div className="flex min-w-0 flex-1 flex-col gap-2 p-4 sm:flex-row sm:items-center">
+            <li key={n.id} className="border-b border-separator px-4 py-4 last:border-b-0">
+              <div className="flex gap-3">
+                {estado === 'pendiente' && restantes !== undefined ? (
+                  <DiasRestantes dias={restantes} />
+                ) : (
+                  <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-muted text-muted-foreground" aria-hidden>
+                    <InboxIcon className="size-5" />
+                  </span>
+                )}
                 <div className="min-w-0 flex-1">
                   <p className="font-medium">{n.asunto}</p>
                   <p className="text-sm text-muted-foreground">
                     {exp ? (
-                      <Link to={`/expedientes/${exp.id}`} className="underline-offset-2 hover:underline">
+                      <Link to={`/expedientes/${exp.id}`} className="text-primary underline-offset-2 hover:underline">
                         {etiquetaExp(exp)}
                       </Link>
                     ) : (
                       <Mono>{n.numero}</Mono>
-                    )}{' '}
-                    · notificada {fecha(n.recibido)}
-                    {n.casilla ? ' (casilla)' : ''}
+                    )}
+                    {' · '}notificada {fecha(n.recibido)}
+                    {n.casilla ? ' por casilla' : ''}
+                    {n.vencimiento && (estado === 'pendiente' ? ` · vence ${fecha(n.vencimiento)}` : ` · atendida ${fecha(n.atendidaEn)}`)}
                   </p>
-                  {n.resumen && <p className="mt-1 text-sm">{n.resumen}</p>}
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  {n.vencimiento && (
-                    <Severo severidad={sev}>
-                      {estado === 'atendida' ? `Atendida ${fecha(n.atendidaEn)}` : `Vence ${fecha(n.vencimiento)}`}
-                    </Severo>
-                  )}
-                  {estado === 'pendiente' ? (
-                    <BotonEnlace a={`/registrar?notificacion=${n.id}`} size="sm">
-                      Registrar acción
-                    </BotonEnlace>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => void c.notificaciones.actualizar(n.id, { estado: 'pendiente', atendidaEn: undefined })}
-                    >
-                      <RotateCcwIcon aria-hidden /> Reabrir
-                    </Button>
-                  )}
-                  {estado === 'pendiente' && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => void c.notificaciones.actualizar(n.id, { estado: 'atendida', atendidaEn: d.hoy })}
-                    >
-                      Marcar atendida
-                    </Button>
-                  )}
+                  {n.resumen && <p className="mt-1.5 text-sm text-foreground/85">{n.resumen}</p>}
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {estado === 'pendiente' ? (
+                      <>
+                        <BotonEnlace a={`/registrar?notificacion=${n.id}`} size="sm">
+                          Registrar acción
+                        </BotonEnlace>
+                        <Button size="sm" variant="ghost" onClick={() => void marcarAtendida(n.id)}>
+                          Marcar atendida
+                        </Button>
+                      </>
+                    ) : (
+                      <Button size="sm" variant="ghost" onClick={() => void c.notificaciones.actualizar(n.id, { estado: 'pendiente', atendidaEn: undefined })}>
+                        <RotateCcwIcon aria-hidden /> Reabrir
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             </li>
           )
         })}
-      </ul>
+      </Lista>
     )
   }
 
@@ -250,7 +262,7 @@ export function Bandeja() {
     <>
       <EncabezadoPagina
         titulo="Notificaciones"
-        descripcion="Lo que llega del SINOE y de los juzgados, con su plazo calculado en días hábiles."
+        descripcion="Avisos del SINOE y de los juzgados, con el plazo calculado en días hábiles."
         acciones={
           <Button onClick={() => setNueva(true)}>
             <PlusIcon aria-hidden /> Nueva notificación
@@ -259,9 +271,7 @@ export function Bandeja() {
       />
       <Tabs defaultValue="pendiente">
         <TabsList>
-          <TabsTrigger value="pendiente">
-            <InboxIcon aria-hidden /> Pendientes ({pendientes})
-          </TabsTrigger>
+          <TabsTrigger value="pendiente">Pendientes · {pendientes}</TabsTrigger>
           <TabsTrigger value="atendida">Atendidas</TabsTrigger>
         </TabsList>
         <TabsContent value="pendiente" className="mt-4">
@@ -271,7 +281,7 @@ export function Bandeja() {
           {lista('atendida')}
         </TabsContent>
       </Tabs>
-      {nueva && <NuevaNotificacion abierto={nueva} cerrar={() => setNueva(false)} />}
+      {nueva && <NuevaNotificacion abierto cerrar={() => setNueva(false)} />}
     </>
   )
 }

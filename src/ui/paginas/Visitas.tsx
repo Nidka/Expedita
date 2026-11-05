@@ -134,7 +134,7 @@ function Planificar() {
                   <Label className="flex items-start gap-3">
                     <Checkbox checked={todos} onCheckedChange={(v) => alternar(ids, Boolean(v))} aria-label={`Marcar todo ${g.nombre}`} />
                     <span className="grid gap-0.5">
-                      <CardTitle className="font-heading text-base">{g.nombre}</CardTitle>
+                      <CardTitle className="text-[0.9375rem] font-semibold">{g.nombre}</CardTitle>
                       <span className="text-xs font-normal text-muted-foreground">
                         {g.distrito} · {plural(g.expedientes.length, 'expediente', 'expedientes')}
                       </span>
@@ -178,7 +178,7 @@ function Planificar() {
       )}
 
       {sel.size > 0 && (
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 p-3 shadow-lg backdrop-blur md:left-(--sidebar-width)">
+        <div className="material fixed inset-x-0 bottom-[calc(3.75rem+env(safe-area-inset-bottom))] z-30 border-t p-3 shadow-lg md:bottom-0 md:left-(--sidebar-width)">
           <div className="mx-auto flex max-w-6xl flex-wrap items-end gap-3">
             <Campo etiqueta="Fecha de visita">
               {(p) => <Input {...p} type="date" value={fechaVisita} min={d.hoy} onChange={(e) => setFechaVisita(e.target.value)} />}
@@ -245,7 +245,7 @@ function VisitaProgramada({ visita }: { visita: Visita }) {
   return (
     <Card size="sm">
       <CardHeader>
-        <CardTitle className="font-heading text-base">{visita.juzgado}</CardTitle>
+        <CardTitle className="text-[0.9375rem] font-semibold">{visita.juzgado}</CardTitle>
         <p className="text-xs text-muted-foreground">
           {visita.sede ? `${visita.sede} · ` : ''}
           {visita.responsable} · {visita.estado === 'realizada' ? 'Realizada' : 'Programada'}
@@ -325,7 +325,7 @@ function Programadas() {
       {porFecha.map(([f, visitas]) => (
         <section key={f} aria-labelledby={`dia-${f}`} className="grid gap-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 id={`dia-${f}`} className="text-lg font-semibold capitalize">
+            <h3 id={`dia-${f}`} className="text-lg font-semibold">
               {fechaLarga(f)}
             </h3>
             <Button variant="outline" size="sm" onClick={() => copiar(f, visitas)}>

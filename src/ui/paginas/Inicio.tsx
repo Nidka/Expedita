@@ -1,50 +1,90 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { AlarmClockIcon, BellRingIcon, CalendarClockIcon, HourglassIcon, PenLineIcon } from 'lucide-react'
-import { calcularPendientes, type TipoPendiente } from '@/domain/agenda/que-toca-hoy'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { HourglassIcon, TriangleAlertIcon } from 'lucide-react'
+import { calcularPendientes, type Pendiente } from '@/domain/agenda/que-toca-hoy'
+import { aDate } from '@/domain/shared/fecha'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { useDatos } from '../contexto'
-import { BotonEnlace, EncabezadoPagina, EstadoVacio, FRANJA_SEVERIDAD, Severo } from '../componentes/base'
-import { etiquetaExp, fecha, fechaLarga } from '../formato'
+import { DiasRestantes, EncabezadoPagina, EstadoVacio, Fila, Lista, Seccion, Severo } from '../componentes/base'
+import { etiquetaExp, fecha, fechaLarga, plural } from '../formato'
 
-const TIPO_TEXTO: Record<TipoPendiente, string> = {
-  notificacion: 'Notificación',
-  proxima: 'Próxima acción',
-  audiencia: 'Audiencia',
-  visita: 'Visita',
-  abandono: 'Abandono',
-  'sin-movimiento': 'Sin movimiento',
+const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'set', 'oct', 'nov', 'dic']
+
+/** Chip de fecha para audiencias y visitas (día grande + mes). */
+export function FechaChip({ f, className }: { f: string; className?: string }) {
+  const d = aDate(f)
+  return (
+    <span className={cn('grid size-12 shrink-0 place-items-center rounded-xl bg-info-soft text-info-foreground', className)} aria-hidden>
+      <span className="grid text-center leading-none">
+        <span className="text-[0.625rem] font-semibold tracking-wide uppercase">{MESES[d.getUTCMonth()]}</span>
+        <span className="tabular text-lg font-bold">{d.getUTCDate()}</span>
+      </span>
+    </span>
+  )
 }
 
-const MAX_VISIBLES = 10
+function saludo() {
+  const h = new Date().getHours()
+  return h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches'
+}
 
-function Indicador({ titulo, valor, icono: Icono, tono, a }: { titulo: string; valor: number; icono: typeof BellRingIcon; tono?: 'alerta' | 'aviso'; a: string }) {
+function Resumen({ valores }: { valores: { etiqueta: string; valor: number; a: string; tono?: 'rojo' | 'ambar' }[] }) {
   return (
-    <Link
-      to={a}
-      className="group rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-      aria-label={`${titulo}: ${valor}`}
-    >
-      <Card className="h-full transition-colors group-hover:border-primary/40">
-        <CardContent className="flex items-center gap-3">
+    <nav aria-label="Resumen" className="mb-8 grid grid-cols-2 overflow-hidden rounded-2xl bg-card shadow-[0_0_0_1px_var(--border)] sm:grid-cols-4">
+      {valores.map((v, i) => (
+        <Link
+          key={v.etiqueta}
+          to={v.a}
+          className={cn(
+            'flex flex-col gap-1 px-5 py-4 outline-none transition-colors hover:bg-muted/60 focus-visible:bg-muted',
+            i % 2 === 1 && 'border-l border-separator',
+            i >= 2 && 'border-t border-separator sm:border-t-0',
+            i === 2 && 'sm:border-l',
+          )}
+        >
           <span
             className={cn(
-              'grid size-10 shrink-0 place-items-center rounded-lg bg-secondary text-secondary-foreground',
-              tono === 'alerta' && valor > 0 && 'bg-destructive/12 text-destructive',
-              tono === 'aviso' && valor > 0 && 'bg-warning/25 text-warning-foreground dark:text-warning',
+              'tabular text-[1.75rem] leading-none font-bold',
+              v.valor > 0 && v.tono === 'rojo' && 'text-destructive',
+              v.valor > 0 && v.tono === 'ambar' && 'text-warning-foreground',
             )}
           >
-            <Icono className="size-5" aria-hidden />
+            {v.valor}
           </span>
-          <div className="min-w-0">
-            <p className="font-heading text-2xl leading-none font-semibold tabular-nums">{valor}</p>
-            <p className="mt-1 truncate text-xs text-muted-foreground">{titulo}</p>
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
+          <span className="text-sm text-muted-foreground">{v.etiqueta}</span>
+        </Link>
+      ))}
+    </nav>
+  )
+}
+
+function FilaPendiente({ p }: { p: Pendiente }) {
+  const d = useDatos()
+  const a = p.expedienteId ? `/expedientes/${p.expedienteId}` : p.tipo === 'visita' ? '/visitas' : '/agenda'
+  const conPlazo = (p.tipo === 'notificacion' || p.tipo === 'proxima') && p.fecha
+  const inicio = conPlazo ? (
+    <DiasRestantes dias={d.calendario.habilesEntre(d.hoy, p.fecha!)} />
+  ) : (p.tipo === 'audiencia' || p.tipo === 'visita') && p.fecha ? (
+    <FechaChip f={p.fecha} />
+  ) : p.tipo === 'abandono' ? (
+    <span className="grid size-12 place-items-center rounded-xl bg-destructive-soft text-destructive" aria-hidden>
+      <TriangleAlertIcon className="size-5" />
+    </span>
+  ) : (
+    <span className="grid size-12 place-items-center rounded-xl bg-muted text-muted-foreground" aria-hidden>
+      <HourglassIcon className="size-5" />
+    </span>
+  )
+  const tipo = { notificacion: 'Notificación', proxima: 'Próxima acción', audiencia: 'Audiencia', visita: 'Visita', abandono: 'Abandono', 'sin-movimiento': 'Sin movimiento' }[p.tipo]
+  return (
+    <Fila
+      a={a}
+      inicio={inicio}
+      titulo={p.titulo}
+      subtitulo={`${tipo} · ${p.detalle}${conPlazo ? ` · vence ${fecha(p.fecha)}` : ''}`}
+      fin={p.tipo === 'abandono' ? <Severo severidad={p.severidad} /> : undefined}
+    />
   )
 }
 
@@ -54,105 +94,141 @@ export function Inicio() {
     () => calcularPendientes(d, { hoy: d.hoy, calendario: d.calendario, diasSinMovimiento: d.config.diasSinMovimiento }),
     [d],
   )
-  const visibles = pendientes.slice(0, MAX_VISIBLES)
+  const vencidos = pendientes.filter((p) => p.severidad === 'vencido')
+  const semana = pendientes.filter((p) => p.severidad === 'urgente' || p.severidad === 'proximo')
+  const seguimiento = pendientes.filter((p) => p.severidad === 'info')
   const ultimas = useMemo(
-    () => [...d.acciones].sort((a, b) => b.fecha.localeCompare(a.fecha) || b.creadoEn.localeCompare(a.creadoEn)).slice(0, 6),
+    () => [...d.acciones].sort((a, b) => b.fecha.localeCompare(a.fecha) || b.creadoEn.localeCompare(a.creadoEn)).slice(0, 5),
     [d.acciones],
   )
+  const audiencias = d.audiencias
+    .filter((a) => a.estado === 'programada' && a.fecha >= d.hoy)
+    .sort((a, b) => a.fecha.localeCompare(b.fecha) || (a.hora ?? '').localeCompare(b.hora ?? ''))
+    .slice(0, 4)
+  const nombre = d.sesion.miembro.nombre.split(' ')[0]
 
   return (
     <>
       <EncabezadoPagina
-        titulo="Qué toca hoy"
-        descripcion={<span className="capitalize">{fechaLarga(d.hoy)}</span>}
-        acciones={
-          <BotonEnlace a="/registrar">
-            <PenLineIcon aria-hidden /> Registrar acción
-          </BotonEnlace>
+        antetitulo={fechaLarga(d.hoy)}
+        titulo={`${saludo()}, ${nombre}`}
+        descripcion={
+          d.cargando
+            ? 'Revisando expedientes…'
+            : vencidos.length
+              ? `Tienes ${plural(vencidos.length, 'asunto vencido', 'asuntos vencidos')}. Empieza por ahí.`
+              : semana.length
+                ? `Nada vencido. ${plural(semana.length, 'asunto vence', 'asuntos vencen')} esta semana.`
+                : 'Todo al día. Michi está tranquilo.'
         }
       />
 
-      <section aria-label="Indicadores" className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Indicador a="/bandeja" titulo="Notificaciones pendientes" valor={indicadores.notificacionesPendientes} icono={BellRingIcon} tono="aviso" />
-        <Indicador a="/agenda" titulo="Plazos vencidos" valor={indicadores.plazosVencidos} icono={AlarmClockIcon} tono="alerta" />
-        <Indicador a="/agenda" titulo="Vencen en ≤ 3 días hábiles" valor={indicadores.plazosPorVencer} icono={CalendarClockIcon} tono="aviso" />
-        <Indicador a="/visitas" titulo="Sin movimiento" valor={indicadores.sinMovimiento} icono={HourglassIcon} />
-      </section>
+      <Resumen
+        valores={[
+          { etiqueta: 'Notificaciones pendientes', valor: indicadores.notificacionesPendientes, a: '/bandeja', tono: 'ambar' },
+          { etiqueta: 'Plazos vencidos', valor: indicadores.plazosVencidos, a: '/agenda', tono: 'rojo' },
+          { etiqueta: 'Vencen en 3 días hábiles', valor: indicadores.plazosPorVencer, a: '/agenda', tono: 'ambar' },
+          { etiqueta: 'Sin movimiento', valor: indicadores.sinMovimiento, a: '/expedientes' },
+        ]}
+      />
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_22rem]">
-        <section aria-labelledby="titulo-pendientes">
-          <h2 id="titulo-pendientes" className="mb-3 text-lg font-semibold">
-            Pendientes por urgencia
-          </h2>
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <div className="grid content-start gap-8">
           {d.cargando ? (
             <div className="grid gap-2">
               {Array.from({ length: 4 }, (_, i) => (
-                <Skeleton key={i} className="h-16 rounded-xl" />
+                <Skeleton key={i} className="h-18 rounded-2xl" />
               ))}
             </div>
-          ) : visibles.length === 0 ? (
-            <EstadoVacio titulo="Michi no encontró nada pendiente hoy">Todos los plazos están al día. Buen trabajo.</EstadoVacio>
+          ) : pendientes.length === 0 ? (
+            <EstadoVacio titulo="Nada pendiente hoy">Todos los plazos están al día.</EstadoVacio>
           ) : (
-            <ul className="grid gap-2">
-              {visibles.map((p) => {
-                const destino = p.expedienteId ? `/expedientes/${p.expedienteId}` : p.tipo === 'visita' ? '/visitas' : '/agenda'
-                return (
-                  <li key={p.clave}>
-                    <Link
-                      to={destino}
-                      className="flex items-stretch overflow-hidden rounded-xl border bg-card outline-none transition-colors hover:border-primary/40 focus-visible:ring-3 focus-visible:ring-ring/50"
-                    >
-                      <span className={cn('w-1.5 shrink-0', FRANJA_SEVERIDAD[p.severidad])} aria-hidden />
-                      <span className="flex min-w-0 flex-1 flex-col gap-0.5 px-4 py-3">
-                        <span className="flex flex-wrap items-center gap-2">
-                          <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">{TIPO_TEXTO[p.tipo]}</span>
-                          <Severo severidad={p.severidad} />
-                        </span>
-                        <span className="truncate font-medium">{p.titulo}</span>
-                        <span className="truncate text-sm text-muted-foreground">{p.detalle}</span>
-                      </span>
+            <>
+              {vencidos.length > 0 && (
+                <Seccion titulo={`Vencidos · ${vencidos.length}`}>
+                  <Lista>
+                    {vencidos.map((p) => (
+                      <FilaPendiente key={p.clave} p={p} />
+                    ))}
+                  </Lista>
+                </Seccion>
+              )}
+              {semana.length > 0 && (
+                <Seccion titulo={`Próximos 7 días · ${semana.length}`}>
+                  <Lista>
+                    {semana.map((p) => (
+                      <FilaPendiente key={p.clave} p={p} />
+                    ))}
+                  </Lista>
+                </Seccion>
+              )}
+              {seguimiento.length > 0 && (
+                <Seccion
+                  titulo={`Seguimiento · ${seguimiento.length}`}
+                  accion={
+                    <Link to="/visitas" className="text-sm font-medium text-primary hover:underline">
+                      Planificar visitas
                     </Link>
-                  </li>
-                )
-              })}
-              {pendientes.length > MAX_VISIBLES && (
-                <li>
-                  <BotonEnlace a="/visitas" variant="outline" className="w-full">
-                    Ver {pendientes.length - MAX_VISIBLES} más
-                  </BotonEnlace>
-                </li>
+                  }
+                >
+                  <Lista>
+                    {seguimiento.slice(0, 6).map((p) => (
+                      <FilaPendiente key={p.clave} p={p} />
+                    ))}
+                  </Lista>
+                  {seguimiento.length > 6 && (
+                    <p className="px-1 text-sm text-muted-foreground">
+                      y {plural(seguimiento.length - 6, 'expediente más', 'expedientes más')} sin movimiento.
+                    </p>
+                  )}
+                </Seccion>
               )}
-            </ul>
+            </>
           )}
-        </section>
+        </div>
 
-        <aside aria-labelledby="titulo-ultimas">
-          <Card>
-            <CardHeader>
-              <CardTitle id="titulo-ultimas" className="font-heading text-lg">
-                Últimas acciones
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {ultimas.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Aún no hay acciones registradas.</p>
-              ) : (
-                <ol className="grid gap-3">
-                  {ultimas.map((a) => (
-                    <li key={a.id} className="border-l-2 border-brand-gold/60 pl-3">
-                      <p className="text-sm font-medium">{a.tipo}</p>
-                      <p className="text-xs text-muted-foreground">
-                        <Link className="underline-offset-2 hover:underline" to={`/expedientes/${a.expedienteId}`}>
-                          {etiquetaExp(d.expPorId.get(a.expedienteId))}
-                        </Link>{' '}
-                        · {fecha(a.fecha)} · {a.responsable}
-                      </p>
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </CardContent>
-          </Card>
+        <aside className="grid content-start gap-8">
+          <Seccion
+            titulo="Audiencias"
+            accion={
+              <Link to="/agenda" className="text-sm font-medium text-primary hover:underline">
+                Agenda
+              </Link>
+            }
+          >
+            {audiencias.length === 0 ? (
+              <p className="rounded-2xl bg-card px-4 py-5 text-sm text-muted-foreground shadow-[0_0_0_1px_var(--border)]">Sin audiencias programadas.</p>
+            ) : (
+              <Lista>
+                {audiencias.map((a) => (
+                  <Fila
+                    key={a.id}
+                    a={`/expedientes/${a.expedienteId}`}
+                    inicio={<FechaChip f={a.fecha} />}
+                    titulo={a.tipo}
+                    subtitulo={`${a.hora ?? 'Sin hora'} · ${etiquetaExp(d.expPorId.get(a.expedienteId))}`}
+                  />
+                ))}
+              </Lista>
+            )}
+          </Seccion>
+
+          <Seccion titulo="Últimas acciones">
+            {ultimas.length === 0 ? (
+              <p className="rounded-2xl bg-card px-4 py-5 text-sm text-muted-foreground shadow-[0_0_0_1px_var(--border)]">Aún no hay acciones registradas.</p>
+            ) : (
+              <Lista>
+                {ultimas.map((a) => (
+                  <Fila
+                    key={a.id}
+                    a={`/expedientes/${a.expedienteId}`}
+                    titulo={a.tipo}
+                    subtitulo={`${fecha(a.fecha)} · ${a.responsable} · ${etiquetaExp(d.expPorId.get(a.expedienteId))}`}
+                  />
+                ))}
+              </Lista>
+            )}
+          </Seccion>
         </aside>
       </div>
     </>

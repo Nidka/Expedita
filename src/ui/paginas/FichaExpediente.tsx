@@ -56,7 +56,7 @@ function DesgloseCej({ numero, onRevision }: { numero: string; onRevision: () =>
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-heading text-lg">Consulta en el CEJ</CardTitle>
+        <CardTitle className="text-[1.0625rem] font-semibold">Consulta en el CEJ</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-4">
         {n && (
@@ -283,7 +283,7 @@ export function FichaExpediente() {
         <div className="grid min-w-0 gap-6">
           <Card>
             <CardHeader>
-              <CardTitle className="font-heading text-lg">{VIAS[exp.via]?.nombre}</CardTitle>
+              <CardTitle className="text-[1.0625rem] font-semibold">{VIAS[exp.via]?.nombre}</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-3">
               <RutaEtapas via={exp.via} etapa={exp.etapa} />
@@ -293,7 +293,7 @@ export function FichaExpediente() {
                 </Severo>
               )}
               {sugerencia && (
-                <p className="rounded-lg bg-accent/60 px-3 py-2 text-sm text-accent-foreground">
+                <p className="rounded-xl bg-secondary px-3.5 py-2.5 text-sm text-secondary-foreground">
                   <strong>Sugerencia:</strong> {sugerencia}
                 </p>
               )}
@@ -310,7 +310,7 @@ export function FichaExpediente() {
               <ol className="relative grid gap-4 border-l pl-5">
                 {historial.map((h) => (
                   <li key={h.clave} className="relative">
-                    <span className="absolute top-1.5 -left-[1.6rem] size-2.5 rounded-full bg-brand-gold ring-4 ring-background" aria-hidden />
+                    <span className="absolute top-1.5 -left-[1.6rem] size-2.5 rounded-full bg-primary ring-4 ring-card" aria-hidden />
                     <p className="text-xs text-muted-foreground">
                       {fecha(h.fecha)} · {h.tipo}
                     </p>
@@ -331,7 +331,7 @@ export function FichaExpediente() {
 
         <Card className="self-start">
           <CardHeader>
-            <CardTitle className="font-heading text-lg">Datos</CardTitle>
+            <CardTitle className="text-[1.0625rem] font-semibold">Datos</CardTitle>
           </CardHeader>
           <CardContent>
             <dl className="grid gap-2.5 text-sm">

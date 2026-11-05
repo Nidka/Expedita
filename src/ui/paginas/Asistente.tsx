@@ -31,7 +31,7 @@ function Resultado({ texto, etiqueta }: { texto: string; etiqueta: string }) {
           <CopyIcon aria-hidden /> Copiar
         </Button>
       </div>
-      <div className="max-h-[60dvh] overflow-y-auto rounded-lg border bg-muted/40 p-4 font-heading text-[0.95rem] leading-relaxed whitespace-pre-wrap" tabIndex={0} aria-label={etiqueta}>
+      <div className="max-h-[60dvh] overflow-y-auto rounded-xl border bg-card p-5 font-serif text-[0.95rem] leading-relaxed whitespace-pre-wrap sm:p-8" tabIndex={0} aria-label={etiqueta}>
         {texto}
       </div>
     </div>
@@ -76,7 +76,7 @@ function Sugerencias() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-heading text-lg">Sugerencias de impulso</CardTitle>
+        <CardTitle className="text-[1.0625rem] font-semibold">Sugerencias de impulso</CardTitle>
         <CardDescription>Claude revisa etapa, plazos y días sin movimiento de cada expediente activo y propone qué hacer primero.</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
@@ -114,7 +114,7 @@ function Redactar() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-heading text-lg">Redactar escrito</CardTitle>
+        <CardTitle className="text-[1.0625rem] font-semibold">Redactar escrito</CardTitle>
         <CardDescription>Borrador con formato peruano. Los datos que falten quedan entre [CORCHETES].</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">

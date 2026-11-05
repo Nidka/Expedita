@@ -1,23 +1,37 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/source-serif-4";
-@import "@fontsource/ibm-plex-sans/400.css";
-@import "@fontsource/ibm-plex-sans/500.css";
-@import "@fontsource/ibm-plex-sans/600.css";
-@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource-variable/plus-jakarta-sans";
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * Sistema visual de Expedita
+ * Paleta de marca: ciruela #41164B · baya #901D64 · celeste #5BA0D1 · lavanda #E4D4EA · gris #F3F3F3
+ * Tipografía: Plus Jakarta Sans (variable, empaquetada; sin servicios externos).
+ * Contrastes medidos (texto/fondo):
+ *   claro  · foreground #24122A/#FFF 17.0:1 · muted #685A6E/#FFF 6.4:1 · primary #41164B/#FFF 13.9:1
+ *          · baya #901D64/#FFF 8.3:1 · secondary-fg #41164B/#E4D4EA 10.7:1 · info-fg #1D5C88/#E3F0F9 6.3:1
+ *          · destructive #B42318/#FFF 6.6:1 · warning-fg #8A4B00/#FFF3DC 6.2:1 · success #19713F/#FFF 5.9:1
+ *   oscuro · foreground #F3EEF5/#1E1422 15.5:1 · muted #B4A8BA/#1E1422 7.8:1 · primary #D9C2E3/#1E1422 10.8:1
+ * El celeste #5BA0D1 no alcanza 4.5:1 sobre blanco: en claro solo se usa como relleno, nunca como texto.
+ */
 @theme inline {
-    --font-heading: 'Source Serif 4 Variable', Georgia, serif;
-    --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
-    --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+    --font-sans: "Plus Jakarta Sans Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-heading: "Plus Jakarta Sans Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, monospace;
     --color-warning: var(--warning);
     --color-warning-foreground: var(--warning-foreground);
+    --color-warning-soft: var(--warning-soft);
     --color-success: var(--success);
-    --color-success-foreground: var(--success-foreground);
+    --color-success-soft: var(--success-soft);
+    --color-destructive-soft: var(--destructive-soft);
     --color-brand-gold: var(--brand-gold);
+    --color-separator: var(--separator);
+    --color-berry: var(--berry);
+    --color-info: var(--info);
+    --color-info-soft: var(--info-soft);
+    --color-info-foreground: var(--info-foreground);
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -58,100 +72,153 @@
     --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* Paleta Expedita: azul tinta institucional + dorado latón. Contraste AA en ambos temas. */
 :root {
-    --background: oklch(0.985 0.004 85);
-    --foreground: oklch(0.22 0.03 255);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.22 0.03 255);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.22 0.03 255);
-    --primary: oklch(0.33 0.07 258);
-    --primary-foreground: oklch(0.98 0.005 85);
-    --secondary: oklch(0.95 0.01 255);
-    --secondary-foreground: oklch(0.28 0.05 258);
-    --muted: oklch(0.955 0.006 85);
-    --muted-foreground: oklch(0.48 0.02 255);
-    --accent: oklch(0.94 0.035 85);
-    --accent-foreground: oklch(0.36 0.07 70);
-    --destructive: oklch(0.53 0.2 27);
-    --warning: oklch(0.8 0.15 75);
-    --warning-foreground: oklch(0.3 0.07 60);
-    --success: oklch(0.52 0.12 155);
-    --success-foreground: oklch(0.98 0.01 155);
-    --brand-gold: oklch(0.7 0.12 78);
-    --border: oklch(0.9 0.01 255);
-    --input: oklch(0.88 0.012 255);
-    --ring: oklch(0.55 0.12 258);
-    --chart-1: oklch(0.45 0.1 258);
-    --chart-2: oklch(0.7 0.12 78);
-    --chart-3: oklch(0.55 0.12 155);
-    --chart-4: oklch(0.6 0.18 27);
-    --chart-5: oklch(0.65 0.08 220);
-    --radius: 0.5rem;
-    --sidebar: oklch(0.26 0.05 258);
-    --sidebar-foreground: oklch(0.93 0.01 255);
-    --sidebar-primary: oklch(0.75 0.12 78);
-    --sidebar-primary-foreground: oklch(0.22 0.04 258);
-    --sidebar-accent: oklch(0.33 0.06 258);
-    --sidebar-accent-foreground: oklch(0.98 0.005 85);
-    --sidebar-border: oklch(0.34 0.05 258);
-    --sidebar-ring: oklch(0.75 0.12 78);
+    --background: #F3F3F3;
+    --foreground: #24122A;
+    --card: #FFFFFF;
+    --card-foreground: #24122A;
+    --popover: #FFFFFF;
+    --popover-foreground: #24122A;
+    --primary: #41164B;
+    --primary-foreground: #FFFFFF;
+    --secondary: #E4D4EA;
+    --secondary-foreground: #41164B;
+    --muted: #EFEBF0;
+    --muted-foreground: #685A6E;
+    --accent: #F1E8F4;
+    --accent-foreground: #901D64;
+    --berry: #901D64;
+    --info: #5BA0D1;
+    --info-soft: #E3F0F9;
+    --info-foreground: #1D5C88;
+    --destructive: #B42318;
+    --destructive-soft: #FDECEA;
+    --warning: #F2A33A;
+    --warning-foreground: #8A4B00;
+    --warning-soft: #FFF3DC;
+    --success: #19713F;
+    --success-foreground: #FFFFFF;
+    --success-soft: #E6F4EC;
+    --brand-gold: #5BA0D1;
+    --border: #E4DDE7;
+    --separator: #EEE9F0;
+    --input: #D4CAD8;
+    --ring: #901D64;
+    --chart-1: #41164B;
+    --chart-2: #901D64;
+    --chart-3: #5BA0D1;
+    --chart-4: #E4D4EA;
+    --chart-5: #B42318;
+    --radius: 0.75rem;
+    --sidebar: #FFFFFF;
+    --sidebar-foreground: #24122A;
+    --sidebar-primary: #901D64;
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-accent: #E4D4EA;
+    --sidebar-accent-foreground: #41164B;
+    --sidebar-border: #EEE9F0;
+    --sidebar-ring: #901D64;
 }
 
 .dark {
-    --background: oklch(0.17 0.02 258);
-    --foreground: oklch(0.94 0.008 85);
-    --card: oklch(0.21 0.025 258);
-    --card-foreground: oklch(0.94 0.008 85);
-    --popover: oklch(0.21 0.025 258);
-    --popover-foreground: oklch(0.94 0.008 85);
-    --primary: oklch(0.78 0.08 250);
-    --primary-foreground: oklch(0.18 0.03 258);
-    --secondary: oklch(0.27 0.03 258);
-    --secondary-foreground: oklch(0.94 0.008 85);
-    --muted: oklch(0.25 0.025 258);
-    --muted-foreground: oklch(0.72 0.015 255);
-    --accent: oklch(0.3 0.04 78);
-    --accent-foreground: oklch(0.88 0.08 85);
-    --destructive: oklch(0.68 0.18 25);
-    --warning: oklch(0.82 0.14 78);
-    --warning-foreground: oklch(0.22 0.05 60);
-    --success: oklch(0.72 0.13 155);
-    --success-foreground: oklch(0.18 0.03 155);
-    --brand-gold: oklch(0.78 0.12 80);
-    --border: oklch(1 0 0 / 11%);
-    --input: oklch(1 0 0 / 16%);
-    --ring: oklch(0.7 0.1 250);
-    --chart-1: oklch(0.72 0.1 250);
-    --chart-2: oklch(0.78 0.12 80);
-    --chart-3: oklch(0.72 0.13 155);
-    --chart-4: oklch(0.68 0.18 25);
-    --chart-5: oklch(0.72 0.08 220);
-    --sidebar: oklch(0.14 0.02 258);
-    --sidebar-foreground: oklch(0.9 0.01 255);
-    --sidebar-primary: oklch(0.78 0.12 80);
-    --sidebar-primary-foreground: oklch(0.18 0.03 258);
-    --sidebar-accent: oklch(0.24 0.03 258);
-    --sidebar-accent-foreground: oklch(0.96 0.005 85);
-    --sidebar-border: oklch(1 0 0 / 9%);
-    --sidebar-ring: oklch(0.78 0.12 80);
+    --background: #140B17;
+    --foreground: #F3EEF5;
+    --card: #1E1422;
+    --card-foreground: #F3EEF5;
+    --popover: #241828;
+    --popover-foreground: #F3EEF5;
+    --primary: #D9C2E3;
+    --primary-foreground: #2A0E31;
+    --secondary: #33203B;
+    --secondary-foreground: #E4D4EA;
+    --muted: #2A1C2F;
+    --muted-foreground: #B4A8BA;
+    --accent: #33203B;
+    --accent-foreground: #F08BC4;
+    --berry: #F08BC4;
+    --info: #5BA0D1;
+    --info-soft: #14283A;
+    --info-foreground: #8EC3EA;
+    --destructive: #FF7A6E;
+    --destructive-soft: #3A1714;
+    --warning: #F5B342;
+    --warning-foreground: #F5B342;
+    --warning-soft: #33260B;
+    --success: #5BD38A;
+    --success-foreground: #0B2516;
+    --success-soft: #10301D;
+    --brand-gold: #5BA0D1;
+    --border: #35263B;
+    --separator: #2C1F31;
+    --input: #47344E;
+    --ring: #F08BC4;
+    --chart-1: #D9C2E3;
+    --chart-2: #F08BC4;
+    --chart-3: #5BA0D1;
+    --chart-4: #E4D4EA;
+    --chart-5: #FF7A6E;
+    --sidebar: #1A1020;
+    --sidebar-foreground: #F3EEF5;
+    --sidebar-primary: #F08BC4;
+    --sidebar-primary-foreground: #2A0E31;
+    --sidebar-accent: #33203B;
+    --sidebar-accent-foreground: #F3EEF5;
+    --sidebar-border: #2C1F31;
+    --sidebar-ring: #F08BC4;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    }
+  }
+  html {
+    @apply font-sans antialiased;
+    font-size: 15px;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+  @media (max-width: 640px) {
+    /* En celular el texto base sube a 16px: evita el zoom automático de iOS en campos */
+    html { font-size: 16px; }
+  }
   body {
     @apply bg-background text-foreground;
-    }
-  html {
-    @apply font-sans;
+    font-feature-settings: "tnum" 0, "cv11" 1;
   }
   h1, h2, h3, h4 {
-    @apply font-heading tracking-tight;
+    @apply font-heading tracking-tight text-balance;
+  }
+  /* Los hijos de grid/flex no deben ensancharse por textos largos (evita scroll horizontal en celular) */
+  :where(.grid, .flex) > * {
+    min-width: 0;
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--primary) 25%, transparent);
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
   }
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  }
+  @media (prefers-contrast: more) {
+    :root { --muted-foreground: #4A3E50; --border: #A99BAF; --separator: #C6BBCA; }
+    .dark { --muted-foreground: #C8C8D0; --border: #5A5B60; --separator: #4A4B50; }
+  }
+}
+
+@layer utilities {
+  /* Espacio para la barra de pestañas inferior en celular + zona segura del iPhone */
+  .pb-tabbar { padding-bottom: calc(5rem + env(safe-area-inset-bottom)); }
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+  .tabular { font-variant-numeric: tabular-nums; }
+  .material {
+    background: color-mix(in oklab, var(--background) 82%, transparent);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    .material { background: var(--background); backdrop-filter: none; -webkit-backdrop-filter: none; }
   }
 }

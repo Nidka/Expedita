@@ -52,7 +52,7 @@ function Equipo() {
     <div className="grid gap-6 lg:grid-cols-2">
       <Card>
         <CardHeader>
-          <CardTitle className="font-heading text-lg">Miembros</CardTitle>
+          <CardTitle className="text-[1.0625rem] font-semibold">Miembros</CardTitle>
         </CardHeader>
         <CardContent>
           <ul className="divide-y">
@@ -82,7 +82,7 @@ function Equipo() {
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle className="font-heading text-lg">Invitar</CardTitle>
+          <CardTitle className="text-[1.0625rem] font-semibold">Invitar</CardTitle>
           <CardDescription>La persona entra con su correo (enlace o contraseña). No se envía nada automáticamente: avísale tú.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
@@ -154,7 +154,7 @@ function Plazos() {
     <div className="grid gap-6 lg:grid-cols-2">
       <Card>
         <CardHeader>
-          <CardTitle className="font-heading text-lg">Cómputo y alertas</CardTitle>
+          <CardTitle className="text-[1.0625rem] font-semibold">Cómputo y alertas</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={guardar} className="grid gap-4">
@@ -175,7 +175,7 @@ function Plazos() {
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle className="font-heading text-lg">Feriados nacionales cargados</CardTitle>
+          <CardTitle className="text-[1.0625rem] font-semibold">Feriados nacionales cargados</CardTitle>
           <CardDescription>
             Cubre hasta {ultimoAnio ?? '—'}.{' '}
             {ultimoAnio && ultimoAnio <= anioActual && <strong className="text-destructive">Hay que cargar los feriados del próximo año.</strong>}
@@ -241,7 +241,7 @@ function Importar() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-heading text-lg">Importar cuadro de expedientes</CardTitle>
+        <CardTitle className="text-[1.0625rem] font-semibold">Importar cuadro de expedientes</CardTitle>
         <CardDescription>
           Se lee solo la hoja elegida, en tu navegador. La «Hoja 8» nunca se abre. Si un número aparece en el cuadro actualizado, sus datos
           prevalecen; el código interno sale siempre del cuadro principal.
@@ -370,7 +370,7 @@ function Exportar() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-heading text-lg">Exportar</CardTitle>
+        <CardTitle className="text-[1.0625rem] font-semibold">Exportar</CardTitle>
         <CardDescription>Archivos CSV que abren en Excel o se suben a Google Sheets. Además hay respaldo automático cada noche.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-wrap gap-2">

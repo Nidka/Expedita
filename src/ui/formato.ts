@@ -7,8 +7,15 @@ const FMT_MES = new Intl.DateTimeFormat('es-PE', { month: 'long', year: 'numeric
 const SOLES = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN', maximumFractionDigits: 2 })
 
 export const fecha = (f?: FechaISO) => (f ? FMT_CORTA.format(aDate(f)).replace('.', '') : '—')
-export const fechaLarga = (f: FechaISO) => FMT_LARGA.format(aDate(f))
-export const mes = (f: FechaISO) => FMT_MES.format(aDate(f))
+/** «Jueves, 5 de noviembre» (solo la primera letra en mayúscula). */
+export const fechaLarga = (f: FechaISO) => {
+  const s = FMT_LARGA.format(aDate(f))
+  return s.charAt(0).toUpperCase() + s.slice(1)
+}
+export const mes = (f: FechaISO) => {
+  const s = FMT_MES.format(aDate(f))
+  return s.charAt(0).toUpperCase() + s.slice(1)
+}
 export const soles = (n?: number) => (n === undefined ? '—' : SOLES.format(n))
 
 export const etiquetaExp = (e?: Pick<Expediente, 'codigo' | 'numero'>) =>
