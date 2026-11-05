@@ -57,3 +57,14 @@ export {
   SidebarSimpleIcon as PanelLeftIcon,
   XIcon,
 } from '@phosphor-icons/react'
+
+// Acceso
+export {
+  EnvelopeSimpleIcon as MailIcon,
+  LockSimpleIcon as LockIcon,
+  EyeIcon,
+  EyeSlashIcon as EyeOffIcon,
+  ShieldCheckIcon,
+  ArrowLeftIcon,
+  ArrowRightIcon,
+} from '@phosphor-icons/react'
