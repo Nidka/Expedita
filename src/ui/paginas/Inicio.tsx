@@ -1,7 +1,10 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { calcularPendientes, type Pendiente } from '@/domain/agenda/que-toca-hoy'
+import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { modoDemo } from '@/infrastructure/composicion'
+import { CLAVE_DEFINIDA } from './Cuenta'
 import { cn } from '@/lib/utils'
 import { useDatos } from '../contexto'
 import { BotonEnlace, EstadoVacio, Fila, Lista, Seccion, Vence, fechaCorta } from '../componentes/base'
@@ -120,6 +123,8 @@ export function Inicio() {
           <Michi key={estado.pose} pose={estado.pose} className="size-28 animate-entrar [animation-duration:480ms] lg:size-32" />
         </span>
       </header>
+
+      <AvisoClave />
 
       {/* Resumen en una sola banda */}
       <nav
@@ -268,5 +273,42 @@ export function Inicio() {
         </aside>
       </div>
     </>
+  )
+}
+
+/** Sugerencia (descartable) de crear una contraseña: el correo gratuito tiene un límite de envíos por hora. */
+function AvisoClave() {
+  const { sesion } = useDatos()
+  const [visible, setVisible] = useState(() => {
+    try {
+      return !modoDemo && !localStorage.getItem(CLAVE_DEFINIDA) && !localStorage.getItem('expedita.aviso-clave-cerrado')
+    } catch {
+      return false
+    }
+  })
+  if (!visible) return null
+  const cerrar = () => {
+    try {
+      localStorage.setItem('expedita.aviso-clave-cerrado', '1')
+    } catch {
+      /* sin almacenamiento */
+    }
+    setVisible(false)
+  }
+  return (
+    <div role="status" className="mb-8 flex animate-entrar flex-wrap items-center gap-x-4 gap-y-2 rounded-xl bg-card px-5 py-4 shadow-[0_0_0_1px_var(--border)]">
+      <p className="min-w-0 flex-1 text-sm">
+        <span className="font-semibold">{sesion.miembro.nombre.split(' ')[0]}, crea una contraseña</span>
+        <span className="text-muted-foreground"> para entrar al instante sin esperar el enlace por correo.</span>
+      </p>
+      <div className="flex gap-2">
+        <BotonEnlace a="/cuenta" size="sm">
+          Crear contraseña
+        </BotonEnlace>
+        <Button size="sm" variant="ghost" onClick={cerrar}>
+          Ahora no
+        </Button>
+      </div>
+    </div>
   )
 }

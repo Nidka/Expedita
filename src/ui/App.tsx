@@ -16,6 +16,7 @@ const Bandeja = lazy(() => import('./paginas/Bandeja').then((m) => ({ default: m
 const Agenda = lazy(() => import('./paginas/Agenda').then((m) => ({ default: m.Agenda })))
 const Visitas = lazy(() => import('./paginas/Visitas').then((m) => ({ default: m.Visitas })))
 const Asistente = lazy(() => import('./paginas/Asistente').then((m) => ({ default: m.Asistente })))
+const Cuenta = lazy(() => import('./paginas/Cuenta').then((m) => ({ default: m.Cuenta })))
 const Ajustes = lazy(() => import('./paginas/Ajustes').then((m) => ({ default: m.Ajustes })))
 
 function Cargando() {
@@ -77,6 +78,7 @@ export function App() {
               <Route path="visitas" element={<Visitas />} />
               <Route path="asistente" element={<Asistente />} />
               <Route path="ajustes" element={<Ajustes />} />
+              <Route path="cuenta" element={<Cuenta />} />
               <Route path="*" element={<EstadoVacio pose="espaldas" titulo="Esta página no existe">Revisa el enlace o vuelve a Hoy.</EstadoVacio>} />
             </Route>
           </Routes>

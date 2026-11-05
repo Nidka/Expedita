@@ -1,6 +1,6 @@
 import type { Contenedor } from '@/application/contenedor'
 import { hoyEnLima } from '@/domain/shared/fecha'
-import { leerHojaCuadro } from './excel/leer-cuadro'
+import { hojasDelLibro, leerHojaCuadro } from './excel/leer-cuadro'
 import { AsistenteClaude } from './ia/asistente-claude'
 import { contenedorMemoria } from './memoria/repositorios'
 import { sembrarDemo } from './memoria/semilla-demo'
@@ -22,7 +22,7 @@ export const modoDemo = !supabaseConfigurado
 
 /** Raíz de composición: el único lugar que conoce los adaptadores concretos. */
 export async function crearContenedor(): Promise<Contenedor> {
-  const excel = { leerHoja: leerHojaCuadro }
+  const excel = { leerHoja: leerHojaCuadro, hojas: hojasDelLibro }
   if (modoDemo) {
     // Si cambia la semilla de demostración, se descarta la copia guardada en el navegador.
     const VERSION_SEMILLA = '2'

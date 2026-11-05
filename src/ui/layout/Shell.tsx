@@ -55,12 +55,12 @@ function Usuario({ compacto = false }: { compacto?: boolean }) {
         {iniciales}
       </span>
       {!compacto && (
-        <span className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
+        <NavLink to="/cuenta" className="min-w-0 flex-1 rounded-md outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/25 group-data-[collapsible=icon]:hidden" title="Mi cuenta">
           <span className="block truncate text-sm font-medium">{sesion.miembro.nombre}</span>
           <span className="block truncate text-xs text-muted-foreground">
             {sesion.miembro.rol === 'admin' ? 'Administrador' : 'Abogado'} · {sesion.orgNombre}
           </span>
-        </span>
+        </NavLink>
       )}
       <Button
         variant="ghost"

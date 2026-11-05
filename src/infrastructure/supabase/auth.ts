@@ -50,6 +50,11 @@ export class AuthSupabase implements AuthPort {
     if (error) throw new Error(error.message)
   }
 
+  async cambiarClave(nueva: string): Promise<void> {
+    const { error } = await supabase().auth.updateUser({ password: nueva })
+    if (error) throw new Error(/weak|short|least/i.test(error.message) ? 'La contraseña es muy débil: usa al menos 10 caracteres.' : /same/i.test(error.message) ? 'La nueva contraseña debe ser distinta de la actual.' : error.message)
+  }
+
   async cerrarSesion(): Promise<void> {
     await supabase().auth.signOut()
     this.sesion = null

@@ -8,6 +8,8 @@ import type { Miembro, Rol } from '@/domain/entidades'
 import { importarCuadro, type ResultadoImportacion } from '@/domain/expediente/importacion'
 import { esFechaISO } from '@/domain/shared/fecha'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -199,25 +201,70 @@ function Plazos() {
   )
 }
 
-const HOJAS = ['CASOS LABORALES', 'CASOS CIVILES', 'COMERCIALES', 'ADMINISTRATIVO', 'CONSTITUCIONAL', 'GESTIÓN DE CRÉDITOS', 'CASOS JUDICIALES - GAMALIEL']
+/** Hoja más probable según su nombre (p. ej. «con codigo» como principal y «sin codigo» como actualizada). */
+function sugerirHojas(hojas: string[]): { principal: string; actualizada: string } {
+  const n = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim()
+  const principal = hojas.find((h) => /con codigo|laboral/.test(n(h))) ?? hojas[0] ?? ''
+  const actualizada = hojas.find((h) => h !== principal && /sin codigo|actualiz/.test(n(h))) ?? ''
+  return { principal, actualizada }
+}
 
 function Importar() {
   const c = useContenedor()
-  const [principal, setPrincipal] = useState<File | null>(null)
-  const [actualizado, setActualizado] = useState<File | null>(null)
-  const [hoja, setHoja] = useState(HOJAS[0])
+  const [archivo, setArchivo] = useState<File | null>(null)
+  const [hojas, setHojas] = useState<string[]>([])
+  const [principal, setPrincipal] = useState('')
+  const [actualizada, setActualizada] = useState('')
+  const [otroArchivo, setOtroArchivo] = useState<File | null>(null)
+  const [hojasOtro, setHojasOtro] = useState<string[]>([])
+  const [incluirSinCodigo, setIncluirSinCodigo] = useState(false)
   const [resultado, setResultado] = useState<ResultadoImportacion | null>(null)
   const [trabajando, setTrabajando] = useState(false)
+  const [error, setError] = useState<string>()
 
-  const previsualizar = async () => {
-    if (!principal) return toast.error('Elige el cuadro principal (el que tiene la columna CODIGO).')
-    setTrabajando(true)
+  const elegirArchivo = async (f: File | null) => {
+    setArchivo(f)
+    setResultado(null)
+    setError(undefined)
+    setHojas([])
+    if (!f) return
     try {
-      const filasP = await c.excel.leerHoja(principal, hoja)
-      const filasA = actualizado ? await c.excel.leerHoja(actualizado, hoja).catch(() => []) : []
+      const h = await c.excel.hojas(f)
+      if (!h.length) throw new Error('El archivo no tiene hojas que se puedan importar.')
+      setHojas(h)
+      const s = sugerirHojas(h)
+      setPrincipal(s.principal)
+      setActualizada(s.actualizada)
+    } catch (e) {
+      setError((e as Error).message)
+    }
+  }
+
+  const elegirOtro = async (f: File | null) => {
+    setOtroArchivo(f)
+    setResultado(null)
+    setHojasOtro([])
+    if (!f) return setActualizada(sugerirHojas(hojas).actualizada)
+    try {
+      const h = await c.excel.hojas(f)
+      setHojasOtro(h)
+      setActualizada(h.includes(principal) ? principal : (h[0] ?? ''))
+    } catch (e) {
+      setError((e as Error).message)
+    }
+  }
+
+  const revisar = async () => {
+    if (!archivo || !principal) return
+    setTrabajando(true)
+    setError(undefined)
+    try {
+      const filasP = await c.excel.leerHoja(archivo, principal)
+      const fuente = otroArchivo ?? archivo
+      const filasA = actualizada ? await c.excel.leerHoja(fuente, actualizada) : []
       setResultado(importarCuadro(filasP, filasA))
     } catch (e) {
-      toast.error((e as Error).message)
+      setError((e as Error).message)
     } finally {
       setTrabajando(false)
     }
@@ -227,72 +274,142 @@ function Importar() {
     if (!resultado) return
     setTrabajando(true)
     try {
-      const r = await importarExpedientes(c, resultado.expedientes)
+      const lista = incluirSinCodigo ? [...resultado.expedientes, ...resultado.soloEnActualizado] : resultado.expedientes
+      const r = await importarExpedientes(c, lista)
       exito(`${plural(r.creados, 'expediente importado', 'expedientes importados')}`, {
         pose: 'libros',
         descripcion: r.omitidos.length ? `${r.omitidos.length} ya existían y no se tocaron.` : undefined,
       })
       setResultado(null)
     } catch (e) {
-      toast.error((e as Error).message)
+      setError((e as Error).message)
     } finally {
       setTrabajando(false)
     }
   }
+
+  const hojasActualizada = otroArchivo ? hojasOtro : hojas.filter((h) => h !== principal)
+  const archivados = resultado?.expedientes.filter((e) => e.estado === 'archivado').length ?? 0
+  const total = (resultado?.expedientes.length ?? 0) + (incluirSinCodigo ? (resultado?.soloEnActualizado.length ?? 0) : 0)
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-[1.0625rem] font-semibold">Importar cuadro de expedientes</CardTitle>
         <CardDescription>
-          Se lee solo la hoja elegida, en tu navegador. La «Hoja 8» nunca se abre. Si un número aparece en el cuadro actualizado, sus datos
-          prevalecen; el código interno sale siempre del cuadro principal.
+          El archivo se lee en tu navegador y solo se abren las hojas que elijas. El código interno sale de la hoja principal; si un expediente
+          también está en la hoja actualizada, sus datos más recientes prevalecen.
         </CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-4">
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Campo etiqueta="Cuadro principal (con CODIGO)" requerido>
-            {(p) => <Input {...p} type="file" accept=".xlsx" onChange={(e) => setPrincipal(e.target.files?.[0] ?? null)} />}
-          </Campo>
-          <Campo opcional etiqueta="Cuadro actualizado">
-            {(p) => <Input {...p} type="file" accept=".xlsx" onChange={(e) => setActualizado(e.target.files?.[0] ?? null)} />}
-          </Campo>
-          <Campo etiqueta="Hoja">
-            {(p) => (
-              <SelectNativo {...p} value={hoja} onChange={(e) => setHoja(e.target.value)}>
-                {HOJAS.map((h) => (
-                  <option key={h}>{h}</option>
-                ))}
-              </SelectNativo>
-            )}
-          </Campo>
-        </div>
-        <Button variant="outline" onClick={previsualizar} disabled={trabajando || !principal} className="justify-self-start">
-          <FileSpreadsheetIcon aria-hidden /> {trabajando && !resultado ? 'Leyendo…' : 'Revisar antes de importar'}
-        </Button>
+      <CardContent className="grid gap-6">
+        <Campo etiqueta="1. Archivo de Excel (.xlsx)">
+          {(p) => <Input {...p} type="file" accept=".xlsx" onChange={(e) => void elegirArchivo(e.target.files?.[0] ?? null)} />}
+        </Campo>
+
+        {hojas.length > 0 && (
+          <div className="grid animate-entrar gap-4 sm:grid-cols-2">
+            <Campo etiqueta="2. Hoja principal (con código)">
+              {(p) => (
+                <SelectNativo
+                  {...p}
+                  value={principal}
+                  onChange={(e) => {
+                    setPrincipal(e.target.value)
+                    setResultado(null)
+                  }}
+                >
+                  {hojas.map((h) => (
+                    <option key={h} value={h}>
+                      {h.trim()}
+                    </option>
+                  ))}
+                </SelectNativo>
+              )}
+            </Campo>
+            <Campo opcional etiqueta="Hoja actualizada (sin código)" ayuda="Aporta los datos más recientes de cada expediente.">
+              {(p) => (
+                <SelectNativo
+                  {...p}
+                  value={actualizada}
+                  onChange={(e) => {
+                    setActualizada(e.target.value)
+                    setResultado(null)
+                  }}
+                >
+                  <option value="">No usar</option>
+                  {hojasActualizada.map((h) => (
+                    <option key={h} value={h}>
+                      {h.trim()}
+                    </option>
+                  ))}
+                </SelectNativo>
+              )}
+            </Campo>
+            <details className="text-sm sm:col-span-2">
+              <summary className="cursor-pointer text-muted-foreground">¿La hoja actualizada está en otro archivo?</summary>
+              <div className="mt-3">
+                <Input type="file" accept=".xlsx" aria-label="Archivo con la hoja actualizada" onChange={(e) => void elegirOtro(e.target.files?.[0] ?? null)} />
+              </div>
+            </details>
+          </div>
+        )}
+
+        {error && (
+          <p role="alert" className="text-sm font-medium text-destructive">
+            {error}
+          </p>
+        )}
+
+        {hojas.length > 0 && !resultado && (
+          <Button variant="outline" onClick={revisar} disabled={trabajando || !principal} className="justify-self-start">
+            <FileSpreadsheetIcon aria-hidden /> {trabajando ? 'Leyendo…' : '3. Revisar antes de importar'}
+          </Button>
+        )}
 
         {resultado && (
-          <div className="grid gap-4 border-t border-separator pt-6" aria-live="polite">
-            <p className="font-medium">
-              {plural(resultado.expedientes.length, 'expediente listo', 'expedientes listos')} ·{' '}
-              {resultado.expedientes.filter((e) => e.estado === 'archivado').length} archivados
-            </p>
+          <div className="grid animate-entrar gap-5 border-t border-separator pt-6" aria-live="polite">
+            <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+              {(
+                [
+                  ['Listos para importar', resultado.expedientes.length],
+                  ['Activos', resultado.expedientes.length - archivados],
+                  ['Archivados', archivados],
+                  ['Fusionados', resultado.fusionados.length],
+                ] as [string, number][]
+              ).map(([k, v]) => (
+                <div key={k}>
+                  <dt className="text-xs text-muted-foreground">{k}</dt>
+                  <dd className="tabular text-2xl font-semibold">{v}</dd>
+                </div>
+              ))}
+            </dl>
+
             {resultado.fusionados.length > 0 && (
-              <div className="text-sm">
-                <p className="font-medium">Números repetidos que se fusionarán:</p>
-                <ul className="list-disc pl-5">
-                  {resultado.fusionados.map((f) => (
-                    <li key={f.numero}>
-                      {f.numero} ({f.codigos.join(' / ')})
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <p className="text-sm">
+                <span className="font-medium">Números repetidos que se unen en un solo expediente:</span>{' '}
+                {resultado.fusionados.map((f) => f.codigos.join(' / ')).join(' · ')}
+              </p>
             )}
+
+            {resultado.soloEnActualizado.length > 0 && (
+              <Label className="items-start gap-3 rounded-lg bg-muted/60 p-4 font-normal">
+                <Checkbox checked={incluirSinCodigo} onCheckedChange={(v) => setIncluirSinCodigo(Boolean(v))} className="mt-0.5" />
+                <span className="grid gap-1">
+                  <span className="font-medium">
+                    Incluir también {plural(resultado.soloEnActualizado.length, 'expediente que solo está', 'expedientes que solo están')} en la hoja
+                    actualizada
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    Se importan sin código interno; puedes asignárselo después. {resultado.soloEnActualizado.map((e) => e.numero).join(', ')}
+                  </span>
+                </span>
+              </Label>
+            )}
+
             {resultado.descartadas.length > 0 && (
               <div className="text-sm">
                 <p className="font-medium">Filas sin número reconocible (no se importan):</p>
-                <ul className="list-disc pl-5">
+                <ul className="mt-1 list-disc pl-5 text-muted-foreground">
                   {resultado.descartadas.map((d) => (
                     <li key={d.fila}>
                       Fila {d.fila}: «{d.valor}»
@@ -301,8 +418,9 @@ function Importar() {
                 </ul>
               </div>
             )}
+
             <details className="text-sm">
-              <summary className="cursor-pointer">Ver los primeros 10</summary>
+              <summary className="cursor-pointer text-muted-foreground">Ver los primeros 10</summary>
               <ul className="mt-2 grid gap-1">
                 {resultado.expedientes.slice(0, 10).map((e) => (
                   <li key={e.numero}>
@@ -311,12 +429,13 @@ function Importar() {
                 ))}
               </ul>
             </details>
-            <div className="flex gap-2">
+
+            <div className="flex flex-wrap gap-2">
               <Button onClick={confirmar} disabled={trabajando}>
-                {trabajando ? 'Importando…' : 'Importar'}
+                {trabajando ? 'Importando…' : `Importar ${plural(total, 'expediente', 'expedientes')}`}
               </Button>
               <Button variant="ghost" onClick={() => setResultado(null)}>
-                Cancelar
+                Volver
               </Button>
             </div>
           </div>

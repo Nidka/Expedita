@@ -25,3 +25,24 @@ export async function leerHojaCuadro(archivo: File, hoja: string): Promise<FilaC
     .filter((f) => f.some((c) => c !== null && c !== undefined && String(c).trim() !== ''))
     .map((f) => Object.fromEntries(encabezados.map((h, i) => [h, f[i]]).filter(([h]) => h)))
 }
+
+/**
+ * Nombres de las hojas tal como están en el archivo (incluidos espacios al final).
+ * Solo lee el índice del libro (xl/workbook.xml), nunca el contenido de las hojas.
+ * Las hojas prohibidas (credenciales) no se ofrecen.
+ */
+export async function hojasDelLibro(archivo: File): Promise<string[]> {
+  const { unzipSync, strFromU8 } = await import('fflate')
+  let indice: Uint8Array | undefined
+  try {
+    indice = unzipSync(new Uint8Array(await archivo.arrayBuffer()), { filter: (f) => f.name === 'xl/workbook.xml' })['xl/workbook.xml']
+  } catch {
+    throw new Error(`No se pudo leer «${archivo.name}». ¿Es un .xlsx válido?`)
+  }
+  if (!indice) throw new Error(`«${archivo.name}» no parece un libro de Excel (.xlsx).`)
+  const xml = strFromU8(indice)
+  const entidades: Record<string, string> = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&apos;': "'" }
+  return [...xml.matchAll(/<sheet\b[^>]*\bname="([^"]*)"/g)]
+    .map((m) => m[1].replace(/&(amp|lt|gt|quot|apos);/g, (e) => entidades[e]))
+    .filter(hojaPermitida)
+}

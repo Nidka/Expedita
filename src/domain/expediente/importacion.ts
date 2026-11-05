@@ -12,6 +12,8 @@ export interface ResultadoImportacion {
   expedientes: ExpedienteImportado[]
   fusionados: { numero: string; codigos: string[] }[]
   descartadas: { fila: number; motivo: string; valor: string }[]
+  /** Expedientes que solo están en el cuadro actualizado (sin código interno). No se importan salvo que se pida. */
+  soloEnActualizado: ExpedienteImportado[]
 }
 
 /** Hojas que nunca se leen (la Hoja 8 contiene credenciales en texto plano). */
@@ -92,6 +94,11 @@ function booleano(v: unknown): boolean | undefined {
   return undefined
 }
 
+/** «la - 01 » → «LA-01» */
+export function normalizarCodigo(c: string | undefined): string | undefined {
+  return c?.replace(/\s*-\s*/g, '-').replace(/\s+/g, ' ').trim().toUpperCase() || undefined
+}
+
 /** Anexo C: etapa según el «Estado del proceso». */
 export function etapaDesdeEstado(estadoProceso: string | undefined, ultimoActo: string | undefined): string | undefined {
   const e = (estadoProceso ?? '').toLowerCase()
@@ -127,7 +134,7 @@ function filaAExpediente(fila: FilaCuadro): { exp?: ExpedienteImportado; crudo: 
     crudo,
     exp: {
       numero: ext.numero.valor,
-      codigo: texto(datos.codigo),
+      codigo: normalizarCodigo(texto(datos.codigo)),
       via,
       etapa: etapa && (etapa === 'Archivado' || VIAS[via].etapas.includes(etapa)) ? etapa : undefined,
       estado: archivado ? 'archivado' : 'activo',
@@ -194,9 +201,13 @@ export function importarCuadro(principal: FilaCuadro[], actualizado: FilaCuadro[
           ;(fusion as Record<string, unknown>)[k] = v
         }
       }
+      // Etapa y estado se derivan juntos del cuadro actualizado (no mezclar una etapa vieja con un estado nuevo)
+      fusion.etapa = act.etapa
+      fusion.estado = act.estado
     }
     fusion.codigo = cods.length ? cods.join(' / ') : undefined
     expedientes.push(fusion)
   }
-  return { expedientes, fusionados, descartadas }
+  const soloEnActualizado = [...actualizadoPorNumero.values()].filter((e) => !porNumero.has(e.numero))
+  return { expedientes, fusionados, descartadas, soloEnActualizado }
 }

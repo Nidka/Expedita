@@ -226,6 +226,7 @@ class AuthDemo implements AuthPort {
     return null
   }
   async crearEstudio() {}
+  async cambiarClave() {}
 }
 
 class IADemo implements AsistenteIA {
@@ -266,6 +267,7 @@ export function contenedorMemoria(opciones: { persistir?: boolean; semilla?: (c:
       leerHoja: async () => {
         throw new Error('Lector de Excel no disponible en pruebas.')
       },
+      hojas: async () => [],
     },
     reloj: { hoy: () => hoyEnLima() },
   }

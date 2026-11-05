@@ -94,3 +94,24 @@ pg_restore --no-owner --dbname '<SUPABASE_DB_URL>' respaldo.dump
 
 - **Dominio propio** (`expedita.pe`): se compra en punto.pe (~S/ 100 al año) y se conecta en Cloudflare Pages → Custom domains.
 - **Correos en español**: Supabase → Authentication → Email Templates.
+
+## 7. Correo propio para los enlaces de acceso (recomendado)
+
+El correo incluido en Supabase solo envía **2 correos por hora**. Para enviar desde Gmail (hasta 500 al día, gratis):
+
+1. En la cuenta de Gmail: **myaccount.google.com → Seguridad → Verificación en 2 pasos** (activarla si no lo está).
+2. **myaccount.google.com/apppasswords** → nombre `Expedita` → **Crear**. Copia la clave de 16 letras (es distinta a la contraseña de Gmail; se puede revocar cuando quieras).
+3. Supabase → **Authentication → Emails → SMTP Settings** → **Enable Custom SMTP**:
+
+| Campo | Valor |
+|---|---|
+| Sender email | tu Gmail |
+| Sender name | `Expedita` |
+| Host | `smtp.gmail.com` |
+| Port | `587` |
+| Username | tu Gmail |
+| Password | la clave de 16 letras del paso 2 |
+
+4. Supabase → **Authentication → Rate Limits** → *Rate limit for sending emails*: súbelo a **30** por hora.
+
+Además, cada persona puede crear su contraseña en **Mi cuenta** (clic en su nombre, abajo a la izquierda) y entrar con «Usar mi contraseña» sin depender del correo.

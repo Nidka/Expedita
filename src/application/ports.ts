@@ -95,6 +95,8 @@ export interface AuthPort {
   alCambiar(cb: () => void): () => void
   /** Usuario autenticado que todavía no pertenece a ningún estudio (primer ingreso). */
   usuarioSinEstudio(): Promise<{ email: string } | null>
+  /** Define o cambia la contraseña del usuario actual (para no depender del enlace por correo). */
+  cambiarClave(nueva: string): Promise<void>
   /** Crea el estudio y deja al usuario actual como administrador. */
   crearEstudio(nombreEstudio: string, nombreUsuario: string): Promise<void>
 }
@@ -150,6 +152,8 @@ export interface AsistenteIA {
 /** Lee una hoja de un archivo de Excel como filas con encabezado. */
 export interface LectorExcel {
   leerHoja(archivo: File, hoja: string): Promise<Record<string, unknown>[]>
+  /** Nombres de las hojas del libro, sin leer su contenido */
+  hojas(archivo: File): Promise<string[]>
 }
 
 export interface Reloj {
