@@ -1,10 +1,14 @@
 import type { Contenedor } from '@/application/contenedor'
+import { CalendarioHabil } from '@/domain/plazos/calendario-habil'
+import { FERIADOS_NACIONALES } from '@/domain/plazos/feriados'
 import { sumarDias } from '@/domain/shared/fecha'
 
 /** Datos ficticios para el modo demo. No corresponden a clientes reales. */
 export async function sembrarDemo(c: Contenedor): Promise<void> {
   if ((await c.expedientes.listar()).length) return
   const hoy = c.reloj.hoy()
+  const cal = new CalendarioHabil(FERIADOS_NACIONALES)
+  const habil = (n: number) => cal.sumarHabiles(hoy, n)
   const exps = await c.expedientes.crearVarios([
     {
       numero: '01234-2025-0-1801-JR-LA-05',
@@ -77,7 +81,7 @@ export async function sembrarDemo(c: Contenedor): Promise<void> {
     casilla: true,
     estado: 'pendiente',
     origen: 'manual',
-    vencimiento: sumarDias(hoy, 3),
+    vencimiento: habil(2),
   })
   await c.acciones.crear({
     expedienteId: exps[1].id,
@@ -87,14 +91,14 @@ export async function sembrarDemo(c: Contenedor): Promise<void> {
     responsable: 'Usuario demo',
     cargo: '4521-2026',
     proxima: 'Revisar CEJ si se expidió sentencia',
-    proximaFecha: sumarDias(hoy, 2),
+    proximaFecha: habil(4),
     proximaCumplida: false,
     origen: 'manual',
   })
   await c.audiencias.crear({
     expedienteId: exps[0].id,
     tipo: 'Juzgamiento',
-    fecha: sumarDias(hoy, 4),
+    fecha: habil(3),
     hora: '09:30',
     modalidad: 'virtual',
     estado: 'programada',

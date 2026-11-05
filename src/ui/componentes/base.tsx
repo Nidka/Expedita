@@ -95,11 +95,13 @@ export function EncabezadoPagina({
 /** Sección con título pequeño y contenido agrupado. */
 export function Seccion({
   titulo,
+  cantidad,
   accion,
   children,
   className,
 }: {
   titulo: string
+  cantidad?: number
   accion?: ReactNode
   children: ReactNode
   className?: string
@@ -108,8 +110,9 @@ export function Seccion({
   return (
     <section aria-labelledby={id} className={cn('grid content-start gap-3', className)}>
       <div className="flex items-center justify-between gap-2 px-1">
-        <h2 id={id} className="text-[0.8125rem] font-semibold tracking-wide text-muted-foreground uppercase">
+        <h2 id={id} className="text-[1.0625rem] font-semibold">
           {titulo}
+          {cantidad !== undefined && <span className="ml-2 font-normal text-muted-foreground tabular">{cantidad}</span>}
         </h2>
         {accion}
       </div>
@@ -135,8 +138,11 @@ export function Fila({
   subtitulo,
   detalle,
   fin,
+  estado,
   className,
 }: {
+  /** Franja de estado a la izquierda (vencido, urgente…) */
+  estado?: Severidad
   a?: string
   inicio?: ReactNode
   titulo: ReactNode
@@ -147,6 +153,7 @@ export function Fila({
 }) {
   const contenido = (
     <>
+      {estado && <span className={cn('absolute inset-y-3 left-0 w-[3px] rounded-r-full', FRANJA_SEVERIDAD[estado])} aria-hidden />}
       {inicio && <span className="shrink-0">{inicio}</span>}
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="truncate font-medium">{titulo}</span>
@@ -157,7 +164,7 @@ export function Fila({
       {a && <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground/60 transition-transform duration-200 ease-(--ease-apple) group-hover:translate-x-0.5 group-hover:text-muted-foreground" aria-hidden />}
     </>
   )
-  const base = 'flex min-h-12 items-center gap-4 px-5 py-3.5'
+  const base = cn('relative flex min-h-14 items-center gap-4 px-5 py-3.5', estado && 'pl-6')
   return (
     <li className={cn('border-b border-separator last:border-b-0', className)}>
       {a ? (
@@ -222,32 +229,6 @@ export const FRANJA_SEVERIDAD: Record<Severidad, string> = {
   info: 'bg-muted-foreground/40',
 }
 
-/**
- * Elemento distintivo de Expedita: los días hábiles que quedan, grande y legible.
- * Negativo = vencido hace N días.
- */
-export function DiasRestantes({ dias, className }: { dias: number | undefined; className?: string }) {
-  if (dias === undefined) return null
-  const sev: Severidad = dias < 0 ? 'vencido' : dias <= 3 ? 'urgente' : 'proximo'
-  const valor = Math.abs(dias)
-  const texto = dias < 0 ? `Vencido hace ${valor} ${valor === 1 ? 'día hábil' : 'días hábiles'}` : dias === 0 ? 'Vence hoy' : `Quedan ${valor} ${valor === 1 ? 'día hábil' : 'días hábiles'}`
-  return (
-    <span
-      className={cn('grid size-12 shrink-0 place-items-center rounded-xl text-center leading-none', ESTILO_SEVERIDAD[sev], className)}
-      role="img"
-      aria-label={texto}
-      title={texto}
-    >
-      <span className="grid gap-0.5">
-        <span className="tabular text-lg font-bold">{dias === 0 ? 'Hoy' : dias < 0 ? `−${valor}` : valor}</span>
-        {dias !== 0 && (
-          <span className="text-[0.625rem] font-semibold tracking-wide uppercase">{dias < 0 ? 'venc.' : valor === 1 ? 'hábil' : 'hábiles'}</span>
-        )}
-      </span>
-    </span>
-  )
-}
-
 /** Enlace interno con apariencia de botón (semántica correcta: es un enlace). */
 export function BotonEnlace({
   a,
@@ -268,4 +249,47 @@ export function Mono({ children, className }: { children: ReactNode; className?:
 /** Código interno del estudio (LA-04) como etiqueta. */
 export function Codigo({ children }: { children: ReactNode }) {
   return <span className="rounded-md bg-secondary px-1.5 py-0.5 text-xs font-semibold text-secondary-foreground">{children}</span>
+}
+
+const DIAS_CORTOS = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb']
+const MESES_CORTOS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'set', 'oct', 'nov', 'dic']
+
+/** «lun 8 nov» */
+export function fechaCorta(f: string): string {
+  const [a, m, d] = f.split('-').map(Number)
+  const dia = new Date(Date.UTC(a, m - 1, d)).getUTCDay()
+  return `${DIAS_CORTOS[dia]} ${d} ${MESES_CORTOS[m - 1]}`
+}
+
+/**
+ * Vencimiento en lenguaje natural, alineado a la derecha de la fila:
+ * «Vence hoy», «Vence mañana», «En 4 días hábiles», «Venció hace 2 días hábiles», con la fecha debajo.
+ */
+export function Vence({ fecha, hoy, habiles, className }: { fecha: string; hoy: string; habiles: number; className?: string }) {
+  const naturales = Math.round((Date.parse(fecha) - Date.parse(hoy)) / 86_400_000)
+  const sev: Severidad = naturales < 0 ? 'vencido' : habiles <= 3 ? 'urgente' : 'proximo'
+  const n = Math.abs(habiles)
+  const texto =
+    naturales < 0
+      ? `Venció hace ${n || 1} ${n === 1 ? 'día hábil' : 'días hábiles'}`
+      : naturales === 0
+        ? 'Vence hoy'
+        : naturales === 1
+          ? 'Vence mañana'
+          : `En ${n} ${n === 1 ? 'día hábil' : 'días hábiles'}`
+  return (
+    <span className={cn('flex shrink-0 flex-col items-end text-right leading-tight', className)}>
+      <span
+        className={cn(
+          'text-sm font-semibold tabular',
+          sev === 'vencido' && 'text-destructive',
+          sev === 'urgente' && 'text-warning-foreground',
+          sev === 'proximo' && 'text-foreground',
+        )}
+      >
+        {texto}
+      </span>
+      <span className="mt-0.5 text-xs text-muted-foreground">{fechaCorta(fecha)}</span>
+    </span>
+  )
 }

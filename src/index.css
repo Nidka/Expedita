@@ -7,13 +7,13 @@
 
 /*
  * Sistema visual de Expedita — identidad judicial peruana
- * Azul PJ #264769 (tomado del CEJ) · Ocre (provisional, ajustar con el tono exacto del CEJ: --ocre)
+ * Guinda institucional #8C1D2B (marca y acciones principales) · Azul PJ #264769 (tomado del CEJ, secundario) · Ocre (provisional, ajustar con el tono exacto del CEJ: --ocre)
  * Neutros cálidos tipo papel. Modo oscuro carbón azulado con acento ocre (sin morados).
  * Contrastes medidos (texto/fondo):
- *   claro  · foreground #1C1B19/#FFF 17.2:1 · muted #6B6660/#FFF 5.7:1 (5.1:1 sobre papel) · primary #FFF/#264769 9.6:1
+ *   claro  · foreground #1C1B19/#FFF 17.2:1 · muted #6B6660/#FFF 5.7:1 (5.1:1 sobre papel) · primary #FFF/#8C1D2B 9.0:1 · vencido #C4291C/#FFF 5.7:1
  *          · ocre-texto #8A5F17/#FFF 5.6:1 · urgente #A8410A/#FDF0E7 5.5:1 · destructive #B42318/#FFF 6.6:1
  *   oscuro · foreground #ECEAE6/#161C23 14.3:1 · muted #9AA3AD/#161C23 6.7:1
- *          · primary #E1B65C/#161C23 9.0:1 · texto #1A1305 sobre ocre 9.7:1
+ *          · primary #E98A90/#0F1419 7.5:1 · texto #2A0A0E sobre guinda claro 7.4:1
  *   El ocre claro #C9963A sobre papel da 2.4:1: solo rellenos e indicadores, nunca texto ni foco.
  */
 @theme inline {
@@ -29,6 +29,7 @@
     --color-brand-gold: var(--brand-gold);
     --color-separator: var(--separator);
     --color-berry: var(--berry);
+    --color-guinda: var(--guinda);
     --color-ocre: var(--ocre);
     --color-ocre-texto: var(--ocre-texto);
     --color-azul-pj: var(--azul-pj);
@@ -76,6 +77,7 @@
 }
 
 :root {
+    --guinda: #8C1D2B;
     --ocre: #C9963A;
     --ocre-texto: #8A5F17;
     --azul-pj: #264769;
@@ -85,7 +87,7 @@
     --card-foreground: #1C1B19;
     --popover: #FFFFFF;
     --popover-foreground: #1C1B19;
-    --primary: #264769;
+    --primary: #8C1D2B;
     --primary-foreground: #FFFFFF;
     --secondary: #E7ECF2;
     --secondary-foreground: #1F3B57;
@@ -93,11 +95,11 @@
     --muted-foreground: #6B6660;
     --accent: #F5ECDA;
     --accent-foreground: #8A5F17;
-    --berry: #8A5F17;
+    --berry: #8C1D2B;
     --info: #3B6E9C;
     --info-soft: #E7EEF5;
     --info-foreground: #1F4E79;
-    --destructive: #B42318;
+    --destructive: #C4291C;
     --destructive-soft: #FCEBE9;
     --warning: #D97A2B;
     --warning-foreground: #A8410A;
@@ -110,7 +112,7 @@
     --separator: #ECE8E1;
     --input: #D3CEC5;
     --ring: #8A5F17;
-    --chart-1: #264769;
+    --chart-1: #8C1D2B;
     --chart-2: #C9963A;
     --chart-3: #3B6E9C;
     --chart-4: #23704A;
@@ -127,6 +129,7 @@
 }
 
 .dark {
+    --guinda: #E98A90;
     --ocre: #E1B65C;
     --ocre-texto: #E1B65C;
     --azul-pj: #6E95BD;
@@ -136,19 +139,19 @@
     --card-foreground: #ECEAE6;
     --popover: #1B222A;
     --popover-foreground: #ECEAE6;
-    --primary: #E1B65C;
-    --primary-foreground: #1A1305;
+    --primary: #E98A90;
+    --primary-foreground: #2A0A0E;
     --secondary: #1E2A37;
     --secondary-foreground: #C7D6E6;
     --muted: #1D242C;
     --muted-foreground: #9AA3AD;
     --accent: #2A2215;
     --accent-foreground: #E8C77F;
-    --berry: #E1B65C;
+    --berry: #E98A90;
     --info: #6E95BD;
     --info-soft: #18283A;
     --info-foreground: #9DBDDE;
-    --destructive: #F0796D;
+    --destructive: #FF8A65;
     --destructive-soft: #35191A;
     --warning: #F0A15E;
     --warning-foreground: #F0A15E;

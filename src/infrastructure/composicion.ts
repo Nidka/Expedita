@@ -24,6 +24,18 @@ export const modoDemo = !supabaseConfigurado
 export async function crearContenedor(): Promise<Contenedor> {
   const excel = { leerHoja: leerHojaCuadro }
   if (modoDemo) {
+    // Si cambia la semilla de demostración, se descarta la copia guardada en el navegador.
+    const VERSION_SEMILLA = '2'
+    try {
+      if (localStorage.getItem('expedita-demo:version') !== VERSION_SEMILLA) {
+        Object.keys(localStorage)
+          .filter((k) => k.startsWith('expedita-demo:'))
+          .forEach((k) => localStorage.removeItem(k))
+        localStorage.setItem('expedita-demo:version', VERSION_SEMILLA)
+      }
+    } catch {
+      /* sin almacenamiento: la demo vive solo en memoria */
+    }
     const c = { ...contenedorMemoria({ persistir: true }), excel }
     await sembrarDemo(c)
     return c

@@ -1,29 +1,21 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { HourglassIcon, TriangleAlertIcon } from '@/ui/iconos'
 import { calcularPendientes, type Pendiente } from '@/domain/agenda/que-toca-hoy'
-import { aDate } from '@/domain/shared/fecha'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { useDatos } from '../contexto'
-import { BotonEnlace, DiasRestantes, EstadoVacio, Fila, Lista, Seccion, Severo } from '../componentes/base'
+import { BotonEnlace, EstadoVacio, Fila, Lista, Seccion, Vence, fechaCorta } from '../componentes/base'
 import { Contador } from '../componentes/Contador'
 import { Michi, type Pose } from '../componentes/marca'
 import { etiquetaExp, fecha, fechaLarga, plural } from '../formato'
 
-const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'set', 'oct', 'nov', 'dic']
-
-/** Chip de fecha para audiencias y visitas (día grande + mes). */
-export function FechaChip({ f, className }: { f: string; className?: string }) {
-  const d = aDate(f)
-  return (
-    <span className={cn('grid size-12 shrink-0 place-items-center rounded-xl bg-info-soft text-info-foreground', className)} aria-hidden>
-      <span className="grid text-center leading-none">
-        <span className="text-[0.625rem] font-semibold tracking-wide uppercase">{MESES[d.getUTCMonth()]}</span>
-        <span className="tabular text-lg font-bold">{d.getUTCDate()}</span>
-      </span>
-    </span>
-  )
+const TIPO: Record<Pendiente['tipo'], string> = {
+  notificacion: 'Notificación',
+  proxima: 'Próxima acción',
+  audiencia: 'Audiencia',
+  visita: 'Visita',
+  abandono: 'Riesgo de abandono',
+  'sin-movimiento': 'Sin movimiento',
 }
 
 function saludo() {
@@ -31,32 +23,44 @@ function saludo() {
   return h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches'
 }
 
+/** Fila de pendiente: franja de estado, qué es y de qué expediente, y a la derecha cuándo vence. */
 function FilaPendiente({ p }: { p: Pendiente }) {
   const d = useDatos()
   const a = p.expedienteId ? `/expedientes/${p.expedienteId}` : p.tipo === 'visita' ? '/visitas' : '/agenda'
   const conPlazo = (p.tipo === 'notificacion' || p.tipo === 'proxima') && p.fecha
-  const inicio = conPlazo ? (
-    <DiasRestantes dias={d.calendario.habilesEntre(d.hoy, p.fecha!)} />
-  ) : (p.tipo === 'audiencia' || p.tipo === 'visita') && p.fecha ? (
-    <FechaChip f={p.fecha} />
-  ) : p.tipo === 'abandono' ? (
-    <span className="grid size-12 place-items-center rounded-xl bg-destructive-soft text-destructive" aria-hidden>
-      <TriangleAlertIcon className="size-5" />
+  const fin = conPlazo ? (
+    <Vence fecha={p.fecha!} hoy={d.hoy} habiles={d.calendario.habilesEntre(d.hoy, p.fecha!)} />
+  ) : p.fecha ? (
+    <span className="flex shrink-0 flex-col items-end text-right leading-tight">
+      <span className="text-sm font-semibold">{fechaCorta(p.fecha)}</span>
+      <span className="mt-0.5 text-xs text-muted-foreground">{TIPO[p.tipo]}</span>
     </span>
-  ) : (
-    <span className="grid size-12 place-items-center rounded-xl bg-muted text-muted-foreground" aria-hidden>
-      <HourglassIcon className="size-5" />
-    </span>
-  )
-  const tipo = { notificacion: 'Notificación', proxima: 'Próxima acción', audiencia: 'Audiencia', visita: 'Visita', abandono: 'Abandono', 'sin-movimiento': 'Sin movimiento' }[p.tipo]
+  ) : undefined
   return (
     <Fila
       a={a}
-      inicio={inicio}
+      estado={p.severidad}
       titulo={p.titulo}
-      subtitulo={`${tipo} · ${p.detalle}${conPlazo ? ` · vence ${fecha(p.fecha)}` : ''}`}
-      fin={p.tipo === 'abandono' ? <Severo severidad={p.severidad} /> : undefined}
+      subtitulo={conPlazo || !p.fecha ? `${TIPO[p.tipo]} · ${p.detalle}` : p.detalle}
+      fin={fin}
     />
+  )
+}
+
+function Bloque({ titulo, items, max, accion }: { titulo: string; items: Pendiente[]; max?: number; accion?: React.ReactNode }) {
+  if (!items.length) return null
+  const visibles = max ? items.slice(0, max) : items
+  return (
+    <Seccion titulo={titulo} cantidad={items.length} accion={accion}>
+      <Lista>
+        {visibles.map((p) => (
+          <FilaPendiente key={p.clave} p={p} />
+        ))}
+      </Lista>
+      {max && items.length > max && (
+        <p className="px-1 text-sm text-muted-foreground">y {plural(items.length - max, 'expediente más', 'expedientes más')}.</p>
+      )}
+    </Seccion>
   )
 }
 
@@ -66,9 +70,11 @@ export function Inicio() {
     () => calcularPendientes(d, { hoy: d.hoy, calendario: d.calendario, diasSinMovimiento: d.config.diasSinMovimiento }),
     [d],
   )
-  const vencidos = pendientes.filter((p) => p.severidad === 'vencido')
-  const semana = pendientes.filter((p) => p.severidad === 'urgente' || p.severidad === 'proximo')
-  const seguimiento = pendientes.filter((p) => p.severidad === 'info')
+  // Secciones por naturaleza: plazos y citas (con fecha) vs. seguimiento de expedientes (abandono, sin movimiento).
+  const deSeguimiento = (p: Pendiente) => p.tipo === 'abandono' || p.tipo === 'sin-movimiento'
+  const vencidos = pendientes.filter((p) => !deSeguimiento(p) && p.severidad === 'vencido')
+  const semana = pendientes.filter((p) => !deSeguimiento(p) && p.severidad !== 'vencido')
+  const seguimiento = pendientes.filter(deSeguimiento)
   const ultimas = useMemo(
     () => [...d.acciones].sort((a, b) => b.fecha.localeCompare(a.fecha) || b.creadoEn.localeCompare(a.creadoEn)).slice(0, 5),
     [d.acciones],
@@ -76,77 +82,99 @@ export function Inicio() {
   const audiencias = d.audiencias
     .filter((a) => a.estado === 'programada' && a.fecha >= d.hoy)
     .sort((a, b) => a.fecha.localeCompare(b.fecha) || (a.hora ?? '').localeCompare(b.hora ?? ''))
-    .slice(0, 4)
-  const nombre = d.sesion.miembro.nombre.split(' ')[0]
+    .slice(0, 5)
+
+  const urgentes = semana.filter((p) => p.severidad === 'urgente').length
+  const estado: { pose: Pose; texto: string } = d.cargando
+    ? { pose: 'corriendo', texto: 'Revisando expedientes…' }
+    : vencidos.length
+      ? { pose: 'enojado', texto: `Tienes ${plural(vencidos.length, 'asunto vencido', 'asuntos vencidos')}. Empieza por ahí.` }
+      : urgentes
+        ? { pose: 'alerta', texto: `Nada vencido, pero ${plural(urgentes, 'asunto vence', 'asuntos vencen')} en 3 días hábiles o menos.` }
+        : semana.length
+          ? { pose: 'saludando', texto: `Nada vencido. ${plural(semana.length, 'asunto vence', 'asuntos vencen')} esta semana.` }
+          : { pose: 'durmiendo', texto: 'Todo al día. Michi aprovecha para dormir.' }
+
+  const resumen = [
+    { etiqueta: 'Notificaciones pendientes', valor: indicadores.notificacionesPendientes, a: '/bandeja', tono: 'ambar' as const },
+    { etiqueta: 'Plazos vencidos', valor: indicadores.plazosVencidos, a: '/agenda', tono: 'rojo' as const },
+    { etiqueta: 'Vencen en 3 días hábiles', valor: indicadores.plazosPorVencer, a: '/agenda', tono: 'ambar' as const },
+    { etiqueta: 'Sin movimiento', valor: indicadores.sinMovimiento, a: '/expedientes' },
+  ]
 
   return (
     <>
-      <Portada
-        fecha={fechaLarga(d.hoy)}
-        titulo={`${saludo()}, ${nombre}`}
-        cargando={d.cargando}
-        vencidos={vencidos.length}
-        urgentes={semana.filter((p) => p.severidad === 'urgente').length}
-        semana={semana.length}
-        indicadores={[
-          { etiqueta: 'Notificaciones pendientes', valor: indicadores.notificacionesPendientes, a: '/bandeja', tono: 'ambar' },
-          { etiqueta: 'Plazos vencidos', valor: indicadores.plazosVencidos, a: '/agenda', tono: 'rojo' },
-          { etiqueta: 'Vencen en 3 días hábiles', valor: indicadores.plazosPorVencer, a: '/agenda', tono: 'ambar' },
-          { etiqueta: 'Sin movimiento', valor: indicadores.sinMovimiento, a: '/expedientes' },
-        ]}
-      />
+      {/* Encabezado: saludo y estado del día; Michi refleja ese estado */}
+      <header className="mb-8 flex items-end justify-between gap-6">
+        <div className="min-w-0">
+          <p className="text-sm text-muted-foreground">{fechaLarga(d.hoy)}</p>
+          <h1 className="mt-1 text-[1.875rem] leading-tight font-bold tracking-tight sm:text-[2.25rem]">
+            {saludo()}, {d.sesion.miembro.nombre.split(' ')[0]}
+          </h1>
+          <p className="mt-2 max-w-lg text-[0.9375rem] text-muted-foreground" aria-live="polite">
+            {estado.texto}
+          </p>
+        </div>
+        <span className="hidden shrink-0 animate-flotar sm:block" aria-hidden>
+          <Michi key={estado.pose} pose={estado.pose} className="size-28 animate-entrar [animation-duration:480ms] lg:size-32" />
+        </span>
+      </header>
 
-      <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_20rem]">
+      {/* Resumen en una sola banda */}
+      <nav
+        aria-label="Resumen"
+        className="mb-12 grid grid-cols-2 overflow-hidden rounded-xl bg-card shadow-[0_0_0_1px_var(--border)] lg:grid-cols-4"
+      >
+        {resumen.map((v, i) => (
+          <Link
+            key={v.etiqueta}
+            to={v.a}
+            className={cn(
+              'group flex flex-col gap-2 px-5 py-5 outline-none transition-colors duration-200 hover:bg-muted/50 focus-visible:bg-muted sm:px-6',
+              i % 2 === 1 && 'border-l border-separator',
+              i >= 2 && 'border-t border-separator lg:border-t-0',
+              i === 2 && 'lg:border-l',
+            )}
+          >
+            <span className="text-sm text-muted-foreground transition-colors group-hover:text-foreground">{v.etiqueta}</span>
+            <Contador
+              valor={v.valor}
+              className={cn(
+                'tabular text-[2rem] leading-none font-semibold tracking-tight',
+                v.valor > 0 && v.tono === 'rojo' && 'text-destructive',
+                v.valor > 0 && v.tono === 'ambar' && 'text-warning-foreground',
+              )}
+            />
+          </Link>
+        ))}
+      </nav>
+
+      <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_21rem]">
         <div className="grid content-start gap-10">
           {d.cargando ? (
             <div className="grid gap-2">
               {Array.from({ length: 4 }, (_, i) => (
-                <Skeleton key={i} className="h-18 rounded-xl" />
+                <Skeleton key={i} className="h-16 rounded-xl" />
               ))}
             </div>
           ) : pendientes.length === 0 ? (
-            <EstadoVacio pose="feliz" titulo="Nada pendiente hoy">Todos los plazos están al día.</EstadoVacio>
+            <EstadoVacio pose="feliz" titulo="Nada pendiente hoy">
+              Todos los plazos están al día.
+            </EstadoVacio>
           ) : (
             <>
-              {vencidos.length > 0 && (
-                <Seccion titulo={`Vencidos · ${vencidos.length}`}>
-                  <Lista>
-                    {vencidos.map((p) => (
-                      <FilaPendiente key={p.clave} p={p} />
-                    ))}
-                  </Lista>
-                </Seccion>
-              )}
-              {semana.length > 0 && (
-                <Seccion titulo={`Próximos 7 días · ${semana.length}`}>
-                  <Lista>
-                    {semana.map((p) => (
-                      <FilaPendiente key={p.clave} p={p} />
-                    ))}
-                  </Lista>
-                </Seccion>
-              )}
-              {seguimiento.length > 0 && (
-                <Seccion
-                  titulo={`Seguimiento · ${seguimiento.length}`}
-                  accion={
-                    <Link to="/visitas" className="text-sm font-medium text-primary hover:underline">
-                      Planificar visitas
-                    </Link>
-                  }
-                >
-                  <Lista>
-                    {seguimiento.slice(0, 6).map((p) => (
-                      <FilaPendiente key={p.clave} p={p} />
-                    ))}
-                  </Lista>
-                  {seguimiento.length > 6 && (
-                    <p className="px-1 text-sm text-muted-foreground">
-                      y {plural(seguimiento.length - 6, 'expediente más', 'expedientes más')} sin movimiento.
-                    </p>
-                  )}
-                </Seccion>
-              )}
+              <Bloque titulo="Vencidos" items={vencidos} />
+              <Bloque titulo="Esta semana" items={semana} />
+              <Bloque
+                titulo="Seguimiento"
+                items={seguimiento}
+                max={6}
+                accion={
+                  <Link to="/visitas" className="text-sm font-medium text-primary hover:underline">
+                    Planificar visitas
+                  </Link>
+                }
+              />
             </>
           )}
         </div>
@@ -154,24 +182,35 @@ export function Inicio() {
         <aside className="grid content-start gap-10">
           <Seccion
             titulo="Audiencias"
+            cantidad={audiencias.length || undefined}
             accion={
               <Link to="/agenda" className="text-sm font-medium text-primary hover:underline">
-                Agenda
+                Ver agenda
               </Link>
             }
           >
             {audiencias.length === 0 ? (
-              <p className="rounded-xl bg-card px-4 py-5 text-sm text-muted-foreground shadow-[0_0_0_1px_var(--border)]">Sin audiencias programadas.</p>
+              <p className="px-1 text-sm text-muted-foreground">Sin audiencias programadas.</p>
             ) : (
               <Lista>
                 {audiencias.map((a) => (
-                  <Fila
-                    key={a.id}
-                    a={`/expedientes/${a.expedienteId}`}
-                    inicio={<FechaChip f={a.fecha} />}
-                    titulo={a.tipo}
-                    subtitulo={`${a.hora ?? 'Sin hora'} · ${etiquetaExp(d.expPorId.get(a.expedienteId))}`}
-                  />
+                  <li key={a.id} className="border-b border-separator last:border-b-0">
+                    <Link
+                      to={`/expedientes/${a.expedienteId}`}
+                      className="grid grid-cols-[4.25rem_1fr] gap-3 px-5 py-3.5 outline-none transition-colors hover:bg-muted/50 focus-visible:bg-muted"
+                    >
+                      <span className="leading-tight">
+                        <span className="block text-sm font-semibold">{fechaCorta(a.fecha).split(' ').slice(1).join(' ')}</span>
+                        <span className="block text-xs text-muted-foreground tabular">{a.hora ?? 'Sin hora'}</span>
+                      </span>
+                      <span className="min-w-0 leading-tight">
+                        <span className="block truncate text-sm font-medium">{a.tipo}</span>
+                        <span className="block truncate text-xs text-muted-foreground">
+                          {etiquetaExp(d.expPorId.get(a.expedienteId))} · {a.modalidad}
+                        </span>
+                      </span>
+                    </Link>
+                  </li>
                 ))}
               </Lista>
             )}
@@ -179,109 +218,34 @@ export function Inicio() {
 
           <Seccion titulo="Últimas acciones">
             {ultimas.length === 0 ? (
-              <p className="rounded-xl bg-card px-4 py-5 text-sm text-muted-foreground shadow-[0_0_0_1px_var(--border)]">Aún no hay acciones registradas.</p>
+              <p className="px-1 text-sm text-muted-foreground">Aún no hay acciones registradas.</p>
             ) : (
-              <Lista>
+              <ol className="relative grid gap-5 pl-5 before:absolute before:inset-y-1 before:left-[5px] before:w-px before:bg-separator">
                 {ultimas.map((a) => (
-                  <Fila
-                    key={a.id}
-                    a={`/expedientes/${a.expedienteId}`}
-                    titulo={a.tipo}
-                    subtitulo={`${fecha(a.fecha)} · ${a.responsable} · ${etiquetaExp(d.expPorId.get(a.expedienteId))}`}
-                  />
+                  <li key={a.id} className="relative">
+                    <span className="absolute top-1.5 -left-5 size-[11px] rounded-full border-2 border-background bg-ocre" aria-hidden />
+                    <Link to={`/expedientes/${a.expedienteId}`} className="group block outline-none">
+                      <span className="block text-sm font-medium group-hover:underline">{a.tipo}</span>
+                      <span className="block text-xs text-muted-foreground">
+                        {fecha(a.fecha)} · {a.responsable} · {etiquetaExp(d.expPorId.get(a.expedienteId))}
+                      </span>
+                    </Link>
+                  </li>
                 ))}
-              </Lista>
+              </ol>
             )}
           </Seccion>
+
+          <div className="flex flex-wrap gap-2">
+            <BotonEnlace a="/bandeja?nueva=1" variant="outline" className="flex-1">
+              Nueva notificación
+            </BotonEnlace>
+            <BotonEnlace a="/expedientes?nuevo=1" variant="outline" className="flex-1">
+              Agregar expediente
+            </BotonEnlace>
+          </div>
         </aside>
       </div>
     </>
-  )
-}
-
-interface Indicador {
-  etiqueta: string
-  valor: number
-  a: string
-  tono?: 'rojo' | 'ambar'
-}
-
-/** Portada de Hoy: saludo, estado del día con Michi en la pose que corresponde, e indicadores. */
-function Portada({
-  fecha,
-  titulo,
-  cargando,
-  vencidos,
-  urgentes,
-  semana,
-  indicadores,
-}: {
-  fecha: string
-  titulo: string
-  cargando: boolean
-  vencidos: number
-  urgentes: number
-  semana: number
-  indicadores: Indicador[]
-}) {
-  const estado: { pose: Pose; texto: string } = cargando
-    ? { pose: 'corriendo', texto: 'Revisando expedientes…' }
-    : vencidos
-      ? { pose: 'enojado', texto: `Tienes ${plural(vencidos, 'asunto vencido', 'asuntos vencidos')}. Empieza por ahí.` }
-      : urgentes
-        ? { pose: 'alerta', texto: `Nada vencido, pero ${plural(urgentes, 'asunto vence', 'asuntos vencen')} en 3 días hábiles o menos.` }
-        : semana
-          ? { pose: 'saludando', texto: `Nada vencido. ${plural(semana, 'asunto vence', 'asuntos vencen')} esta semana.` }
-          : { pose: 'durmiendo', texto: 'Todo al día. Michi aprovecha para dormir.' }
-
-  return (
-    <section aria-labelledby="titulo-hoy" className="mb-12 overflow-hidden rounded-xl bg-card shadow-[0_0_0_1px_var(--border)]">
-      <div className="grid grid-cols-[1fr_auto] items-start gap-4 px-6 pt-7 pb-6 sm:items-center sm:gap-6 sm:px-8 sm:pt-9">
-        <div className="min-w-0">
-          <p className="text-sm text-muted-foreground">{fecha}</p>
-          <h1 id="titulo-hoy" className="mt-1 text-[1.75rem] leading-tight font-bold sm:text-[2.125rem]">
-            {titulo}
-          </h1>
-          <p className="mt-2 max-w-md text-[0.9375rem] text-muted-foreground" aria-live="polite">
-            {estado.texto}
-          </p>
-          <div className="col-span-2 mt-1 flex flex-wrap gap-2 sm:col-span-1 sm:mt-5">
-            <BotonEnlace a="/registrar">Registrar acción</BotonEnlace>
-            <BotonEnlace a="/bandeja?nueva=1" variant="outline">
-              Nueva notificación
-            </BotonEnlace>
-          </div>
-        </div>
-        <div className="relative grid size-20 place-items-center rounded-full bg-secondary/70 sm:size-44" aria-hidden>
-          <span className="animate-flotar">
-            <Michi key={estado.pose} pose={estado.pose} className="size-16 animate-entrar [animation-duration:480ms] sm:size-36" />
-          </span>
-        </div>
-      </div>
-      <nav aria-label="Resumen" className="grid grid-cols-2 border-t border-separator sm:grid-cols-4">
-        {indicadores.map((v, i) => (
-          <Link
-            key={v.etiqueta}
-            to={v.a}
-            className={cn(
-              'group flex flex-col gap-1.5 px-6 py-5 outline-none transition-colors duration-200 hover:bg-muted/60 focus-visible:bg-muted sm:px-8',
-              i % 2 === 1 && 'border-l border-separator',
-              i >= 2 && 'border-t border-separator sm:border-t-0',
-              i === 2 && 'sm:border-l',
-            )}
-          >
-            <Contador
-              valor={v.valor}
-              className={cn(
-                'tabular text-[1.75rem] leading-none font-bold',
-                v.valor > 0 && v.tono === 'rojo' && 'text-destructive',
-                v.valor > 0 && v.tono === 'ambar' && 'text-warning-foreground',
-              )}
-            />
-            <span className="text-sm text-muted-foreground transition-colors group-hover:text-foreground">{v.etiqueta}</span>
-          </Link>
-        ))}
-      </nav>
-    </section>
   )
 }

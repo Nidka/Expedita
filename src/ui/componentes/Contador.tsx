@@ -25,7 +25,15 @@ export function Contador({ valor, className }: { valor: number; className?: stri
       if (p < 1) raf = requestAnimationFrame(paso)
     }
     raf = requestAnimationFrame(paso)
-    return () => cancelAnimationFrame(raf)
+    // Respaldo: si el navegador pausa la animación (pestaña en segundo plano), igual se muestra el valor real.
+    const respaldo = window.setTimeout(() => {
+      setMostrado(valor)
+      desde.current = valor
+    }, 700)
+    return () => {
+      cancelAnimationFrame(raf)
+      window.clearTimeout(respaldo)
+    }
   }, [valor])
 
   return (

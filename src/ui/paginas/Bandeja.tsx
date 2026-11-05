@@ -1,7 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { InboxIcon, PlusIcon, RotateCcwIcon } from '@/ui/iconos'
+import { PlusIcon, RotateCcwIcon } from '@/ui/iconos'
 import { previsualizarPlazo, registrarNotificacion } from '@/application/casos-uso/notificaciones'
 import { extraerDeCorreo } from '@/domain/notificaciones/extraer'
 import { parsearNumeroExpediente } from '@/domain/expediente/numero-expediente'
@@ -14,7 +14,8 @@ import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { useContenedor, useDatos } from '../contexto'
-import { BotonEnlace, Campo, DiasRestantes, EncabezadoPagina, EstadoVacio, Lista, Mono, SelectNativo } from '../componentes/base'
+import { BotonEnlace, Campo, EncabezadoPagina, EstadoVacio, FRANJA_SEVERIDAD, Lista, Mono, SelectNativo, Vence } from '../componentes/base'
+import { cn } from '@/lib/utils'
 import { etiquetaExp, fecha } from '../formato'
 import { exito } from '../notificar'
 
@@ -209,21 +210,16 @@ export function Bandeja() {
         {items.map((n) => {
           const restantes = n.vencimiento ? d.calendario.habilesEntre(d.hoy, n.vencimiento) : undefined
           const exp = n.expedienteId ? d.expPorId.get(n.expedienteId) : undefined
+          const sev = estado === 'atendida' ? 'info' : restantes === undefined ? 'proximo' : restantes < 0 ? 'vencido' : restantes <= 3 ? 'urgente' : 'proximo'
           return (
-            <li key={n.id} className="border-b border-separator px-4 py-4 last:border-b-0">
-              <div className="flex gap-3">
-                {estado === 'pendiente' && restantes !== undefined ? (
-                  <DiasRestantes dias={restantes} />
-                ) : (
-                  <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-muted text-muted-foreground" aria-hidden>
-                    <InboxIcon className="size-5" />
-                  </span>
-                )}
+            <li key={n.id} className="relative border-b border-separator px-6 py-5 last:border-b-0">
+              <span className={cn('absolute inset-y-4 left-0 w-[3px] rounded-r-full', FRANJA_SEVERIDAD[sev])} aria-hidden />
+              <div className="flex items-start gap-4">
                 <div className="min-w-0 flex-1">
-                  <p className="font-medium">{n.asunto}</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="font-semibold">{n.asunto}</p>
+                  <p className="mt-0.5 text-sm text-muted-foreground">
                     {exp ? (
-                      <Link to={`/expedientes/${exp.id}`} className="text-primary underline-offset-2 hover:underline">
+                      <Link to={`/expedientes/${exp.id}`} className="font-medium text-foreground underline-offset-2 hover:underline">
                         {etiquetaExp(exp)}
                       </Link>
                     ) : (
@@ -231,10 +227,10 @@ export function Bandeja() {
                     )}
                     {' · '}notificada {fecha(n.recibido)}
                     {n.casilla ? ' por casilla' : ''}
-                    {n.vencimiento && (estado === 'pendiente' ? ` · vence ${fecha(n.vencimiento)}` : ` · atendida ${fecha(n.atendidaEn)}`)}
+                    {estado === 'atendida' && n.atendidaEn ? ` · atendida ${fecha(n.atendidaEn)}` : ''}
                   </p>
-                  {n.resumen && <p className="mt-1.5 text-sm text-foreground/85">{n.resumen}</p>}
-                  <div className="mt-3 flex flex-wrap gap-2">
+                  {n.resumen && <p className="mt-2 max-w-2xl text-sm leading-relaxed text-foreground/85">{n.resumen}</p>}
+                  <div className="mt-4 flex flex-wrap gap-2">
                     {estado === 'pendiente' ? (
                       <>
                         <BotonEnlace a={`/registrar?notificacion=${n.id}`} size="sm">
@@ -251,6 +247,7 @@ export function Bandeja() {
                     )}
                   </div>
                 </div>
+                {estado === 'pendiente' && n.vencimiento && restantes !== undefined && <Vence fecha={n.vencimiento} hoy={d.hoy} habiles={restantes} />}
               </div>
             </li>
           )
