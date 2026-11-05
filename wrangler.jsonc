@@ -1,0 +1,12 @@
+// Despliegue en Cloudflare Workers (recursos estáticos). Gratis y con uso comercial permitido.
+// La compilación (npm run build) genera dist/; Cloudflare la publica tal cual.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "expedita",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    // Aplicación de una sola página: cualquier ruta (/expedientes/123) abre index.html
+    "not_found_handling": "single-page-application"
+  }
+}
