@@ -1,7 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { InboxIcon, PlusIcon, RotateCcwIcon, SparklesIcon, WandIcon } from 'lucide-react'
+import { InboxIcon, PlusIcon, RotateCcwIcon } from 'lucide-react'
 import { previsualizarPlazo, registrarNotificacion } from '@/application/casos-uso/notificaciones'
 import { extraerDeCorreo } from '@/domain/notificaciones/extraer'
 import { parsearNumeroExpediente } from '@/domain/expediente/numero-expediente'
@@ -101,15 +101,15 @@ function NuevaNotificacion({ abierto, cerrar }: { abierto: boolean; cerrar: () =
           <DialogDescription>Pega el correo del SINOE o del juzgado. Nada se guarda hasta que lo confirmes.</DialogDescription>
         </DialogHeader>
         <form id="form-notif" onSubmit={guardar} className="grid gap-4 sm:grid-cols-2">
-          <Campo etiqueta="Texto del correo" className="sm:col-span-2">
+          <Campo opcional etiqueta="Texto del correo" className="sm:col-span-2">
             {(p) => <Textarea {...p} rows={5} value={texto} onChange={(e) => setTexto(e.target.value)} />}
           </Campo>
           <div className="flex flex-wrap gap-2 sm:col-span-2">
             <Button type="button" variant="outline" onClick={extraer}>
-              <WandIcon aria-hidden /> Extraer datos
+              Extraer datos
             </Button>
             <Button type="button" variant="secondary" onClick={analizar} disabled={analizando}>
-              <SparklesIcon aria-hidden /> {analizando ? 'Analizando…' : 'Analizar con Claude'}
+              {analizando ? 'Analizando…' : 'Analizar con Claude'}
             </Button>
           </div>
           <Campo
@@ -147,10 +147,10 @@ function NuevaNotificacion({ abierto, cerrar }: { abierto: boolean; cerrar: () =
               {computo.detalle}
             </p>
           )}
-          <Campo etiqueta="Vencimiento fijado por la resolución" ayuda="Solo si la resolución fija un plazo propio; reemplaza al cálculo.">
+          <Campo opcional etiqueta="Vencimiento fijado por la resolución" ayuda="Solo si la resolución fija un plazo propio; reemplaza al cálculo.">
             {(p) => <Input {...p} type="date" value={manual} onChange={(e) => setManual(e.target.value)} />}
           </Campo>
-          <Campo etiqueta="Resumen" className="sm:col-span-2">
+          <Campo opcional etiqueta="Resumen" className="sm:col-span-2">
             {(p) => <Textarea {...p} rows={2} value={resumen} onChange={(e) => setResumen(e.target.value)} />}
           </Campo>
         </form>

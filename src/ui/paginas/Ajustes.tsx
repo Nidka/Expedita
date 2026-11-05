@@ -106,7 +106,7 @@ function Equipo() {
             </Button>
           </form>
           {invs.length > 0 && (
-            <ul className="divide-y rounded-lg border">
+            <ul className="divide-y divide-separator border-t border-separator">
               {invs.map((i) => (
                 <li key={i.id} className="flex items-center gap-2 px-3 py-2 text-sm">
                   <span className="min-w-0 flex-1 truncate">
@@ -252,7 +252,7 @@ function Importar() {
           <Campo etiqueta="Cuadro principal (con CODIGO)" requerido>
             {(p) => <Input {...p} type="file" accept=".xlsx" onChange={(e) => setPrincipal(e.target.files?.[0] ?? null)} />}
           </Campo>
-          <Campo etiqueta="Cuadro actualizado (opcional)">
+          <Campo opcional etiqueta="Cuadro actualizado">
             {(p) => <Input {...p} type="file" accept=".xlsx" onChange={(e) => setActualizado(e.target.files?.[0] ?? null)} />}
           </Campo>
           <Campo etiqueta="Hoja">
@@ -270,7 +270,7 @@ function Importar() {
         </Button>
 
         {resultado && (
-          <div className="grid gap-3 rounded-xl border p-4" aria-live="polite">
+          <div className="grid gap-4 border-t border-separator pt-6" aria-live="polite">
             <p className="font-medium">
               {plural(resultado.expedientes.length, 'expediente listo', 'expedientes listos')} ·{' '}
               {resultado.expedientes.filter((e) => e.estado === 'archivado').length} archivados

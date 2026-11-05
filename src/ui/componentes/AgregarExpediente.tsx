@@ -77,13 +77,13 @@ export function AgregarExpediente({ abierto, cerrar }: { abierto: boolean; cerra
             </div>
           )}
           <div className="grid gap-4 sm:grid-cols-2">
-            <Campo etiqueta="Código interno">
+            <Campo opcional etiqueta="Código interno">
               {(p) => <Input {...p} placeholder="LA-182" value={codigo} onChange={(e) => setCodigo(e.target.value)} />}
             </Campo>
-            <Campo etiqueta="Cliente">
+            <Campo opcional etiqueta="Cliente">
               {(p) => <Input {...p} value={cliente} onChange={(e) => setCliente(e.target.value)} />}
             </Campo>
-            <Campo etiqueta="Materia (carpeta)" className="sm:col-span-2">
+            <Campo opcional etiqueta="Materia (carpeta)" className="sm:col-span-2">
               {(p) => (
                 <>
                   <Input {...p} list="materias-alta" value={materia} onChange={(e) => setMateria(e.target.value)} />

@@ -195,7 +195,8 @@ export function Shell() {
   const [buscar, setBuscar] = useState(false)
   const [mas, setMas] = useState(false)
   const { pathname } = useLocation()
-  const enRegistrar = pathname.startsWith('/registrar')
+  // En Registrar y en la ficha (que tiene su botón contextual) no se repite la acción global.
+  const enRegistrar = pathname.startsWith('/registrar') || /^\/expedientes\/[^/]+/.test(pathname)
 
   return (
     <SidebarProvider>

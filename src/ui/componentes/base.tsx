@@ -13,6 +13,7 @@ export function Campo({
   ayuda,
   error,
   requerido,
+  opcional,
   className,
   children,
 }: {
@@ -20,6 +21,8 @@ export function Campo({
   ayuda?: ReactNode
   error?: string
   requerido?: boolean
+  /** Muestra «Opcional»: se marcan los opcionales, no los obligatorios. */
+  opcional?: boolean
   className?: string
   children: (props: { id: string; 'aria-describedby'?: string; 'aria-invalid'?: boolean; required?: boolean }) => ReactNode
 }) {
@@ -29,15 +32,12 @@ export function Campo({
   const describedby = [ayuda ? idAyuda : '', error ? idError : ''].filter(Boolean).join(' ') || undefined
   return (
     <div className={cn('grid content-start gap-1.5', className)}>
-      <Label htmlFor={id} className="text-[0.8125rem] font-medium text-foreground/90">
-        {etiqueta}
-        {requerido && (
-          <span className="text-muted-foreground" aria-hidden>
-            {' '}
-            (obligatorio)
-          </span>
-        )}
-      </Label>
+      <div className="flex items-baseline justify-between gap-2">
+        <Label htmlFor={id} className="text-[0.8125rem] font-medium">
+          {etiqueta}
+        </Label>
+        {opcional && <span className="text-xs text-muted-foreground">Opcional</span>}
+      </div>
       {children({ id, 'aria-describedby': describedby, 'aria-invalid': error ? true : undefined, required: requerido })}
       {ayuda && (
         <p id={idAyuda} className="text-xs text-muted-foreground">

@@ -100,7 +100,7 @@ export function RegistrarAccion() {
       />
       <Card className="max-w-3xl">
         <CardContent>
-          <form onSubmit={enviar} noValidate className="grid gap-5 sm:grid-cols-2">
+          <form onSubmit={enviar} noValidate className="grid gap-6 sm:grid-cols-2">
             <Campo etiqueta="Expediente" requerido error={errores.exp} className="sm:col-span-2">
               {(p) => <SelectorExpediente {...p} valor={expId} onCambio={(e) => setExpId(e?.id)} />}
             </Campo>
@@ -130,10 +130,10 @@ export function RegistrarAccion() {
             <Campo etiqueta="Responsable" requerido error={errores.responsable} ayuda="Se recuerda en este dispositivo.">
               {(p) => <Input {...p} value={responsable} onChange={(e) => setResponsable(e.target.value)} autoComplete="name" />}
             </Campo>
-            <Campo etiqueta="N.° de cargo o ingreso">
+            <Campo opcional etiqueta="N.° de cargo o ingreso">
               {(p) => <Input {...p} value={cargo} onChange={(e) => setCargo(e.target.value)} inputMode="numeric" />}
             </Campo>
-            <Campo etiqueta="Etapa después de esta acción" ayuda={exp?.etapa ? `Etapa actual: ${exp.etapa}` : undefined} className="sm:col-span-2">
+            <Campo opcional etiqueta="Etapa después de esta acción" ayuda={exp?.etapa ? `Etapa actual: ${exp.etapa}` : undefined} className="sm:col-span-2">
               {(p) => (
                 <SelectNativo {...p} value={etapa} onChange={(e) => setEtapa(e.target.value)} disabled={!exp}>
                   <option value="">Sin cambio</option>
@@ -142,12 +142,12 @@ export function RegistrarAccion() {
               )}
             </Campo>
 
-            <fieldset className="grid gap-4 rounded-xl border p-4 sm:col-span-2 sm:grid-cols-2">
-              <legend className="px-1 text-sm font-medium">Próxima acción (opcional)</legend>
-              <Campo etiqueta="¿Qué sigue?" error={errores.proxima}>
+            <fieldset className="grid gap-5 border-t border-separator pt-6 sm:col-span-2 sm:grid-cols-2">
+              <legend className="float-left mb-1 w-full text-[0.9375rem] font-semibold sm:col-span-2">Próxima acción</legend>
+              <Campo opcional etiqueta="¿Qué sigue?" error={errores.proxima}>
                 {(p) => <Input {...p} value={proxima} onChange={(e) => setProxima(e.target.value)} placeholder="Ej.: Revisar CEJ" />}
               </Campo>
-              <Campo etiqueta="Fecha límite" ayuda={proximaFecha ? fmtFecha(proximaFecha) : 'Atajos en días hábiles'}>
+              <Campo opcional etiqueta="Fecha límite" ayuda={proximaFecha ? fmtFecha(proximaFecha) : 'Atajos en días hábiles'}>
                 {(p) => (
                   <div className="grid gap-2">
                     <Input {...p} type="date" value={proximaFecha} onChange={(e) => setProximaFecha(e.target.value)} />

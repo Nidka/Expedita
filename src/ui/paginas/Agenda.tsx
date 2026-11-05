@@ -280,16 +280,16 @@ function DialogoAudiencia({ inicial, id, cerrar }: { inicial: FormAudiencia; id?
           <Campo etiqueta="Fecha" requerido>
             {(p) => <Input {...p} type="date" value={f.fecha} onChange={(e) => set('fecha', e.target.value)} />}
           </Campo>
-          <Campo etiqueta="Hora (Lima)">
+          <Campo opcional etiqueta="Hora (Lima)">
             {(p) => <Input {...p} type="time" value={f.hora ?? ''} onChange={(e) => set('hora', e.target.value || undefined)} />}
           </Campo>
-          <Campo etiqueta="Sala o enlace" className="sm:col-span-2">
+          <Campo opcional etiqueta="Sala o enlace" className="sm:col-span-2">
             {(p) => <Input {...p} value={f.lugar ?? ''} onChange={(e) => set('lugar', e.target.value)} />}
           </Campo>
-          <Campo etiqueta="Abogado responsable">
+          <Campo opcional etiqueta="Abogado responsable">
             {(p) => <Input {...p} value={f.responsable ?? ''} onChange={(e) => set('responsable', e.target.value)} />}
           </Campo>
-          <Campo etiqueta="Resolución que la programa">
+          <Campo opcional etiqueta="Resolución que la programa">
             {(p) => <Input {...p} value={f.resolucion ?? ''} onChange={(e) => set('resolucion', e.target.value)} />}
           </Campo>
           <Campo etiqueta="Estado">
@@ -302,7 +302,7 @@ function DialogoAudiencia({ inicial, id, cerrar }: { inicial: FormAudiencia; id?
               </SelectNativo>
             )}
           </Campo>
-          <Campo etiqueta="Notas" className="sm:col-span-2">
+          <Campo opcional etiqueta="Notas" className="sm:col-span-2">
             {(p) => <Textarea {...p} rows={2} value={f.notas ?? ''} onChange={(e) => set('notas', e.target.value)} />}
           </Campo>
         </form>

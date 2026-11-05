@@ -1,19 +1,20 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
-import { ClipboardCopyIcon, MapPinIcon, SaveIcon } from 'lucide-react'
+import { ClipboardCopyIcon, MapPinIcon } from 'lucide-react'
 import { guardarResultadosVisita, programarVisitas } from '@/application/casos-uso/visitas'
 import type { Visita } from '@/domain/entidades'
 import { agruparPorJuzgado, DISTRITOS_LIMA, esSoloImpulso, hojaDeRuta, motivoVisita } from '@/domain/visitas/juzgados'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { useContenedor, useDatos } from '../contexto'
-import { Campo, EncabezadoPagina, EstadoVacio, Mono } from '../componentes/base'
+import { Campo, Codigo, EncabezadoPagina, EstadoVacio, Lista, Mono } from '../componentes/base'
+import { cn } from '@/lib/utils'
 import { etiquetaExp, fecha, fechaLarga, plural } from '../formato'
 
 function Planificar() {
@@ -84,94 +85,100 @@ function Planificar() {
 
   return (
     <div className="grid gap-4">
-      <Card>
-        <CardContent className="grid gap-4">
-          <fieldset>
-            <legend className="mb-2 text-sm font-medium">Distritos</legend>
-            <div className="flex flex-wrap gap-x-4 gap-y-2">
-              {[...DISTRITOS_LIMA.filter((x) => presentes.includes(x)), ...presentes.filter((x) => !DISTRITOS_LIMA.includes(x)).sort()].map((dist) => (
-                <Label key={dist} className="font-normal">
-                  <Checkbox
-                    checked={distritos.has(dist)}
-                    onCheckedChange={(v) =>
-                      setDistritos((s) => {
-                        const n = new Set(s)
-                        if (v) n.add(dist)
-                        else n.delete(dist)
-                        return n
-                      })
-                    }
-                  />
-                  {dist}
-                </Label>
-              ))}
-            </div>
-          </fieldset>
-          <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
-            <Input type="search" placeholder="Filtrar por código, cliente, juzgado…" aria-label="Filtrar expedientes" value={q} onChange={(e) => setQ(e.target.value)} />
-            <Label className="font-normal">
-              <Checkbox checked={soloPendientes} onCheckedChange={(v) => setSoloPendientes(Boolean(v))} />
-              Solo con actuación pendiente concreta
-            </Label>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="grid gap-4">
+        <div role="group" aria-label="Distritos" className="flex flex-wrap gap-2">
+          {[...DISTRITOS_LIMA.filter((x) => presentes.includes(x)), ...presentes.filter((x) => !DISTRITOS_LIMA.includes(x)).sort()].map((dist) => {
+            const on = distritos.has(dist)
+            return (
+              <button
+                key={dist}
+                type="button"
+                aria-pressed={on}
+                onClick={() =>
+                  setDistritos((s) => {
+                    const n = new Set(s)
+                    if (on) n.delete(dist)
+                    else n.add(dist)
+                    return n
+                  })
+                }
+                className={cn(
+                  'h-9 rounded-full px-3.5 text-sm outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/25',
+                  on ? 'bg-primary font-medium text-primary-foreground' : 'bg-card text-foreground shadow-[0_0_0_1px_var(--border)] hover:bg-muted',
+                )}
+              >
+                {dist}
+              </button>
+            )
+          })}
+        </div>
+        <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
+          <Input type="search" placeholder="Filtrar por código, cliente o juzgado" aria-label="Filtrar expedientes" value={q} onChange={(e) => setQ(e.target.value)} />
+          <Label className="font-normal text-muted-foreground">
+            <Checkbox checked={soloPendientes} onCheckedChange={(v) => setSoloPendientes(Boolean(v))} />
+            Solo con actuación pendiente
+          </Label>
+        </div>
+      </div>
 
-      <p className="text-sm text-muted-foreground" aria-live="polite">
-        {plural(grupos.length, 'juzgado', 'juzgados')} · {plural(total, 'expediente activo', 'expedientes activos')} · {sel.size} marcados
+      <p className="px-1 text-sm text-muted-foreground" aria-live="polite">
+        {plural(grupos.length, 'juzgado', 'juzgados')} · {plural(total, 'expediente activo', 'expedientes activos')}
+        {sel.size > 0 && ` · ${sel.size} marcados`}
       </p>
 
       {grupos.length === 0 ? (
-        <EstadoVacio titulo="No hay expedientes activos con estos filtros" />
+        <EstadoVacio pose="pensando" titulo="No hay expedientes activos con estos filtros" />
       ) : (
-        <div className="grid gap-3 pb-28">
+        <div className="grid gap-10 pb-28">
           {grupos.map((g) => {
             const ids = g.expedientes.map((e) => e.id)
             const todos = ids.every((id) => sel.has(id))
             return (
-              <Card key={g.clave} size="sm">
-                <CardHeader>
-                  <Label className="flex items-start gap-3">
-                    <Checkbox checked={todos} onCheckedChange={(v) => alternar(ids, Boolean(v))} aria-label={`Marcar todo ${g.nombre}`} />
+              <section key={g.clave} aria-label={g.nombre} className="grid gap-3">
+                <div className="flex flex-wrap items-start gap-x-4 gap-y-1 px-1">
+                  <Label className="flex min-w-0 flex-1 items-start gap-3">
+                    <Checkbox checked={todos} onCheckedChange={(v) => alternar(ids, Boolean(v))} aria-label={`Marcar todo ${g.nombre}`} className="mt-1" />
                     <span className="grid gap-0.5">
-                      <CardTitle className="text-[0.9375rem] font-semibold">{g.nombre}</CardTitle>
-                      <span className="text-xs font-normal text-muted-foreground">
+                      <span className="text-[1.0625rem] font-semibold">{g.nombre}</span>
+                      <span className="text-sm font-normal text-muted-foreground">
                         {g.distrito} · {plural(g.expedientes.length, 'expediente', 'expedientes')}
                       </span>
                     </span>
                   </Label>
                   <SedeJuzgado clave={g.clave} nombre={g.nombre} sede={sedes.get(g.clave) ?? ''} />
-                </CardHeader>
-                <CardContent>
-                  <ul className="grid gap-2">
-                    {g.expedientes.map((e) => (
-                      <li key={e.id} className="flex gap-3 rounded-lg border p-2.5">
+                </div>
+                <Lista>
+                  {g.expedientes.map((e) => (
+                    <li key={e.id} className="border-b border-separator last:border-b-0">
+                      <label className="flex cursor-pointer gap-4 px-5 py-4 hover:bg-muted/50">
                         <Checkbox
                           checked={sel.has(e.id)}
                           onCheckedChange={(v) => alternar([e.id], Boolean(v))}
                           aria-label={`Marcar ${etiquetaExp(e)}`}
                           className="mt-0.5"
                         />
-                        <div className="min-w-0 text-sm">
-                          <Link to={`/expedientes/${e.id}`} className="font-medium underline-offset-2 hover:underline">
-                            {e.codigo && `${e.codigo} · `}
-                            <Mono>{e.numero}</Mono>
-                          </Link>
-                          <p className="truncate text-muted-foreground">
+                        <span className="grid min-w-0 gap-1 text-sm">
+                          <span className="flex flex-wrap items-center gap-2">
+                            {e.codigo && <Codigo>{e.codigo}</Codigo>}
+                            <Link to={`/expedientes/${e.id}`} className="underline-offset-2 hover:underline" onClick={(ev) => ev.stopPropagation()}>
+                              <Mono>{e.numero}</Mono>
+                            </Link>
+                          </span>
+                          <span className="truncate text-muted-foreground">
                             {e.cliente ?? e.demandante ?? '—'}
                             {e.especialista ? ` · Esp. ${e.especialista}` : ''}
-                          </p>
-                          <p className="mt-0.5">{motivoVisita(e)}</p>
-                          <p className="text-xs text-muted-foreground">
+                          </span>
+                          <span>{motivoVisita(e)}</span>
+                          <span className="text-xs text-muted-foreground">
                             Última visita: {ultimaVisita.get(e.id) ? fecha(ultimaVisita.get(e.id)) : 'nunca'}
                             {enVisita.has(e.id) && ' · ya está en una visita programada'}
-                          </p>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
+                          </span>
+                        </span>
+                      </label>
+                    </li>
+                  ))}
+                </Lista>
+              </section>
             )
           })}
         </div>
@@ -196,26 +203,46 @@ function Planificar() {
   )
 }
 
+/** Sede del juzgado: texto discreto que se edita en línea. */
 function SedeJuzgado({ clave, nombre, sede }: { clave: string; nombre: string; sede: string }) {
   const c = useContenedor()
+  const [editando, setEditando] = useState(false)
   const [valor, setValor] = useState(sede)
   const guardar = async () => {
-    if (valor === sede) return
+    setEditando(false)
+    if (valor.trim() === sede) return
     await c.juzgados.guardarSede(clave, nombre, valor)
     toast.success('Sede guardada')
   }
-  return (
-    <div className="flex items-center gap-2 pl-7">
-      <MapPinIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+  if (editando)
+    return (
       <Input
+        autoFocus
         value={valor}
         onChange={(e) => setValor(e.target.value)}
         onBlur={guardar}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') void guardar()
+          if (e.key === 'Escape') {
+            setValor(sede)
+            setEditando(false)
+          }
+        }}
         placeholder="Sede, dirección o piso"
         aria-label={`Sede de ${nombre}`}
-        className="h-8"
+        className="h-9 w-full sm:w-72"
       />
-    </div>
+    )
+  return (
+    <button
+      type="button"
+      onClick={() => setEditando(true)}
+      className="flex h-9 items-center gap-1.5 rounded-lg px-2 text-sm text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/25"
+      aria-label={sede ? `Editar sede de ${nombre}: ${sede}` : `Agregar sede de ${nombre}`}
+    >
+      <MapPinIcon className="size-4" aria-hidden />
+      {sede || 'Agregar sede'}
+    </button>
   )
 }
 
@@ -243,50 +270,51 @@ function VisitaProgramada({ visita }: { visita: Visita }) {
   }
 
   return (
-    <Card size="sm">
-      <CardHeader>
-        <CardTitle className="text-[0.9375rem] font-semibold">{visita.juzgado}</CardTitle>
-        <p className="text-xs text-muted-foreground">
+    <section aria-label={visita.juzgado} className="grid gap-3">
+      <div className="px-1">
+        <h4 className="text-[1.0625rem] font-semibold">{visita.juzgado}</h4>
+        <p className="text-sm text-muted-foreground">
           {visita.sede ? `${visita.sede} · ` : ''}
           {visita.responsable} · {visita.estado === 'realizada' ? 'Realizada' : 'Programada'}
         </p>
-      </CardHeader>
-      <CardContent className="grid gap-3">
+      </div>
+      <Lista>
         {visita.items.map((i) => {
           const e = d.expPorId.get(i.expedienteId)
           const b = borrador[i.id]
           return (
-            <div key={i.id} className="grid gap-2 rounded-lg border p-3">
-              <Label className="items-start font-normal">
-                <Checkbox checked={b.hecho} onCheckedChange={(v) => set(i.id, { hecho: Boolean(v) })} className="mt-0.5" />
-                <span>
+            <li key={i.id} className="grid gap-3 border-b border-separator px-5 py-4 last:border-b-0">
+              <Label className="items-start gap-4 font-normal">
+                <Checkbox checked={b.hecho} onCheckedChange={(v) => set(i.id, { hecho: Boolean(v) })} className="mt-0.5" aria-label={`Visitado: ${etiquetaExp(e)}`} />
+                <span className="grid gap-0.5">
                   <span className="font-medium">{etiquetaExp(e)}</span>
-                  <span className="block text-sm text-muted-foreground">{i.motivo}</span>
+                  <span className="text-sm text-muted-foreground">{i.motivo}</span>
                 </span>
               </Label>
               {i.accionId ? (
-                <p className="text-sm">
-                  <span className="text-success">✓ Registrado:</span> {i.resultado}
+                <p className="pl-8 text-sm">
+                  <span className="font-medium text-success">Registrado:</span> {i.resultado}
                 </p>
               ) : (
                 <Textarea
                   rows={2}
+                  className="ml-8 w-[calc(100%-2rem)]"
                   value={b.resultado}
                   onChange={(ev) => set(i.id, { resultado: ev.target.value })}
                   placeholder="Resultado: qué dijo el especialista, qué falta…"
                   aria-label={`Resultado de ${etiquetaExp(e)}`}
                 />
               )}
-            </div>
+            </li>
           )
         })}
-        {visita.estado === 'programada' && (
-          <Button onClick={guardar} disabled={guardando} className="justify-self-start">
-            <SaveIcon aria-hidden /> {guardando ? 'Guardando…' : 'Guardar resultados'}
-          </Button>
-        )}
-      </CardContent>
-    </Card>
+      </Lista>
+      {visita.estado === 'programada' && (
+        <Button onClick={guardar} disabled={guardando} className="justify-self-start">
+          {guardando ? 'Guardando…' : 'Guardar resultados'}
+        </Button>
+      )}
+    </section>
   )
 }
 

@@ -61,18 +61,23 @@ function DesgloseCej({ numero, onRevision }: { numero: string; onRevision: () =>
       <CardContent className="grid gap-4">
         {n && (
           <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm sm:grid-cols-4">
-            {[
-              ['Número', n.numero],
-              ['Año', n.anio],
-              ['Incidente', n.incidente],
-              ['Distrito', n.distrito],
-              ['Instancia', `${n.instancia} · ${INSTANCIAS[n.instancia] ?? '—'}`],
-              ['Especialidad', `${n.especialidad} · ${ESPECIALIDADES[n.especialidad] ?? '—'}`],
-              ['Juzgado', n.juzgado],
-            ].map(([k, v]) => (
+            {(
+              [
+                ['Número', n.numero],
+                ['Año', n.anio],
+                ['Incidente', n.incidente],
+                ['Distrito', n.distrito],
+                ['Instancia', n.instancia, INSTANCIAS[n.instancia]],
+                ['Especialidad', n.especialidad, ESPECIALIDADES[n.especialidad]],
+                ['Juzgado', n.juzgado],
+              ] as [string, string, string?][]
+            ).map(([k, codigo, nombre]) => (
               <div key={k}>
                 <dt className="text-xs text-muted-foreground">{k}</dt>
-                <dd className="font-mono">{v}</dd>
+                <dd>
+                  <Mono>{codigo}</Mono>
+                  {nombre && <span className="text-muted-foreground"> · {nombre}</span>}
+                </dd>
               </div>
             ))}
           </dl>
@@ -268,12 +273,17 @@ export function FichaExpediente() {
             <BotonEnlace a={`/agenda?audiencia=${exp.id}`} variant="outline">
               <CalendarPlusIcon aria-hidden /> Audiencia
             </BotonEnlace>
-            <Button variant="outline" onClick={() => setEditando(true)}>
-              <PencilIcon aria-hidden /> Editar
+            <Button variant="outline" size="icon" onClick={() => setEditando(true)} aria-label="Editar expediente" title="Editar expediente">
+              <PencilIcon />
             </Button>
-            <Button variant="ghost" onClick={archivar}>
-              {exp.estado === 'activo' ? <ArchiveIcon aria-hidden /> : <ArchiveRestoreIcon aria-hidden />}
-              {exp.estado === 'activo' ? 'Archivar' : 'Reactivar'}
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={archivar}
+              aria-label={exp.estado === 'activo' ? 'Archivar expediente' : 'Reactivar expediente'}
+              title={exp.estado === 'activo' ? 'Archivar expediente' : 'Reactivar expediente'}
+            >
+              {exp.estado === 'activo' ? <ArchiveIcon /> : <ArchiveRestoreIcon />}
             </Button>
           </>
         }
@@ -293,7 +303,7 @@ export function FichaExpediente() {
                 </Severo>
               )}
               {sugerencia && (
-                <p className="rounded-xl bg-secondary px-3.5 py-2.5 text-sm text-secondary-foreground">
+                <p className="border-l-2 border-berry pl-3 text-sm">
                   <strong>Sugerencia:</strong> {sugerencia}
                 </p>
               )}

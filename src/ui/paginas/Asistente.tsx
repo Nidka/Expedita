@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { CopyIcon, FileTextIcon, SparklesIcon } from 'lucide-react'
+import { CopyIcon } from 'lucide-react'
 import type { ResumenExpedienteIA } from '@/application/ports'
 import { calcularPendientes, estadoMovimiento } from '@/domain/agenda/que-toca-hoy'
 import { TIPOS_ESCRITO } from '@/domain/entidades'
@@ -90,7 +90,7 @@ function Sugerencias() {
       </CardHeader>
       <CardContent className="grid gap-4">
         <Button onClick={pedir} disabled={cargando} className="justify-self-start">
-          <SparklesIcon aria-hidden /> {cargando ? 'Revisando expedientes…' : 'Pedir sugerencias'}
+          {cargando ? 'Revisando expedientes…' : 'Pedir sugerencias'}
         </Button>
         <div aria-live="polite">{cargando ? <Trabajando texto="Revisando etapas, plazos y días sin movimiento…" /> : texto && <Resultado texto={texto} etiqueta="Sugerencias" />}</div>
       </CardContent>
@@ -140,12 +140,12 @@ function Redactar() {
               </SelectNativo>
             )}
           </Campo>
-          <Campo etiqueta="Indicaciones" className="sm:col-span-2" ayuda="Ej.: mencionar que la audiencia se frustró dos veces.">
+          <Campo opcional etiqueta="Indicaciones" className="sm:col-span-2" ayuda="Ej.: mencionar que la audiencia se frustró dos veces.">
             {(p) => <Textarea {...p} rows={2} value={indicaciones} onChange={(e) => setIndicaciones(e.target.value)} />}
           </Campo>
         </div>
         <Button onClick={redactar} disabled={cargando} className="justify-self-start">
-          <FileTextIcon aria-hidden /> {cargando ? 'Redactando…' : 'Redactar borrador'}
+          {cargando ? 'Redactando…' : 'Redactar borrador'}
         </Button>
         <div aria-live="polite">{cargando ? <Trabajando texto="Redactando el borrador…" /> : texto && <Resultado texto={texto} etiqueta="Escrito" />}</div>
       </CardContent>
