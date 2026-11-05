@@ -43,6 +43,8 @@ export interface Expediente {
   impulsoMau?: string
   documentacion?: string
   ultimaRevisionCej?: FechaISO
+  /** Carpeta de Drive asignada a mano (si no, se empareja por nombre del cliente) */
+  driveCarpetaId?: string
   notas?: string
   origen?: string
   creadoEn: string
