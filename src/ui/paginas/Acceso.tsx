@@ -1,6 +1,6 @@
 import { useEffect, useId, useState, type FormEvent, type InputHTMLAttributes, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
-import { ArrowRightIcon, CheckIcon, EyeIcon, EyeOffIcon, Loader2Icon, MailIcon } from '@/ui/iconos'
+import { ArrowRightIcon, CheckIcon, EyeIcon, EyeOffIcon, Loader2Icon } from '@/ui/iconos'
 import { useContenedor } from '../contexto'
 import { Michi } from '../componentes/marca'
 
@@ -18,7 +18,10 @@ function Marco({ children }: { children: ReactNode }) {
       <footer className="px-6 pb-8 text-center text-xs leading-relaxed text-muted-foreground">
         Tus datos y los de tus clientes quedan solo en el espacio de tu estudio.
         <br />
-        Expedita · Procuración judicial · Perú
+        Expedita · Procuración judicial · Perú ·{' '}
+        <a href="/privacidad" className="underline outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/25">
+          Aviso de privacidad
+        </a>
       </footer>
     </div>
   )
@@ -27,8 +30,9 @@ function Marco({ children }: { children: ReactNode }) {
 function Cabecera({ titulo, texto }: { titulo: string; texto?: ReactNode }) {
   return (
     <div className="mb-10 flex flex-col items-center text-center">
-      <span className="mb-6 grid size-16 place-items-center rounded-[1.1rem] bg-card shadow-[0_0_0_1px_var(--border),0_8px_24px_rgb(0_0_0/0.04)]">
-        <Michi pose="sentado" className="size-11" />
+      <span className="mb-10 flex items-center gap-2" aria-hidden>
+        <Michi pose="sentado" className="size-8" />
+        <span className="text-[1.0625rem] font-bold tracking-tight">Expedita</span>
       </span>
       <h1 className="text-[1.75rem] leading-tight font-semibold tracking-tight sm:text-[2rem]">{titulo}</h1>
       {texto && <p className="mt-3 text-[0.9375rem] leading-relaxed text-muted-foreground">{texto}</p>}
@@ -241,9 +245,6 @@ export function IniciarSesion({ alEntrar }: { alEntrar: () => void }) {
     return (
       <Marco>
         <div className="flex flex-col items-center text-center">
-          <span className="mb-6 grid size-16 place-items-center rounded-full bg-secondary text-secondary-foreground">
-            <MailIcon className="size-7" />
-          </span>
           <h1 className="text-[1.75rem] leading-tight font-semibold tracking-tight">Revisa tu correo</h1>
           <p className="mt-3 text-[0.9375rem] leading-relaxed text-muted-foreground">
             {motivo === 'recuperar' ? 'Enviamos un enlace para crear una contraseña nueva a ' : 'Enviamos un enlace de acceso a '}

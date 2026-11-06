@@ -5,7 +5,7 @@ import { PlusIcon, RotateCcwIcon } from '@/ui/iconos'
 import { previsualizarPlazo, registrarNotificacion } from '@/application/casos-uso/notificaciones'
 import { extraerDeCorreo } from '@/domain/notificaciones/extraer'
 import { parsearNumeroExpediente } from '@/domain/expediente/numero-expediente'
-import { actosDeVia, viaPorEspecialidad, VIAS } from '@/domain/plazos/catalogo'
+import { ACTOS, actosDeVia, viaPorEspecialidad, VIAS } from '@/domain/plazos/catalogo'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -76,6 +76,37 @@ function NuevaNotificacion({ abierto, cerrar }: { abierto: boolean; cerrar: () =
     }
   }
 
+  /** RF-35: Claude lee el PDF de la resolución y propone los datos; el plazo lo calcula el código. */
+  const analizarPdf = async (archivo: File | undefined) => {
+    if (!archivo) return
+    if (archivo.type !== 'application/pdf' && !archivo.name.toLowerCase().endsWith('.pdf')) return toast.error('Elige un archivo PDF.')
+    if (archivo.size > 8 * 1024 * 1024) return toast.error('El PDF pesa más de 8 MB. Sube solo la resolución, no el expediente completo.')
+    setAnalizando(true)
+    try {
+      const pdf = await new Promise<string>((ok, mal) => {
+        const lector = new FileReader()
+        lector.onload = () => ok(String(lector.result).split(',')[1] ?? '')
+        lector.onerror = () => mal(new Error('No se pudo leer el archivo.'))
+        lector.readAsDataURL(archivo)
+      })
+      const r = await c.ia.analizarResolucion(pdf, ACTOS.map((a) => ({ id: a.id, nombre: `${a.nombre} (${VIAS[a.via].nombre})` })))
+      const numIA = r.numero ? parsearNumeroExpediente(r.numero) : null
+      const viaIA = numIA ? (d.expedientes.find((e) => e.numero === numIA.valor)?.via ?? viaPorEspecialidad(numIA.especialidad)) : via
+      if (r.numero) setNumero(r.numero)
+      if (r.asunto) setAsunto(r.asunto)
+      if (r.recibido) setRecibido(r.recibido)
+      if (r.actoId && actosDeVia(viaIA).some((a) => a.id === r.actoId)) setActoId(r.actoId)
+      if (r.plazoFijado) setManual(r.plazoFijado)
+      if (r.resumen) setResumen(r.resumen)
+      if (!texto.trim()) setTexto(`Resolución en PDF: ${archivo.name}`)
+      toast.success('Claude leyó la resolución. Revisa los datos y el plazo antes de guardar.')
+    } catch (e) {
+      toast.error((e as Error).message)
+    } finally {
+      setAnalizando(false)
+    }
+  }
+
   const guardar = async (ev: FormEvent) => {
     ev.preventDefault()
     if (!num) return toast.error('El número de expediente no es válido.')
@@ -118,13 +149,28 @@ function NuevaNotificacion({ abierto, cerrar }: { abierto: boolean; cerrar: () =
             <Button type="button" variant="secondary" onClick={analizar} disabled={analizando}>
               {analizando ? 'Analizando…' : 'Analizar con Claude'}
             </Button>
+            <Button type="button" variant="outline" disabled={analizando} onClick={() => document.getElementById('pdf-resolucion')?.click()}>
+              Leer PDF de la resolución
+            </Button>
+            <input
+              id="pdf-resolucion"
+              type="file"
+              accept="application/pdf,.pdf"
+              className="sr-only"
+              tabIndex={-1}
+              aria-hidden
+              onChange={(e) => {
+                void analizarPdf(e.target.files?.[0])
+                e.target.value = ''
+              }}
+            />
           </div>
           <Campo
             etiqueta="N.° de expediente"
             requerido
             ayuda={num ? (existente ? `Existe: ${etiquetaExp(existente)}` : `Nuevo · vía ${VIAS[via].nombre}`) : 'Formato 00000-0000-0-0000-XX-XX-00'}
           >
-            {(p) => <Input {...p} className="font-mono" value={numero} onChange={(e) => setNumero(e.target.value)} />}
+            {(p) => <Input {...p} className="tabular" value={numero} onChange={(e) => setNumero(e.target.value)} />}
           </Campo>
           <Campo etiqueta="Fecha de notificación" requerido>
             {(p) => <Input {...p} type="date" value={recibido} onChange={(e) => setRecibido(e.target.value)} />}
@@ -219,9 +265,9 @@ export function Bandeja() {
           const exp = n.expedienteId ? d.expPorId.get(n.expedienteId) : undefined
           const sev = estado === 'atendida' ? 'info' : restantes === undefined ? 'proximo' : restantes < 0 ? 'vencido' : restantes <= 3 ? 'urgente' : 'proximo'
           return (
-            <li key={n.id} className="relative border-b border-separator px-6 py-5 last:border-b-0">
-              <span className={cn('absolute inset-y-4 left-0 w-[3px] rounded-r-full', FRANJA_SEVERIDAD[sev])} aria-hidden />
+            <li key={n.id} className="border-b border-separator px-5 py-5 last:border-b-0">
               <div className="flex items-start gap-4">
+                <span className={cn('mt-2 size-2 shrink-0 rounded-full', FRANJA_SEVERIDAD[sev])} aria-hidden />
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold">
                     {n.asunto}

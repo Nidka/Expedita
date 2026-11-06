@@ -17,7 +17,7 @@ export function RutaEtapas({ via, etapa }: { via: ViaId; etapa?: string }) {
         <span aria-hidden className="absolute top-[11px] right-[var(--borde)] left-[var(--borde)] h-0.5 rounded-full bg-separator" />
         <span
           aria-hidden
-          className="absolute top-[11px] left-[var(--borde)] h-0.5 origin-left animate-[llenar_700ms_var(--ease-apple)_both] rounded-full bg-primary"
+          data-movimiento="espacial" className="absolute top-[11px] left-[var(--borde)] h-0.5 origin-left animate-[llenar_700ms_var(--ease-apple)_both] rounded-full bg-primary"
           style={{ width: `calc((100% - 2 * var(--borde)) * ${progreso})` }}
         />
         {etapas.map((e, i) => {

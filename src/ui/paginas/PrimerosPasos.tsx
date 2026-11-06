@@ -21,7 +21,7 @@ export function BarraProgreso({ hechos, total, className }: { hechos: number; to
       aria-valuenow={hechos}
       className={cn('h-1.5 overflow-hidden rounded-full bg-muted', className)}
     >
-      <div className="h-full origin-left animate-[llenar_700ms_var(--ease-apple)_both] rounded-full bg-primary transition-[width] duration-500" style={{ width: `${(hechos / Math.max(total, 1)) * 100}%` }} />
+      <div data-movimiento="espacial" className="h-full origin-left animate-[llenar_700ms_var(--ease-apple)_both] rounded-full bg-primary transition-[width] duration-500" style={{ width: `${(hechos / Math.max(total, 1)) * 100}%` }} />
     </div>
   )
 }

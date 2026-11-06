@@ -76,7 +76,7 @@ function Contenido({ a }: { a: AvanceCliente }) {
         <p className="text-sm font-medium text-muted-foreground">{a.estudio}</p>
         <div className="grid gap-2">
           <h1 className="text-[1.75rem] leading-tight font-semibold tracking-tight sm:text-[2rem]">Avance de su expediente</h1>
-          <p className="font-mono text-[0.9375rem] break-all text-foreground/80">{a.numero}</p>
+          <p className="tabular text-[0.9375rem] font-medium break-all text-foreground/80">{a.numero}</p>
         </div>
         <dl className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm sm:grid-cols-3">
           {a.cliente && <Dato k="Cliente" v={a.cliente} />}

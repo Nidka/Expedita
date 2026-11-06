@@ -75,20 +75,17 @@ export function EncabezadoPagina({
   titulo,
   descripcion,
   acciones,
-  antetitulo,
   ayuda,
 }: {
   titulo: ReactNode
   descripcion?: ReactNode
   acciones?: ReactNode
-  antetitulo?: ReactNode
   /** Tema de ayuda: muestra el botón «?» junto al título */
   ayuda?: TemaId
 }) {
   return (
     <header className="mb-8 flex flex-col gap-5 sm:mb-12 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
-        {antetitulo && <div className="mb-1 text-sm text-muted-foreground">{antetitulo}</div>}
         <div className="flex items-center gap-1.5">
           <h1 className="text-[1.75rem] leading-tight font-bold sm:text-[2rem]">{titulo}</h1>
           {ayuda && <BotonAyuda tema={ayuda} className="mt-1" />}
@@ -132,7 +129,7 @@ export function Seccion({
 /** Lista agrupada con separadores (inset grouped). */
 export function Lista({ children, className, etiqueta }: { children: ReactNode; className?: string; etiqueta?: string }) {
   return (
-    <ul aria-label={etiqueta} className={cn('escalonar overflow-hidden rounded-xl bg-card shadow-[0_0_0_1px_var(--border)]', className)}>
+    <ul aria-label={etiqueta} className={cn('overflow-hidden rounded-xl bg-card shadow-[0_0_0_1px_var(--border)]', className)}>
       {children}
     </ul>
   )
@@ -161,7 +158,7 @@ export function Fila({
 }) {
   const contenido = (
     <>
-      {estado && <span className={cn('absolute inset-y-3 left-0 w-[3px] rounded-r-full', FRANJA_SEVERIDAD[estado])} aria-hidden />}
+      {estado && <span className={cn('size-2 shrink-0 rounded-full', FRANJA_SEVERIDAD[estado])} aria-hidden />}
       {inicio && <span className="shrink-0">{inicio}</span>}
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="truncate font-medium">{titulo}</span>
@@ -172,7 +169,7 @@ export function Fila({
       {a && <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground/60 transition-transform duration-200 ease-(--ease-apple) group-hover:translate-x-0.5 group-hover:text-muted-foreground" aria-hidden />}
     </>
   )
-  const base = cn('relative flex min-h-14 items-center gap-4 px-5 py-3.5', estado && 'pl-6')
+  const base = 'flex min-h-14 items-center gap-4 px-5 py-3.5'
   return (
     <li className={cn('border-b border-separator last:border-b-0', className)}>
       {a ? (
@@ -251,7 +248,7 @@ export function BotonEnlace({
 }
 
 export function Mono({ children, className }: { children: ReactNode; className?: string }) {
-  return <span className={cn('font-mono text-[0.9em] tracking-tight', className)}>{children}</span>
+  return <span className={cn('tabular text-[0.95em] font-medium tracking-[-0.005em]', className)}>{children}</span>
 }
 
 /** Código interno del estudio (LA-04) como etiqueta. */

@@ -120,7 +120,7 @@
     --chart-3: #3B6E9C;
     --chart-4: #23704A;
     --chart-5: #B42318;
-    --radius: 0.5rem;
+    --radius: 0.625rem;
     --sidebar: #EFECE6;
     --sidebar-foreground: #1C1B19;
     --sidebar-primary: #8A5F17;
@@ -189,34 +189,51 @@
   }
   html {
     @apply font-sans antialiased;
-    font-size: 15px;
+    /* Piso de lectura web: 16 px (impeccable). Los roles densos usan 13–14 px de forma explícita. */
+    font-size: 16px;
     -webkit-text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
-  }
-  @media (max-width: 640px) {
-    /* En celular el texto base sube a 16px: evita el zoom automático de iOS en campos */
-    html { font-size: 16px; }
+    /* Controles nativos y barras de desplazamiento con la paleta, no con los del navegador */
+    accent-color: var(--primary);
+    scrollbar-color: color-mix(in oklab, var(--foreground) 22%, transparent) transparent;
+    scrollbar-width: thin;
   }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "tnum" 0, "cv11" 1;
+    font-feature-settings: "cv11" 1;
   }
   h1, h2, h3, h4 {
     @apply font-heading tracking-tight text-balance;
+  }
+  p, li, dd {
+    text-wrap: pretty;
+  }
+  input, textarea {
+    caret-color: var(--primary);
   }
   /* Los hijos de grid/flex no deben ensancharse por textos largos (evita scroll horizontal en celular) */
   :where(.grid, .flex) > * {
     min-width: 0;
   }
   ::selection {
-    background: color-mix(in oklab, var(--primary) 25%, transparent);
+    background: color-mix(in oklab, var(--primary) 22%, transparent);
   }
   :focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 2px;
   }
+  a {
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: from-font;
+  }
+  /* Movimiento reducido: alternativa pensada, no un apagón global.
+     Se elimina el desplazamiento espacial; se conservan los cambios de opacidad y color. */
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+    :root { --entrar-y: 0px; }
+    html { scroll-behavior: auto; }
+    .brillo { animation: none; }
+    [data-movimiento='espacial'] { animation: none !important; transition: none !important; }
+    [data-slot='button']:active { scale: none; transform: none; }
   }
   @media (prefers-contrast: more) {
     :root { --muted-foreground: #4A4640; --border: #A9A397; --separator: #C9C3B8; }
@@ -225,32 +242,24 @@
 }
 
 /* ---------- Movimiento ----------
- * Curvas tipo Apple: salida rápida y asentamiento suave. Duraciones cortas (180–320 ms).
- * Todo se anula con prefers-reduced-motion (ver @layer base).
+ * Duraciones (impeccable): 100–150 ms respuesta inmediata · 150–300 ms cambio de estado ·
+ * 300–500 ms superposiciones y cambio de vista. La salida es más rápida que la entrada.
+ * Curva de llegada segura, sin rebotes ni elásticos.
+ * Un solo momento protagonista (la portada de Hoy); el resto es sobrio.
  */
 @theme {
-  --ease-apple: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --animate-entrar: entrar 320ms var(--ease-apple) both;
-  --animate-flotar: flotar 4s ease-in-out infinite;
+  --ease-apple: cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-entrar: entrar 280ms var(--ease-apple) both;
   --animate-brillo: brillo 1.6s linear infinite;
   @keyframes entrar {
-    from { opacity: 0; transform: translateY(6px); }
+    from { opacity: 0; transform: translateY(var(--entrar-y, 6px)); }
     to { opacity: 1; transform: none; }
-  }
-  @keyframes saltar {
-    0% { transform: scale(0.6); }
-    60% { transform: scale(1.15); }
-    100% { transform: scale(1); }
   }
   @keyframes llenar {
     from { transform: scaleX(0); }
   }
   @keyframes crecer {
     from { transform: scaleY(0); }
-  }
-  @keyframes flotar {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-4px); }
   }
   @keyframes brillo {
     from { background-position: 200% 0; }
@@ -259,16 +268,6 @@
 }
 
 @layer utilities {
-  /* Entrada escalonada de los hijos directos (listas): 40 ms entre cada uno, máximo 12. */
-  .escalonar > * { animation: entrar 320ms var(--ease-apple) both; }
-  .escalonar > :nth-child(2) { animation-delay: 40ms; }
-  .escalonar > :nth-child(3) { animation-delay: 80ms; }
-  .escalonar > :nth-child(4) { animation-delay: 120ms; }
-  .escalonar > :nth-child(5) { animation-delay: 160ms; }
-  .escalonar > :nth-child(6) { animation-delay: 200ms; }
-  .escalonar > :nth-child(7) { animation-delay: 240ms; }
-  .escalonar > :nth-child(8) { animation-delay: 280ms; }
-  .escalonar > :nth-child(n + 9) { animation-delay: 320ms; }
   /* Esqueleto de carga con brillo que recorre */
   .brillo {
     background: linear-gradient(90deg, var(--muted) 25%, color-mix(in oklab, var(--muted) 60%, var(--card)) 50%, var(--muted) 75%);
@@ -279,6 +278,8 @@
   .pb-tabbar { padding-bottom: calc(5rem + env(safe-area-inset-bottom)); }
   .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
   .tabular { font-variant-numeric: tabular-nums; }
+  /* Medida de lectura: 65–75 caracteres */
+  .medida { max-width: 68ch; }
   .material {
     background: color-mix(in oklab, var(--background) 82%, transparent);
     backdrop-filter: saturate(180%) blur(20px);

@@ -116,16 +116,15 @@ export function Inicio() {
       {/* Encabezado: saludo y estado del día; Michi refleja ese estado */}
       <header className="mb-8 flex items-end justify-between gap-6">
         <div className="min-w-0">
-          <p className="text-sm text-muted-foreground">{fechaLarga(d.hoy)}</p>
-          <h1 className="mt-1 text-[1.875rem] leading-tight font-bold tracking-tight sm:text-[2.25rem]">
+          <h1 className="text-[1.875rem] leading-tight font-bold tracking-tight sm:text-[2.25rem]">
             {saludo()}, {d.sesion.miembro.nombre.split(' ')[0]}
             <BotonAyuda tema="hoy" className="ml-1.5 align-middle" />
           </h1>
-          <p className="mt-2 max-w-lg text-[0.9375rem] text-muted-foreground" aria-live="polite">
-            {estado.texto}
+          <p className="medida mt-2 text-[0.9375rem] text-muted-foreground" aria-live="polite">
+            <span className="text-foreground">{fechaLarga(d.hoy)}.</span> {estado.texto}
           </p>
         </div>
-        <span className="hidden shrink-0 animate-flotar sm:block" aria-hidden>
+        <span className="hidden shrink-0 sm:block" aria-hidden>
           <Michi key={estado.pose} pose={estado.pose} className="size-28 animate-entrar [animation-duration:480ms] lg:size-32" />
         </span>
       </header>

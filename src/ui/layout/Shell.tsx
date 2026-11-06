@@ -98,7 +98,7 @@ function Usuario() {
 /** Insignia con un pequeño «salto» cada vez que cambia el número. */
 function Insignia({ n }: { n: number }) {
   return (
-    <span key={n} className="inline-block animate-[saltar_360ms_var(--ease-apple)]">
+    <span key={n} className="inline-block animate-entrar">
       {n}
     </span>
   )

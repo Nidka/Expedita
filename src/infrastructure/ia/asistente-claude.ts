@@ -2,6 +2,18 @@ import type { AccionPropuestaIA, AnalisisNotificacion, AsistenteIA, ResumenExped
 import { TIPOS_ACCION, type Expediente } from '@/domain/entidades'
 import { supabase } from '../supabase/cliente'
 
+/** Respuesta del asistente (con null) → análisis del dominio (con undefined). */
+function aAnalisis(r: Record<string, string | null>): AnalisisNotificacion {
+  return {
+    numero: r.numero ?? undefined,
+    asunto: r.asunto ?? undefined,
+    recibido: r.recibido ?? undefined,
+    actoId: r.actoId ?? undefined,
+    plazoFijado: r.plazoFijado ?? undefined,
+    resumen: r.resumen ?? undefined,
+  }
+}
+
 /** Adaptador de IA: llama a la Edge Function «asistente», que es la única que conoce la clave de Claude. */
 export class AsistenteClaude implements AsistenteIA {
   private async invocar<T>(cuerpo: Record<string, unknown>): Promise<T> {
@@ -20,14 +32,11 @@ export class AsistenteClaude implements AsistenteIA {
   }
 
   analizarNotificacion(texto: string, actos: { id: string; nombre: string }[]): Promise<AnalisisNotificacion> {
-    return this.invocar<Record<string, string | null>>({ tipo: 'analizar-notificacion', texto, actos }).then((r) => ({
-      numero: r.numero ?? undefined,
-      asunto: r.asunto ?? undefined,
-      recibido: r.recibido ?? undefined,
-      actoId: r.actoId ?? undefined,
-      plazoFijado: r.plazoFijado ?? undefined,
-      resumen: r.resumen ?? undefined,
-    }))
+    return this.invocar<Record<string, string | null>>({ tipo: 'analizar-notificacion', texto, actos }).then(aAnalisis)
+  }
+
+  analizarResolucion(pdf: string, actos: { id: string; nombre: string }[]): Promise<AnalisisNotificacion> {
+    return this.invocar<Record<string, string | null>>({ tipo: 'analizar-resolucion', pdf, actos }).then(aAnalisis)
   }
 
   async sugerirImpulsos(expedientes: ResumenExpedienteIA[]): Promise<string> {

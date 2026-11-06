@@ -53,6 +53,7 @@ function TabsList({
         // Indicador ocre que se desliza hasta la pestaña activa (Base UI expone su posición como variables CSS)
         <TabsPrimitive.Indicator
           data-slot="tabs-indicator"
+          data-movimiento="espacial"
           className="absolute bottom-[-1px] left-0 h-0.5 w-(--active-tab-width) translate-x-(--active-tab-left) rounded-full bg-ocre transition-[translate,width] duration-300 ease-(--ease-apple)"
         />
       )}

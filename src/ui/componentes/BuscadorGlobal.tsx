@@ -92,7 +92,7 @@ export function BuscadorGlobal({ abierto, setAbierto }: { abierto: boolean; setA
                 <span className="flex min-w-0 flex-col">
                   <span className="truncate">
                     {e.codigo && <strong className="mr-1.5">{e.codigo}</strong>}
-                    <span className="font-mono text-[0.85em]">{e.numero}</span>
+                    <span className="tabular font-medium">{e.numero}</span>
                   </span>
                   <span className="truncate text-xs text-muted-foreground">{e.cliente ?? e.demandante ?? '—'}</span>
                 </span>

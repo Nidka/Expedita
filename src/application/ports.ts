@@ -192,6 +192,8 @@ export interface AccionPropuestaIA {
 
 export interface AsistenteIA {
   analizarNotificacion(texto: string, actos: { id: string; nombre: string }[]): Promise<AnalisisNotificacion>
+  /** RF-35: lee el PDF de una resolución (base64) y propone acto, plazo y resumen */
+  analizarResolucion(pdfBase64: string, actos: { id: string; nombre: string }[]): Promise<AnalisisNotificacion>
   sugerirImpulsos(expedientes: ResumenExpedienteIA[]): Promise<string>
   redactarEscrito(datos: { expediente: Expediente; tipo: string; indicaciones: string }): Promise<string>
   interpretarMensajes(

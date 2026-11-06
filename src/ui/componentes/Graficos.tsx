@@ -70,7 +70,7 @@ export function BarrasHorizontales({ filas, unidad, max = 8 }: { filas: { clave:
           </span>
           <span className="flex items-center gap-2" aria-label={`${f.clave}: ${f.n} ${f.n === 1 ? unidad[0] : unidad[1]}`} role="img">
             <span
-              className="h-3.5 origin-left animate-[llenar_600ms_var(--ease-apple)_both] rounded-r-[4px] bg-grafico"
+              data-movimiento="espacial" className="h-3.5 origin-left animate-[llenar_600ms_var(--ease-apple)_both] rounded-r-[4px] bg-grafico"
               style={{ width: `${Math.max(2, (f.n / mayor) * 100)}%` }}
             />
             <span className="shrink-0 text-sm font-medium tabular">{f.n}</span>
@@ -91,7 +91,7 @@ export function BarrasSemanales({ semanas, formato }: { semanas: { inicio: strin
         {semanas.map((s) => (
           <div key={s.inicio} role="listitem" className="group relative flex h-full flex-1 items-end justify-center" tabIndex={0} aria-label={`Semana del ${formato(s.inicio)}: ${s.n} acciones`}>
             <span
-              className="w-full max-w-10 origin-bottom animate-[crecer_600ms_var(--ease-apple)_both] rounded-t-[4px] bg-grafico transition-opacity group-hover:opacity-80"
+              data-movimiento="espacial" className="w-full max-w-10 origin-bottom animate-[crecer_600ms_var(--ease-apple)_both] rounded-t-[4px] bg-grafico transition-opacity group-hover:opacity-80"
               style={{ height: s.n ? `${Math.max(3, (s.n / mayor) * 100)}%` : '0%' }}
             />
             {s.n === 0 && <span className="absolute bottom-0 h-px w-3/4 bg-input" aria-hidden />}

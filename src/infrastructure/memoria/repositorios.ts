@@ -250,6 +250,9 @@ class IADemo implements AsistenteIA {
   async analizarNotificacion(): Promise<never> {
     this.falla()
   }
+  async analizarResolucion(): Promise<never> {
+    this.falla()
+  }
   async sugerirImpulsos(): Promise<never> {
     this.falla()
   }

@@ -57,7 +57,7 @@ export function AgregarExpediente({ abierto, cerrar }: { abierto: boolean; cerra
               <Input
                 {...p}
                 autoFocus
-                className="h-11 font-mono text-base tracking-tight"
+                className="h-11 tabular text-base"
                 placeholder="01234-2025-0-1801-JR-LA-05"
                 value={numero}
                 onChange={(e) => setNumero(e.target.value)}

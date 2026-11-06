@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useContenedor, useDatos } from '../contexto'
 import { Campo, EncabezadoPagina, SelectNativo } from '../componentes/base'
 import { SelectorExpediente } from '../componentes/SelectorExpediente'
+import { ImportarWhatsApp } from '../componentes/ImportarWhatsApp'
 import { etiquetaExp, fecha as fmtFecha } from '../formato'
 import { exito } from '../notificar'
 
@@ -28,6 +29,7 @@ export function RegistrarAccion() {
   const c = useContenedor()
   const d = useDatos()
   const navegar = useNavigate()
+  const [whatsapp, setWhatsapp] = useState(false)
   const [params] = useSearchParams()
   const notificacionId = params.get('notificacion') ?? undefined
   const notificacion = notificacionId ? d.notificaciones.find((n) => n.id === notificacionId) : undefined
@@ -99,7 +101,15 @@ export function RegistrarAccion() {
         ayuda="registrar"
         titulo="Registrar acción"
         descripcion={notificacion ? `Atiende la notificación «${notificacion.asunto}»` : 'Escritos, visitas, llamadas y revisiones del CEJ'}
+        acciones={
+          !notificacion && (
+            <Button variant="outline" onClick={() => setWhatsapp(true)}>
+              Importar de WhatsApp
+            </Button>
+          )
+        }
       />
+      {whatsapp && <ImportarWhatsApp abierto cerrar={() => setWhatsapp(false)} />}
       <Card className="max-w-3xl">
         <CardContent>
           <form onSubmit={enviar} noValidate className="grid gap-6 sm:grid-cols-2">

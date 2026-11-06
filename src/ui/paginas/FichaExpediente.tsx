@@ -290,8 +290,8 @@ export function FichaExpediente() {
                 </Severo>
               )}
               {sugerencia && (
-                <p className="border-l-2 border-berry pl-3 text-sm">
-                  <strong>Sugerencia:</strong> {sugerencia}
+                <p className="medida text-sm text-muted-foreground">
+                  <strong className="font-semibold text-foreground">Sugerencia:</strong> {sugerencia}
                 </p>
               )}
             </CardContent>

@@ -22,6 +22,7 @@ Todo lo que produces es una propuesta: un abogado la revisará antes de usarla.`
 
 type Peticion =
   | { tipo: 'analizar-notificacion'; texto: string; actos: { id: string; nombre: string }[] }
+  | { tipo: 'analizar-resolucion'; pdf: string; actos: { id: string; nombre: string }[] }
   | { tipo: 'sugerir-impulsos'; expedientes: unknown[] }
   | { tipo: 'redactar-escrito'; expediente: Record<string, unknown>; tipoEscrito: string; indicaciones: string }
   | {
@@ -38,7 +39,15 @@ async function llamar(params: {
   esfuerzo: 'low' | 'medium' | 'high'
   maxTokens: number
   esquema?: Record<string, unknown>
+  /** PDF en base64: va antes del texto en el mismo mensaje */
+  pdf?: string
 }): Promise<string> {
+  const contenido = params.pdf
+    ? [
+        { type: 'document' as const, source: { type: 'base64' as const, media_type: 'application/pdf' as const, data: params.pdf } },
+        { type: 'text' as const, text: params.usuario },
+      ]
+    : params.usuario
   const respuesta = await anthropic.beta.messages.create({
     model: MODELO,
     max_tokens: params.maxTokens,
@@ -50,7 +59,7 @@ async function llamar(params: {
       effort: params.esfuerzo,
       ...(params.esquema ? { format: { type: 'json_schema', schema: params.esquema } } : {}),
     },
-    messages: [{ role: 'user', content: params.usuario }],
+    messages: [{ role: 'user', content: contenido }],
   })
   if (respuesta.stop_reason === 'refusal') throw new Error('El asistente no pudo procesar esta solicitud.')
   if (respuesta.stop_reason === 'max_tokens') throw new Error('La respuesta fue demasiado larga; intenta con menos datos.')
@@ -62,8 +71,40 @@ async function llamar(params: {
 
 const opcional = (tipo: string) => ({ type: [tipo, 'null'] })
 
+/** Esquema común: lo que se extrae de una notificación o de una resolución */
+const ESQUEMA_NOTIFICACION = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['numero', 'asunto', 'recibido', 'actoId', 'plazoFijado', 'resumen'],
+  properties: {
+    numero: opcional('string'),
+    asunto: opcional('string'),
+    recibido: opcional('string'),
+    actoId: opcional('string'),
+    plazoFijado: opcional('string'),
+    resumen: opcional('string'),
+  },
+}
+
+/** Límite del PDF: unos 8 MB (en base64 ocupa un tercio más) */
+const MAX_PDF_BASE64 = 11_000_000
+
 async function atender(p: Peticion): Promise<unknown> {
   switch (p.tipo) {
+    case 'analizar-resolucion': {
+      if (!p.pdf || p.pdf.length > MAX_PDF_BASE64) throw new Error('El PDF está vacío o pesa más de 8 MB.')
+      const lista = p.actos.map((a) => `${a.id} = ${a.nombre}`).join('\n')
+      const texto = await llamar({
+        system: `${REGLAS_COMUNES}\nLees resoluciones judiciales peruanas en PDF (autos, decretos, sentencias) y extraes lo que el abogado debe hacer.`,
+        usuario: `Actos con plazo posibles (usa el id exacto o null si ninguno aplica):\n${lista}\n\nDel PDF adjunto devuelve: número de expediente en formato NNNNN-AAAA-I-DDDD-XX-YY-JJ, asunto breve (tipo y número de resolución y lo que decide), fecha de la resolución o de su notificación si figura (AAAA-MM-DD), el acto que corresponde cumplir, la fecha límite solo si la resolución fija un plazo propio distinto al legal, y un resumen de 2 a 4 oraciones de lo que resuelve y ordena. Si un dato no figura, usa null.`,
+        esfuerzo: 'medium',
+        maxTokens: 4000,
+        esquema: ESQUEMA_NOTIFICACION,
+        pdf: p.pdf,
+      })
+      return JSON.parse(texto)
+    }
+
     case 'analizar-notificacion': {
       const lista = p.actos.map((a) => `${a.id} = ${a.nombre}`).join('\n')
       const texto = await llamar({

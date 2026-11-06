@@ -7,6 +7,7 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { crearContenedor } from '@/infrastructure/composicion'
 import { ProveedorContenedor } from '@/ui/contexto'
 import { App } from '@/ui/App'
+import { ErrorInesperado } from '@/ui/ErrorInesperado'
 
 const raiz = createRoot(document.getElementById('root')!)
 
@@ -16,7 +17,9 @@ crearContenedor().then((contenedor) =>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
         <TooltipProvider>
           <ProveedorContenedor contenedor={contenedor}>
-            <App />
+            <ErrorInesperado>
+              <App />
+            </ErrorInesperado>
           </ProveedorContenedor>
           <Toaster richColors closeButton position="top-center" />
         </TooltipProvider>

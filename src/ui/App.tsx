@@ -22,6 +22,7 @@ const PrimerosPasos = lazy(() => import('./paginas/PrimerosPasos').then((m) => (
 const CentroAyuda = lazy(() => import('./paginas/CentroAyuda').then((m) => ({ default: m.CentroAyuda })))
 const Panel = lazy(() => import('./paginas/Panel').then((m) => ({ default: m.Panel })))
 const Cuenta = lazy(() => import('./paginas/Cuenta').then((m) => ({ default: m.Cuenta })))
+const Privacidad = lazy(() => import('./paginas/Privacidad').then((m) => ({ default: m.Privacidad })))
 const PaginaAvance = lazy(() => import('./paginas/Avance').then((m) => ({ default: m.PaginaAvance })))
 const Ajustes = lazy(() => import('./paginas/Ajustes').then((m) => ({ default: m.Ajustes })))
 
@@ -46,6 +47,12 @@ export function App() {
     return (
       <Suspense fallback={null}>
         <PaginaAvance token={token} />
+      </Suspense>
+    )
+  if (/^\/privacidad\/?$/.test(location.pathname))
+    return (
+      <Suspense fallback={null}>
+        <Privacidad />
       </Suspense>
     )
   return <AppPrivada />
