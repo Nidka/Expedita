@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -23,6 +24,8 @@ export function Cuenta() {
   const [repetir, setRepetir] = useState('')
   const [error, setError] = useState<string>()
   const [guardando, setGuardando] = useState(false)
+  const [params] = useSearchParams()
+  const recuperando = params.get('recuperar') === '1'
 
   const guardar = async (ev: FormEvent) => {
     ev.preventDefault()
@@ -46,6 +49,11 @@ export function Cuenta() {
   return (
     <>
       <EncabezadoPagina titulo="Mi cuenta" descripcion={`${sesion.miembro.nombre} · ${sesion.miembro.rol === 'admin' ? 'Administrador' : 'Abogado'} · ${sesion.orgNombre}`} />
+      {recuperando && (
+        <p role="status" className="mb-6 max-w-xl rounded-xl bg-secondary px-5 py-4 text-sm text-secondary-foreground">
+          <strong className="font-semibold">Crea tu nueva contraseña.</strong> Entraste con el enlace de recuperación; guárdala abajo para usarla desde ahora.
+        </p>
+      )}
       <Card className="max-w-xl">
         <CardHeader>
           <CardTitle className="text-[1.0625rem] font-semibold">Contraseña</CardTitle>

@@ -6,8 +6,10 @@ import type {
   CanalCambios,
   Cambios,
   ConfigRepo,
+  AuditoriaRepo,
   EquipoRepo,
   Invitacion,
+  RegistroAuditoria,
   ExpedienteRepo,
   JuzgadoRepo,
   NotificacionRepo,
@@ -216,5 +218,21 @@ export class EquipoSupabase implements EquipoRepo {
   }
   async cambiarRol(miembroId: Id, rol: Rol): Promise<void> {
     lanzarSiError(await supabase().from('miembros').update({ rol }).eq('id', miembroId))
+  }
+  async quitarMiembro(miembroId: Id): Promise<void> {
+    lanzarSiError(await supabase().from('miembros').delete().eq('id', miembroId))
+  }
+}
+
+export class AuditoriaSupabase implements AuditoriaRepo {
+  constructor(private readonly org: OrgActual) {}
+  async recientes(limite: number): Promise<RegistroAuditoria[]> {
+    const r = await supabase()
+      .from('auditoria')
+      .select('id, tabla, fila_id, operacion, usuario, antes, despues, en')
+      .eq('org_id', this.org())
+      .order('en', { ascending: false })
+      .limit(limite)
+    return (lanzarSiError(r) as Record<string, unknown>[]).map((f) => deFila<RegistroAuditoria>(f))
   }
 }

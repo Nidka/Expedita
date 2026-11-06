@@ -9,6 +9,7 @@ import { supabaseConfigurado } from './supabase/cliente'
 import {
   AccionesSupabase,
   CambiosSupabase,
+  AuditoriaSupabase,
   ConfigSupabase,
   EquipoSupabase,
   ExpedientesSupabase,
@@ -52,6 +53,7 @@ export async function crearContenedor(): Promise<Contenedor> {
     juzgados: new JuzgadosSupabase(org),
     config: new ConfigSupabase(org),
     equipo: new EquipoSupabase(org),
+    auditoria: new AuditoriaSupabase(org),
     cambios: new CambiosSupabase(org),
     ia: new AsistenteClaude(),
     excel,

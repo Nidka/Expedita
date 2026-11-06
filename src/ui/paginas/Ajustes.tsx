@@ -3,12 +3,14 @@ import { toast } from 'sonner'
 import { DownloadIcon, FileSpreadsheetIcon, Trash2Icon, UserPlusIcon } from '@/ui/iconos'
 import { importarExpedientes } from '@/application/casos-uso/importar'
 import { descargar, generarCSV } from '@/application/exportar'
-import type { Invitacion } from '@/application/ports'
+import type { Invitacion, RegistroAuditoria } from '@/application/ports'
+import { describirCambio } from '@/domain/auditoria'
 import type { Miembro, Rol } from '@/domain/entidades'
 import { importarCuadro, type ResultadoImportacion } from '@/domain/expediente/importacion'
 import { esFechaISO } from '@/domain/shared/fecha'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -27,6 +29,19 @@ function Equipo() {
   const [email, setEmail] = useState('')
   const [nombre, setNombre] = useState('')
   const [rol, setRol] = useState<Rol>('abogado')
+  const [quitando, setQuitando] = useState<Miembro>()
+
+  const quitar = async () => {
+    if (!quitando) return
+    try {
+      await c.equipo.quitarMiembro(quitando.id)
+      toast.success(`${quitando.nombre} ya no tiene acceso al estudio`)
+      setQuitando(undefined)
+      await cargar()
+    } catch (e) {
+      toast.error((e as Error).message)
+    }
+  }
 
   const cargar = async () => {
     const [m, i] = await Promise.all([c.equipo.miembros(), c.equipo.invitaciones()])
@@ -53,6 +68,26 @@ function Equipo() {
 
   return (
     <div className="grid gap-8 lg:grid-cols-2">
+      {quitando && (
+        <Dialog open onOpenChange={(o) => !o && setQuitando(undefined)}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>¿Quitar a {quitando.nombre} del estudio?</DialogTitle>
+              <DialogDescription>
+                Dejará de ver los expedientes de inmediato. Las acciones que registró se conservan. Puedes volver a invitarla cuando quieras.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setQuitando(undefined)} autoFocus>
+                Cancelar
+              </Button>
+              <Button variant="destructive" onClick={quitar}>
+                Quitar acceso
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
       <Card>
         <CardHeader>
           <CardTitle className="text-[1.0625rem] font-semibold">Miembros</CardTitle>
@@ -78,6 +113,11 @@ function Equipo() {
                   <option value="admin">Administrador</option>
                   <option value="abogado">Abogado</option>
                 </SelectNativo>
+                {m.userId !== sesion.miembro.userId && (
+                  <Button variant="ghost" size="icon-sm" aria-label={`Quitar a ${m.nombre} del estudio`} title="Quitar del estudio" onClick={() => setQuitando(m)}>
+                    <Trash2Icon />
+                  </Button>
+                )}
               </li>
             ))}
           </ul>
@@ -506,6 +546,49 @@ function Exportar() {
   )
 }
 
+/** RF-39: historial de cambios del estudio, en frases legibles. */
+function Actividad() {
+  const c = useContenedor()
+  const [registros, setRegistros] = useState<RegistroAuditoria[] | null>(null)
+  const [miembros, setMiembros] = useState<Miembro[]>([])
+  const [error, setError] = useState<string>()
+
+  useEffect(() => {
+    Promise.all([c.auditoria.recientes(150), c.equipo.miembros()])
+      .then(([r, m]) => {
+        setRegistros(r)
+        setMiembros(m)
+      })
+      .catch((e: Error) => setError(e.message))
+  }, [c])
+
+  const nombre = (u?: string) => miembros.find((m) => m.userId === u)?.nombre ?? (u ? 'Ex-miembro' : 'Sistema')
+  const hora = new Intl.DateTimeFormat('es-PE', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'America/Lima' })
+
+  if (error) return <p className="text-sm text-destructive">{error}</p>
+  if (!registros) return <p className="text-sm text-muted-foreground">Cargando actividad…</p>
+  if (!registros.length) return <EstadoVacio pose="leyendo" titulo="Aún no hay actividad registrada" />
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-[1.0625rem] font-semibold">Actividad reciente</CardTitle>
+        <CardDescription>Los últimos 150 cambios: quién hizo qué y cuándo. Solo lo ven los administradores.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ol className="divide-y divide-separator">
+          {registros.map((r) => (
+            <li key={r.id} className="grid gap-0.5 py-3 sm:grid-cols-[9rem_10rem_1fr] sm:gap-4">
+              <span className="text-xs text-muted-foreground tabular sm:text-sm">{hora.format(new Date(r.en))}</span>
+              <span className="truncate text-sm font-medium">{nombre(r.usuario)}</span>
+              <span className="text-sm">{describirCambio(r)}</span>
+            </li>
+          ))}
+        </ol>
+      </CardContent>
+    </Card>
+  )
+}
+
 export function Ajustes() {
   const { sesion } = useDatos()
   if (sesion.miembro.rol !== 'admin') return <EstadoVacio titulo="Solo los administradores pueden cambiar los ajustes" />
@@ -518,6 +601,7 @@ export function Ajustes() {
           <TabsTrigger value="plazos">Plazos</TabsTrigger>
           <TabsTrigger value="importar">Importar</TabsTrigger>
           <TabsTrigger value="exportar">Exportar</TabsTrigger>
+          <TabsTrigger value="actividad">Actividad</TabsTrigger>
         </TabsList>
         <TabsContent value="equipo" className="mt-4">
           <Equipo />
@@ -530,6 +614,9 @@ export function Ajustes() {
         </TabsContent>
         <TabsContent value="exportar" className="mt-4">
           <Exportar />
+        </TabsContent>
+        <TabsContent value="actividad" className="mt-4">
+          <Actividad />
         </TabsContent>
       </Tabs>
     </>

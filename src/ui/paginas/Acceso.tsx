@@ -121,6 +121,7 @@ export function IniciarSesion({ alEntrar }: { alEntrar: () => void }) {
   const [cargando, setCargando] = useState(false)
   const [error, setError] = useState<string>()
   const [espera, setEspera] = useState(0)
+  const [motivo, setMotivo] = useState<'acceso' | 'recuperar'>('acceso')
 
   useEffect(() => {
     if (espera <= 0) return
@@ -140,7 +141,23 @@ export function IniciarSesion({ alEntrar }: { alEntrar: () => void }) {
     setPaso('metodo')
   }
 
+  const recuperar = async () => {
+    setCargando(true)
+    setError(undefined)
+    try {
+      await c.auth.recuperarClave(email.trim())
+      setMotivo('recuperar')
+      setPaso('enviado')
+      setEspera(60)
+    } catch (e) {
+      setError(mensaje(e))
+    } finally {
+      setCargando(false)
+    }
+  }
+
   const enviarEnlace = async () => {
+    setMotivo('acceso')
     setCargando(true)
     setError(undefined)
     try {
@@ -223,14 +240,15 @@ export function IniciarSesion({ alEntrar }: { alEntrar: () => void }) {
           </span>
           <h1 className="text-[1.75rem] leading-tight font-semibold tracking-tight">Revisa tu correo</h1>
           <p className="mt-3 text-[0.9375rem] leading-relaxed text-muted-foreground">
-            Enviamos un enlace de acceso a <span className="font-medium text-foreground">{email}</span>. Ábrelo en este dispositivo para entrar.
+            {motivo === 'recuperar' ? 'Enviamos un enlace para crear una contraseña nueva a ' : 'Enviamos un enlace de acceso a '}
+            <span className="font-medium text-foreground">{email}</span>. Ábrelo en este dispositivo.
           </p>
           <p className="mt-2 text-sm text-muted-foreground">Si no lo ves en unos minutos, revisa la carpeta de spam.</p>
           <div className="mt-8 flex flex-col items-center gap-3">
             <button
               type="button"
               disabled={espera > 0 || cargando}
-              onClick={() => void enviarEnlace()}
+              onClick={() => void (motivo === 'recuperar' ? recuperar() : enviarEnlace())}
               className="text-[0.9375rem] text-primary outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/25 disabled:text-muted-foreground disabled:no-underline"
             >
               {espera > 0 ? `Reenviar enlace en ${espera} s` : 'Reenviar enlace'}
@@ -390,7 +408,8 @@ export function IniciarSesion({ alEntrar }: { alEntrar: () => void }) {
               </button>
             }
           />
-          <div className="mt-8 text-center">
+          <div className="mt-8 flex flex-col items-center gap-3 text-center">
+            <Enlace onClick={() => void recuperar()}>{cargando ? 'Enviando…' : '¿Olvidaste tu contraseña?'}</Enlace>
             <Enlace
               onClick={() => {
                 setError(undefined)

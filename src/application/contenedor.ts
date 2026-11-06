@@ -1,5 +1,6 @@
 import type {
   AccionRepo,
+  AuditoriaRepo,
   AsistenteIA,
   AudienciaRepo,
   AuthPort,
@@ -25,6 +26,7 @@ export interface Contenedor {
   juzgados: JuzgadoRepo
   config: ConfigRepo
   equipo: EquipoRepo
+  auditoria: AuditoriaRepo
   cambios: CanalCambios
   ia: AsistenteIA
   excel: LectorExcel

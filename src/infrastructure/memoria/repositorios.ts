@@ -207,6 +207,7 @@ class EquipoMemoria implements EquipoRepo {
     this.invs = this.invs.filter((i) => i.id !== id)
   }
   async cambiarRol() {}
+  async quitarMiembro() {}
 }
 
 class AuthDemo implements AuthPort {
@@ -227,6 +228,7 @@ class AuthDemo implements AuthPort {
   }
   async crearEstudio() {}
   async cambiarClave() {}
+  async recuperarClave() {}
   async registrar() {
     return true
   }
@@ -264,6 +266,7 @@ export function contenedorMemoria(opciones: { persistir?: boolean; semilla?: (c:
     juzgados: new JuzgadosMemoria(almacen),
     config: new ConfigMemoria(almacen),
     equipo: new EquipoMemoria(),
+    auditoria: { recientes: async () => [] },
     cambios: { suscribir: (_t, cb) => bus.escuchar(cb) } satisfies CanalCambios,
     ia: new IADemo(),
     excel: {

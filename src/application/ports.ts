@@ -75,6 +75,24 @@ export interface EquipoRepo {
   invitar(datos: Omit<Invitacion, 'id'>): Promise<void>
   quitarInvitacion(id: Id): Promise<void>
   cambiarRol(miembroId: Id, rol: Rol): Promise<void>
+  /** Quita a una persona del estudio (su cuenta sigue existiendo, pero ya no ve nada). */
+  quitarMiembro(miembroId: Id): Promise<void>
+}
+
+export interface RegistroAuditoria {
+  id: number
+  tabla: string
+  filaId: string
+  operacion: 'INSERT' | 'UPDATE' | 'DELETE'
+  usuario?: Id
+  antes?: Record<string, unknown>
+  despues?: Record<string, unknown>
+  en: string
+}
+
+/** Historial de cambios del estudio (solo administradores). */
+export interface AuditoriaRepo {
+  recientes(limite: number): Promise<RegistroAuditoria[]>
 }
 
 /** Cambios en vivo hechos por otros usuarios (RNF-09). */
@@ -101,6 +119,8 @@ export interface AuthPort {
   registrar(email: string, password: string): Promise<boolean>
   /** Define o cambia la contraseña del usuario actual (para no depender del enlace por correo). */
   cambiarClave(nueva: string): Promise<void>
+  /** Envía un correo para crear una contraseña nueva (abre «Mi cuenta» al volver). */
+  recuperarClave(email: string): Promise<void>
   /** Crea el estudio y deja al usuario actual como administrador. */
   crearEstudio(nombreEstudio: string, nombreUsuario: string): Promise<void>
 }
