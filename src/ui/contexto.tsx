@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { indiceUltimaAccion, type IndiceUltimaAccion } from '@/domain/agenda/que-toca-hoy'
 import type { Contenedor } from '@/application/contenedor'
 import type { Sesion } from '@/application/ports'
 import type { Accion, Audiencia, ConfigOrg, Expediente, Juzgado, Notificacion, Visita } from '@/domain/entidades'
@@ -33,12 +34,14 @@ export interface Datos {
   calendario: CalendarioHabil
   hoy: string
   expPorId: Map<string, Expediente>
+  /** Fecha de la última acción por expediente (se calcula una vez por carga) */
+  ultimaAccion: IndiceUltimaAccion
   recargar: (tabla?: string) => Promise<void>
 }
 
 const DatosCtx = createContext<Datos | null>(null)
 
-type Tablas = Omit<Datos, 'cargando' | 'sesion' | 'calendario' | 'hoy' | 'expPorId' | 'recargar'>
+type Tablas = Omit<Datos, 'cargando' | 'sesion' | 'calendario' | 'hoy' | 'expPorId' | 'ultimaAccion' | 'recargar'>
 
 const VACIO: Tablas = {
   expedientes: [],
@@ -101,6 +104,7 @@ export function ProveedorDatos({ sesion, children }: { sesion: Sesion; children:
       calendario,
       hoy: c.reloj.hoy(),
       expPorId: new Map(tablas.expedientes.map((e) => [e.id, e])),
+      ultimaAccion: indiceUltimaAccion(tablas.acciones),
       recargar,
     }
   }, [tablas, cargando, sesion, c, recargar])

@@ -26,6 +26,8 @@ function coincide(e: Expediente, q: string) {
     .includes(q)
 }
 
+const TANDA = 100
+
 export function Expedientes() {
   const d = useDatos()
   const { expedientes } = d
@@ -52,6 +54,13 @@ export function Expedientes() {
   const lista = base
     .filter((e) => (busqueda ? coincide(e, busqueda) : !carpeta || carpetaDe(e) === carpeta))
     .sort((a, b) => (a.codigo ?? '~').localeCompare(b.codigo ?? '~', 'es', { numeric: true }))
+
+  // Con cientos de expedientes se pintan de a 100: la búsqueda responde al instante.
+  // Al cambiar cualquier filtro se vuelve a empezar desde los primeros 100.
+  const claveFiltro = `${busqueda}|${carpeta}|${estado}|${distrito}`
+  const [mostrar, setMostrar] = useState({ clave: claveFiltro, n: TANDA })
+  const limite = mostrar.clave === claveFiltro ? mostrar.n : TANDA
+  const visibles = lista.slice(0, limite)
 
   const fijar = (cambios: Record<string, string | null>) => {
     const p = new URLSearchParams(params)
@@ -147,8 +156,8 @@ export function Expedientes() {
             </EstadoVacio>
           ) : (
             <Lista>
-              {lista.map((e) => {
-                const mov = estadoMovimiento(e, d.acciones, ctx)
+              {visibles.map((e) => {
+                const mov = estadoMovimiento(e, d.ultimaAccion, ctx)
                 return (
                   <Fila
                     key={e.id}
@@ -174,6 +183,16 @@ export function Expedientes() {
                 )
               })}
             </Lista>
+          )}
+          {lista.length > limite && (
+            <div className="mt-4 flex items-center justify-center gap-3">
+              <p className="text-sm text-muted-foreground tabular">
+                {limite} de {lista.length}
+              </p>
+              <Button variant="outline" onClick={() => setMostrar({ clave: claveFiltro, n: limite + TANDA })}>
+                Mostrar {Math.min(TANDA, lista.length - limite)} más
+              </Button>
+            </div>
           )}
         </section>
       </div>

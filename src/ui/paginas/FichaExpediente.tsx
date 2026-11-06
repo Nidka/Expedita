@@ -230,7 +230,7 @@ export function FichaExpediente() {
     return d.cargando ? null : <EstadoVacio titulo="No se encontró el expediente" />
   }
 
-  const mov = estadoMovimiento(exp, d.acciones, { hoy: d.hoy, calendario: d.calendario, diasSinMovimiento: d.config.diasSinMovimiento })
+  const mov = estadoMovimiento(exp, d.ultimaAccion, { hoy: d.hoy, calendario: d.calendario, diasSinMovimiento: d.config.diasSinMovimiento })
   const sugerencia = exp.etapa ? SUGERENCIA_POR_ETAPA[exp.etapa] : undefined
   const archivar = async () => {
     const nuevo = exp.estado === 'activo' ? 'archivado' : 'activo'

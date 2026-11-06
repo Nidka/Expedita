@@ -1,7 +1,7 @@
 import type { Accion, Audiencia, Expediente, Id, Notificacion, Visita } from '../entidades'
 import type { CalendarioHabil } from '../plazos/calendario-habil'
 import { VIAS } from '../plazos/catalogo'
-import { diferenciaDias, type FechaISO } from '../shared/fecha'
+import { diferenciaDias, sumarDias, type FechaISO } from '../shared/fecha'
 
 export const ABANDONO_AVISO_DIAS = 90
 export const ABANDONO_RIESGO_DIAS = 120
@@ -50,10 +50,25 @@ function severidadPorHabiles(restantes: number): Severidad {
   return 'proximo'
 }
 
+/** Fecha de la última acción de cada expediente, calculada una sola vez (evita recorrer todas las acciones por expediente). */
+export type IndiceUltimaAccion = ReadonlyMap<Id, FechaISO>
+
+export function indiceUltimaAccion(acciones: readonly Accion[]): IndiceUltimaAccion {
+  const m = new Map<Id, FechaISO>()
+  for (const a of acciones) {
+    const previa = m.get(a.expedienteId)
+    if (!previa || a.fecha > previa) m.set(a.expedienteId, a.fecha)
+  }
+  return m
+}
+
 /** Fecha del último movimiento conocido: última acción o último acto del cuadro. */
-export function ultimoMovimiento(exp: Expediente, acciones: readonly Accion[]): FechaISO | undefined {
+export function ultimoMovimiento(exp: Expediente, acciones: readonly Accion[] | IndiceUltimaAccion): FechaISO | undefined {
   let ultima = exp.fechaUltimoActo
-  for (const a of acciones) if (a.expedienteId === exp.id && (!ultima || a.fecha > ultima)) ultima = a.fecha
+  if (acciones instanceof Map) {
+    const f = acciones.get(exp.id)
+    if (f && (!ultima || f > ultima)) ultima = f
+  } else for (const a of acciones as readonly Accion[]) if (a.expedienteId === exp.id && (!ultima || a.fecha > ultima)) ultima = a.fecha
   return ultima ?? exp.creadoEn?.slice(0, 10)
 }
 
@@ -65,7 +80,7 @@ export interface EstadoMovimiento {
 
 export function estadoMovimiento(
   exp: Expediente,
-  acciones: readonly Accion[],
+  acciones: readonly Accion[] | IndiceUltimaAccion,
   ctx: Contexto,
 ): EstadoMovimiento | undefined {
   if (exp.estado !== 'activo') return undefined
@@ -111,10 +126,10 @@ export function calcularPendientes(s: Snapshot, ctx: Contexto): { pendientes: Pe
     })
   }
 
+  // Las fechas ISO se comparan como texto: más barato que convertirlas a Date en miles de acciones
+  const limite7 = sumarDias(hoy, 7)
   for (const a of s.acciones) {
-    if (!a.proximaFecha || a.proximaCumplida || !a.proxima) continue
-    const naturales = diferenciaDias(hoy, a.proximaFecha)
-    if (naturales > 7) continue
+    if (!a.proximaFecha || a.proximaCumplida || !a.proxima || a.proximaFecha > limite7) continue
     const restantes = cal.habilesEntre(hoy, a.proximaFecha)
     const sev = severidadPorHabiles(restantes)
     if (sev === 'vencido') plazosVencidos++
@@ -163,8 +178,9 @@ export function calcularPendientes(s: Snapshot, ctx: Contexto): { pendientes: Pe
   }
 
   let sinMovimiento = 0
+  const ultimas = indiceUltimaAccion(s.acciones)
   for (const e of s.expedientes) {
-    const m = estadoMovimiento(e, s.acciones, ctx)
+    const m = estadoMovimiento(e, ultimas, ctx)
     if (!m) continue
     if (m.sinMovimiento) sinMovimiento++
     if (m.abandono) {

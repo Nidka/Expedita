@@ -4,6 +4,8 @@ import type { Feriado } from './feriados'
 /** Calendario judicial: sábados, domingos, feriados y días inhábiles configurados no cuentan. */
 export class CalendarioHabil {
   private readonly inhabiles: Map<FechaISO, string>
+  /** Resultados ya calculados: «hoy» se repite en casi todas las consultas */
+  private readonly memo = new Map<string, number>()
 
   constructor(feriados: readonly Feriado[], diasInhabilesExtra: readonly FechaISO[] = []) {
     this.inhabiles = new Map(feriados.map((f) => [f.fecha, f.nombre]))
@@ -34,6 +36,10 @@ export class CalendarioHabil {
   /** Días hábiles entre `desde` (excluido) y `hasta` (incluido). Negativo si `hasta` es anterior. */
   habilesEntre(desde: FechaISO, hasta: FechaISO): number {
     if (desde === hasta) return 0
+    const clave = desde + hasta
+    const previo = this.memo.get(clave)
+    if (previo !== undefined) return previo
+    if (this.memo.size > 20000) this.memo.clear()
     const signo = hasta > desde ? 1 : -1
     let fecha = desde
     let n = 0
@@ -41,6 +47,7 @@ export class CalendarioHabil {
       fecha = sumarDias(fecha, signo)
       if (this.esHabil(fecha)) n++
     }
+    this.memo.set(clave, n * signo)
     return n * signo
   }
 }

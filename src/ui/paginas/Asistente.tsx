@@ -77,7 +77,7 @@ function Sugerencias() {
             etiqueta: etiquetaExp(e),
             via: VIAS[e.via].nombre,
             etapa: e.etapa,
-            diasSinMovimiento: estadoMovimiento(e, d.acciones, ctx)?.dias,
+            diasSinMovimiento: estadoMovimiento(e, d.ultimaAccion, ctx)?.dias,
             proximoPlazo: prox ? `${prox.proxima} (${prox.proximaFecha})` : undefined,
             alertas: pendientes.filter((p) => p.expedienteId === e.id).map((p) => `${p.titulo}: ${p.detalle}`),
             ultimasAcciones: acciones.slice(0, 6).map((a) => `${a.fecha} ${a.tipo}: ${a.descripcion}`),

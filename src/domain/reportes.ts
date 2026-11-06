@@ -64,8 +64,11 @@ export function calcularReporte(
   // Semanas completas del periodo, aunque no tengan acciones (el cero también informa)
   const porSemanaMapa = new Map<FechaISO, number>()
   for (let s = lunesDe(f.desde); s <= f.hasta; s = sumarDias(s, 7)) porSemanaMapa.set(s, 0)
+  // Muchas acciones comparten fecha: el lunes de cada fecha se calcula una sola vez
+  const lunes = new Map<FechaISO, FechaISO>()
   for (const a of acciones) {
-    const s = lunesDe(a.fecha)
+    let s = lunes.get(a.fecha)
+    if (!s) lunes.set(a.fecha, (s = lunesDe(a.fecha)))
     porSemanaMapa.set(s, (porSemanaMapa.get(s) ?? 0) + 1)
   }
 
