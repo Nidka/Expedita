@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { esAdmin } from '@/domain/permisos'
 import { CalendarDaysIcon, CopyIcon } from '@/ui/iconos'
 import { useContenedor, useDatos } from '../contexto'
+import { marcarPaso } from '../guia'
 
 /** Clave nueva de 256 bits en hexadecimal (64 caracteres). */
 function claveNueva(): string {
@@ -21,10 +22,10 @@ const PASOS: [string, string[]][] = [
 ]
 
 /** RF-30: plazos, audiencias y próximas acciones en el calendario de cada abogado, sin conectar cuentas. */
-export function SuscribirCalendario() {
+export function SuscribirCalendario({ abrirAlInicio = false }: { abrirAlInicio?: boolean }) {
   const c = useContenedor()
   const d = useDatos()
-  const [abierto, setAbierto] = useState(false)
+  const [abierto, setAbierto] = useState(abrirAlInicio)
   const [cambiando, setCambiando] = useState(false)
   const token = d.config.tokenCalendario
   const url = token ? `${location.origin}/calendario/${token}.ics` : ''
@@ -32,7 +33,8 @@ export function SuscribirCalendario() {
   const copiar = async () => {
     try {
       await navigator.clipboard.writeText(url)
-      toast.success('Dirección copiada')
+      marcarPaso(d.sesion.miembro.orgId, d.sesion.miembro.userId, 'calendario')
+      toast.success('Dirección copiada', { description: 'Ahora pégala en tu calendario. Los pasos están aquí abajo.' })
     } catch {
       toast.error('No se pudo copiar')
     }

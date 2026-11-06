@@ -166,6 +166,7 @@ export function Asistente() {
   return (
     <>
       <EncabezadoPagina
+        ayuda="asistente"
         titulo="Asistente"
         descripcion="Claude propone; un abogado revisa y decide. Nada se presenta ni se guarda solo."
       />

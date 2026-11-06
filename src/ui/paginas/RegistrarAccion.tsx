@@ -96,6 +96,7 @@ export function RegistrarAccion() {
   return (
     <>
       <EncabezadoPagina
+        ayuda="registrar"
         titulo="Registrar acción"
         descripcion={notificacion ? `Atiende la notificación «${notificacion.asunto}»` : 'Escritos, visitas, llamadas y revisiones del CEJ'}
       />

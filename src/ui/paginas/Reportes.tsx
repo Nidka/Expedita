@@ -61,6 +61,7 @@ export function Reportes() {
   return (
     <>
       <EncabezadoPagina
+        ayuda="reportes"
         titulo="Reportes"
         descripcion={`Del ${fecha(rango.desde)} al ${fecha(rango.hasta)}`}
         acciones={

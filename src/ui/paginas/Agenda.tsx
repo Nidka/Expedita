@@ -341,11 +341,12 @@ export function Agenda() {
   return (
     <>
       <EncabezadoPagina
+        ayuda="agenda"
         titulo="Agenda"
         descripcion="Plazos, audiencias y visitas. Los días inhábiles no cuentan para el cómputo."
         acciones={
           <>
-            <SuscribirCalendario />
+            <SuscribirCalendario abrirAlInicio={params.get('suscribir') === '1'} />
             <Button variant="outline" onClick={exportar}>
               <DownloadIcon aria-hidden /> Exportar .ics
             </Button>

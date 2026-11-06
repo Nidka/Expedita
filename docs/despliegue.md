@@ -5,10 +5,44 @@ Tiempo estimado: 45 a 60 minutos la primera vez.
 
 | Pieza | Servicio | Costo |
 |---|---|---|
-| Página web | Cloudflare Pages | Gratis (permite uso comercial) |
+| Página web y calendario | Cloudflare Workers | Gratis (permite uso comercial) |
 | Base de datos, acceso y funciones | Supabase | Gratis (500 MB) |
 | Asistente de IA | API de Claude (Anthropic) | Pago por uso, con límite de gasto |
 | Respaldo nocturno | GitHub Actions | Gratis en repositorio privado (2,000 min/mes) |
+
+---
+
+## Lista de control (estado al 5 de noviembre de 2026)
+
+**Ya está hecho**
+
+- [x] Proyecto de Supabase creado y todas las migraciones de `supabase/migrations/` aplicadas.
+- [x] Web publicada en Cloudflare Workers (https://expedita.n00345487.workers.dev). Cada `git push` la vuelve a publicar.
+- [x] Acceso con contraseña, sin correo de confirmación (paso 7).
+- [x] Calendario por suscripción (`/calendario/<clave>.ics`) atendido por el worker.
+
+**Pendiente: tareas técnicas (las hace quien administra el sistema, una sola vez)**
+
+1. [ ] **Repositorio privado** (paso 1). Es lo más urgente: el repositorio hoy es público.
+2. [ ] **Cambiar la contraseña de la base de datos**: Supabase → **Project Settings → Database → Reset database password**.
+   Guárdala en un gestor de contraseñas; no la pegues en chats ni en archivos del repositorio.
+3. [ ] **Respaldo nocturno** (paso 6): dos secretos en GitHub y una prueba manual.
+4. [ ] **IA** (paso 3), cuando se quiera activar el asistente.
+
+**Pendiente: dentro de la aplicación (lo guía Expedita)**
+
+Al entrar por primera vez, Expedita muestra un recorrido de bienvenida y, en **Hoy**, la tarjeta
+**Primeros pasos** con el siguiente paso. La guía completa está en **Ayuda → Primeros pasos** y cada paso
+se marca solo al completarlo:
+
+1. Crear el estudio y tu contraseña.
+2. Importar el cuadro de Excel (**Ajustes → Importar**).
+3. Invitar al equipo (**Ajustes → Equipo**).
+4. Revisar días inhábiles (**Ajustes → Plazos**).
+5. Poner el membrete (**Escritos → Membrete**).
+6. Opcionales: avisos del SINOE, recordatorio diario, Drive y calendario.
+
+Cada pantalla tiene un botón **?** junto al título que explica cómo funciona.
 
 ---
 
@@ -49,27 +83,29 @@ Tiempo estimado: 45 a 60 minutos la primera vez.
    ```
    Opcional: `npx supabase secrets set MODELO_IA=claude-haiku-5-5` para gastar menos (por defecto usa Claude Opus 5.5).
 
-## 4. Cloudflare Pages (10 min)
+## 4. Cloudflare Workers (10 min)
 
-1. Entra a https://dash.cloudflare.com → **Workers & Pages → Create → Pages → Connect to Git** → elige `Nidka/Expedita`.
+1. Entra a https://dash.cloudflare.com → **Workers & Pages → Create → Import a repository** → elige `Nidka/Expedita`.
 2. Configuración de compilación:
    - Framework preset: **None**
    - Build command: `npm run build`
-   - Build output directory: `dist`
+   - Deploy command: `npx wrangler deploy` (lee `wrangler.jsonc`: publica `dist/` y el worker del calendario)
 3. **Environment variables** (Production):
    - `VITE_SUPABASE_URL` = Project URL del paso 2
    - `VITE_SUPABASE_ANON_KEY` = anon public del paso 2
    - `NODE_VERSION` = `22`
-4. **Save and Deploy**. Al terminar te da la dirección (`https://expedita.pages.dev` o similar).
+4. **Save and Deploy**. Al terminar te da la dirección (`https://expedita.<cuenta>.workers.dev`).
    Vuelve al paso 2.4 y pon esa dirección como *Site URL*.
 5. Cada `git push` a `main` vuelve a publicar la página automáticamente.
+6. Si algún día cambias de proyecto de Supabase, actualiza también `SUPABASE_URL` y `SUPABASE_ANON_KEY` en `wrangler.jsonc`
+   (los usa el calendario por suscripción; son los mismos valores públicos del navegador).
 
 ## 5. Primer ingreso y equipo (5 min)
 
-1. Abre la dirección de Cloudflare → escribe tu correo → **Enviarme un enlace** → abre el correo.
-2. Como eres la primera persona, la app te pide crear el estudio: serás **administradora**.
+1. Abre la dirección de Cloudflare → escribe tu correo → **Primera vez: crear mi contraseña** → **Crear cuenta y entrar**.
+2. Como eres la primera persona, la app te pide crear el estudio: serás **administradora**. Luego sigue la guía **Primeros pasos**.
 3. **Ajustes → Equipo → Invitar**: agrega a las otras 3 personas (correo, nombre y rol).
-   Ellas entran con su correo y quedan dentro del estudio automáticamente.
+   Avísales: entran con ese correo, eligen **Primera vez: crear mi contraseña** y quedan dentro del estudio automáticamente.
 4. **Ajustes → Importar**: sube los dos Excel (`CUADRO DE EXPEDIEN.xlsx` como principal y el ACTUALIZADO como segundo),
    hoja **CASOS LABORALES** → **Revisar antes de importar** → **Importar**.
 
@@ -92,7 +128,7 @@ pg_restore --no-owner --dbname '<SUPABASE_DB_URL>' respaldo.dump
 
 ## Opcional
 
-- **Dominio propio** (`expedita.pe`): se compra en punto.pe (~S/ 100 al año) y se conecta en Cloudflare Pages → Custom domains.
+- **Dominio propio** (`expedita.pe`): se compra en punto.pe (~S/ 100 al año) y se conecta en Cloudflare → el worker `expedita` → Settings → Domains & Routes.
 - **Correos en español**: Supabase → Authentication → Email Templates.
 
 ## 7. Acceso sin correos (recomendado)

@@ -373,7 +373,7 @@ function Programadas() {
 export function Visitas() {
   return (
     <>
-      <EncabezadoPagina titulo="Visitas a juzgados" descripcion="Agrupa los expedientes por juzgado, programa la ruta y registra lo que encuentres." />
+      <EncabezadoPagina ayuda="visitas" titulo="Visitas a juzgados" descripcion="Agrupa los expedientes por juzgado, programa la ruta y registra lo que encuentres." />
       <Tabs defaultValue="planificar">
         <TabsList>
           <TabsTrigger value="planificar">Planificar</TabsTrigger>

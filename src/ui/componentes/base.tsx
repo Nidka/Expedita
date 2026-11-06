@@ -1,4 +1,6 @@
 import { useId, type ComponentProps, type ReactNode, type SelectHTMLAttributes } from 'react'
+import { BotonAyuda } from './Ayuda'
+import type { TemaId } from '../ayuda/temas'
 import { Link } from 'react-router-dom'
 import { ChevronDownIcon, ChevronRightIcon } from '@/ui/iconos'
 import type { Severidad } from '@/domain/agenda/que-toca-hoy'
@@ -74,17 +76,23 @@ export function EncabezadoPagina({
   descripcion,
   acciones,
   antetitulo,
+  ayuda,
 }: {
   titulo: ReactNode
   descripcion?: ReactNode
   acciones?: ReactNode
   antetitulo?: ReactNode
+  /** Tema de ayuda: muestra el botón «?» junto al título */
+  ayuda?: TemaId
 }) {
   return (
     <header className="mb-8 flex flex-col gap-5 sm:mb-12 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
         {antetitulo && <div className="mb-1 text-sm text-muted-foreground">{antetitulo}</div>}
-        <h1 className="text-[1.75rem] leading-tight font-bold sm:text-[2rem]">{titulo}</h1>
+        <div className="flex items-center gap-1.5">
+          <h1 className="text-[1.75rem] leading-tight font-bold sm:text-[2rem]">{titulo}</h1>
+          {ayuda && <BotonAyuda tema={ayuda} className="mt-1" />}
+        </div>
         {descripcion && <div className="mt-1.5 text-[0.9375rem] text-muted-foreground">{descripcion}</div>}
       </div>
       {acciones && <div className="flex flex-wrap gap-2">{acciones}</div>}

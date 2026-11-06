@@ -279,6 +279,7 @@ export function Bandeja() {
   return (
     <>
       <EncabezadoPagina
+        ayuda="notificaciones"
         titulo="Notificaciones"
         descripcion="Avisos del SINOE y de los juzgados, con el plazo calculado en días hábiles."
         acciones={

@@ -48,7 +48,7 @@ export function Cuenta() {
 
   return (
     <>
-      <EncabezadoPagina titulo="Mi cuenta" descripcion={`${sesion.miembro.nombre} · ${sesion.miembro.rol === 'admin' ? 'Administrador' : 'Abogado'} · ${sesion.orgNombre}`} />
+      <EncabezadoPagina ayuda="cuenta" titulo="Mi cuenta" descripcion={`${sesion.miembro.nombre} · ${sesion.miembro.rol === 'admin' ? 'Administrador' : 'Abogado'} · ${sesion.orgNombre}`} />
       {recuperando && (
         <p role="status" className="mb-6 max-w-xl rounded-xl bg-secondary px-5 py-4 text-sm text-secondary-foreground">
           <strong className="font-semibold">Crea tu nueva contraseña.</strong> Entraste con el enlace de recuperación; guárdala abajo para usarla desde ahora.

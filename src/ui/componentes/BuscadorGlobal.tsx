@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BellPlusIcon, FolderPlusIcon, PenLineIcon } from '@/ui/iconos'
+import { BellPlusIcon, FolderPlusIcon, ListChecksIcon, PenLineIcon, QuestionIcon } from '@/ui/iconos'
+import { TEMAS } from '../ayuda/temas'
 import { CommandDialog, Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from '@/components/ui/command'
 import { useDatos } from '../contexto'
 import { NAVEGACION } from '../layout/navegacion'
@@ -56,6 +57,17 @@ export function BuscadorGlobal({ abierto, setAbierto }: { abierto: boolean; setA
             {NAVEGACION.filter((n) => !n.soloAdmin || sesion.miembro.rol === 'admin').map(({ a, texto, icono: Icono }) => (
               <CommandItem key={a} value={`ir ${texto}`} onSelect={() => ir(a)}>
                 <Icono aria-hidden /> {texto}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+          <CommandSeparator />
+          <CommandGroup heading="Ayuda">
+            <CommandItem value="primeros pasos guía configurar" onSelect={() => ir('/primeros-pasos')}>
+              <ListChecksIcon aria-hidden /> Primeros pasos
+            </CommandItem>
+            {TEMAS.map((t) => (
+              <CommandItem key={t.id} value={`ayuda ${t.titulo} ${t.resumen}`} onSelect={() => ir(`/ayuda#${t.id}`)}>
+                <QuestionIcon aria-hidden /> {t.titulo}
               </CommandItem>
             ))}
           </CommandGroup>

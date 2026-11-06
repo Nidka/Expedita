@@ -22,6 +22,7 @@ import { cn } from '@/lib/utils'
 import { useContenedor, useDatos } from '../contexto'
 import { BotonEnlace } from '../componentes/base'
 import { BuscadorGlobal } from '../componentes/BuscadorGlobal'
+import { Bienvenida } from '../componentes/Bienvenida'
 import { Logo, Michi } from '../componentes/marca'
 import { NAVEGACION, type ItemNavegacion } from './navegacion'
 import { ProveedorSinoe } from '../sinoe'
@@ -296,6 +297,7 @@ export function Shell() {
       <BarraPestanas abrirMas={() => setMas(true)} />
       <HojaMas abierta={mas} cerrar={() => setMas(false)} />
       <BuscadorGlobal abierto={buscar} setAbierto={setBuscar} />
+      <Bienvenida />
     </SidebarProvider>
     </ProveedorSinoe>
   )

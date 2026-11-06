@@ -241,6 +241,7 @@ export function FichaExpediente() {
   return (
     <>
       <EncabezadoPagina
+        ayuda="expedientes"
         titulo={exp.codigo ? `${exp.codigo}` : 'Expediente'}
         descripcion={
           <>

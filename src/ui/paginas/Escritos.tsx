@@ -32,7 +32,7 @@ export function Escritos() {
   const [texto, setTexto] = useState(estadoNav?.texto ?? '')
   const [editado, setEditado] = useState(Boolean(estadoNav?.texto))
   const [editor, setEditor] = useState<Partial<ModeloEscrito> | null>(null)
-  const [membreteAbierto, setMembreteAbierto] = useState(false)
+  const [membreteAbierto, setMembreteAbierto] = useState(params.get('membrete') === '1')
   const area = useRef<HTMLTextAreaElement>(null)
 
   const cargar = useCallback(async () => {
@@ -102,6 +102,7 @@ export function Escritos() {
   return (
     <>
       <EncabezadoPagina
+        ayuda="escritos"
         titulo="Escritos"
         descripcion="Elige un modelo, revisa el texto y descárgalo en Word con el membrete del estudio."
         acciones={

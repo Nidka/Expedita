@@ -1,4 +1,9 @@
+import { ArrowRightIcon } from '@/ui/iconos'
 import { useMemo, useState } from 'react'
+import { TEXTO_PASO } from '../ayuda/pasos'
+import { BotonAyuda } from '../componentes/Ayuda'
+import { useGuia } from '../guia'
+import { BarraProgreso } from './PrimerosPasos'
 import { Link } from 'react-router-dom'
 import { calcularPendientes, type Pendiente } from '@/domain/agenda/que-toca-hoy'
 import { Button } from '@/components/ui/button'
@@ -114,6 +119,7 @@ export function Inicio() {
           <p className="text-sm text-muted-foreground">{fechaLarga(d.hoy)}</p>
           <h1 className="mt-1 text-[1.875rem] leading-tight font-bold tracking-tight sm:text-[2.25rem]">
             {saludo()}, {d.sesion.miembro.nombre.split(' ')[0]}
+            <BotonAyuda tema="hoy" className="ml-1.5 align-middle" />
           </h1>
           <p className="mt-2 max-w-lg text-[0.9375rem] text-muted-foreground" aria-live="polite">
             {estado.texto}
@@ -124,7 +130,7 @@ export function Inicio() {
         </span>
       </header>
 
-      <AvisoClave />
+      <GuiaInicio />
 
       {/* Resumen en una sola banda */}
       <nav
@@ -277,6 +283,43 @@ export function Inicio() {
 }
 
 /** Sugerencia (descartable) de crear una contraseña: el correo gratuito tiene un límite de envíos por hora. */
+/** Tarjeta de la guía en Hoy: progreso y el siguiente paso, hasta completar lo obligatorio. */
+function GuiaInicio() {
+  const g = useGuia()
+  if (g.completo || g.oculta || !g.siguiente) return <AvisoClave />
+  const t = TEXTO_PASO[g.siguiente.id]
+  return (
+    <section aria-label="Primeros pasos" className="mb-8 grid animate-entrar gap-4 rounded-xl bg-card p-5 shadow-[0_0_0_1px_var(--border)] sm:grid-cols-[1fr_auto] sm:items-center sm:gap-6 sm:p-6">
+      <div className="grid min-w-0 gap-3">
+        <div className="flex items-baseline justify-between gap-3">
+          <p className="text-sm font-medium text-muted-foreground">
+            Primeros pasos · <span className="tabular">{g.hechos} de {g.total}</span>
+          </p>
+          <button type="button" onClick={() => g.ocultar()} className="text-xs text-muted-foreground hover:text-foreground hover:underline sm:hidden">
+            Ocultar
+          </button>
+        </div>
+        <BarraProgreso hechos={g.hechos} total={g.total} />
+        <div>
+          <p className="font-semibold">Siguiente: {t.titulo}</p>
+          <p className="mt-0.5 text-sm text-muted-foreground">{t.porQue}</p>
+        </div>
+      </div>
+      <div className="flex flex-wrap items-center gap-2 sm:flex-col sm:items-stretch">
+        <BotonEnlace a={t.accion.a === '#recorrido' ? '/primeros-pasos' : t.accion.a}>
+          {t.accion.a === '#recorrido' ? 'Continuar' : t.accion.texto} <ArrowRightIcon aria-hidden />
+        </BotonEnlace>
+        <BotonEnlace a="/primeros-pasos" variant="ghost">
+          Ver todos los pasos
+        </BotonEnlace>
+        <button type="button" onClick={() => g.ocultar()} className="hidden text-xs text-muted-foreground hover:text-foreground hover:underline sm:block">
+          Ocultar por ahora
+        </button>
+      </div>
+    </section>
+  )
+}
+
 function AvisoClave() {
   const { sesion } = useDatos()
   const [visible, setVisible] = useState(() => {

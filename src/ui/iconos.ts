@@ -85,5 +85,10 @@ export {
   ScalesIcon,
   BooksIcon,
   TextAlignLeftIcon,
+  QuestionIcon,
+  ListChecksIcon,
+  CircleDashedIcon,
+  LifebuoyIcon,
+  CompassIcon,
   ChartBarIcon,
 } from '@phosphor-icons/react'

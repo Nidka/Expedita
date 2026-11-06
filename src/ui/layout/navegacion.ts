@@ -1,4 +1,4 @@
-import { BellIcon, FileDocIcon, BotIcon, ChartBarIcon, CalendarDaysIcon, FolderIcon, MapIcon, PenLineIcon, SettingsIcon, SunriseIcon, type Icono } from '@/ui/iconos'
+import { LifebuoyIcon, BellIcon, FileDocIcon, BotIcon, ChartBarIcon, CalendarDaysIcon, FolderIcon, MapIcon, PenLineIcon, SettingsIcon, SunriseIcon, type Icono } from '@/ui/iconos'
 
 export interface ItemNavegacion {
   a: string
@@ -23,4 +23,5 @@ export const NAVEGACION: ItemNavegacion[] = [
   { a: '/reportes', texto: 'Reportes', icono: ChartBarIcon },
   { a: '/asistente', texto: 'Asistente', icono: BotIcon },
   { a: '/ajustes', texto: 'Ajustes', icono: SettingsIcon, soloAdmin: true },
+  { a: '/ayuda', texto: 'Ayuda', icono: LifebuoyIcon },
 ]

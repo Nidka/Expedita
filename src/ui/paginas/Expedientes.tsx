@@ -94,6 +94,7 @@ export function Expedientes() {
   return (
     <>
       <EncabezadoPagina
+        ayuda="expedientes"
         titulo="Expedientes"
         descripcion={`${plural(expedientes.filter((e) => e.estado === 'activo').length, 'activo', 'activos')} · ${plural(carpetas.length, 'carpeta', 'carpetas')} por materia`}
         acciones={

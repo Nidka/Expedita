@@ -1,6 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react'
+import type { TemaId } from '../ayuda/temas'
+import { BotonAyuda } from '../componentes/Ayuda'
 import { toast } from 'sonner'
-import { CopyIcon, DownloadIcon, FileSpreadsheetIcon, Trash2Icon, UserPlusIcon } from '@/ui/iconos'
+import { CopyIcon, DownloadIcon, FileSpreadsheetIcon, ListChecksIcon, Trash2Icon, UserPlusIcon } from '@/ui/iconos'
 import { importarExpedientes } from '@/application/casos-uso/importar'
 import { descargar, generarCSV } from '@/application/exportar'
 import type { Invitacion, RegistroAuditoria } from '@/application/ports'
@@ -23,9 +25,19 @@ import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { useContenedor, useDatos } from '../contexto'
-import { Campo, EncabezadoPagina, EstadoVacio, SelectNativo } from '../componentes/base'
+import { BotonEnlace, Campo, EncabezadoPagina, EstadoVacio, SelectNativo } from '../componentes/base'
 import { etiquetaExp, fecha, plural } from '../formato'
 import { exito } from '../notificar'
+
+/** Tema de ayuda de cada pestaña */
+const AYUDA_PESTANA: Record<string, TemaId | undefined> = {
+  equipo: 'equipo',
+  plazos: 'plazos',
+  importar: 'importar',
+  sinoe: 'sinoe',
+  drive: 'drive',
+  recordatorio: 'recordatorio',
+}
 
 function Equipo() {
   const c = useContenedor()
@@ -963,13 +975,24 @@ const PESTANAS = ['equipo', 'plazos', 'importar', 'exportar', 'sinoe', 'drive', 
 
 export function Ajustes() {
   const { sesion } = useDatos()
-  const [params] = useSearchParams()
-  const inicial = PESTANAS.includes(params.get('pestana') ?? '') ? params.get('pestana')! : 'equipo'
+  const [params, setParams] = useSearchParams()
+  // Pestaña en la dirección: los enlaces de la ayuda y de la guía abren la pestaña exacta
+  const pestana = PESTANAS.includes(params.get('pestana') ?? '') ? params.get('pestana')! : 'equipo'
+  const temaPestana = AYUDA_PESTANA[pestana]
   if (sesion.miembro.rol !== 'admin') return <EstadoVacio titulo="Solo los administradores pueden cambiar los ajustes" />
   return (
     <>
-      <EncabezadoPagina titulo="Ajustes" descripcion={sesion.orgNombre} />
-      <Tabs defaultValue={inicial}>
+      <EncabezadoPagina
+        titulo="Ajustes"
+        descripcion={sesion.orgNombre}
+        acciones={
+          <BotonEnlace a="/primeros-pasos" variant="outline">
+            <ListChecksIcon aria-hidden /> Primeros pasos
+          </BotonEnlace>
+        }
+      />
+      <Tabs value={pestana} onValueChange={(v) => setParams({ pestana: String(v) }, { replace: true })}>
+        <div className="flex flex-wrap items-center justify-between gap-2">
         <TabsList className="flex-wrap">
           <TabsTrigger value="equipo">Equipo</TabsTrigger>
           <TabsTrigger value="plazos">Plazos</TabsTrigger>
@@ -980,6 +1003,8 @@ export function Ajustes() {
           <TabsTrigger value="recordatorio">Recordatorio</TabsTrigger>
           <TabsTrigger value="actividad">Actividad</TabsTrigger>
         </TabsList>
+          {temaPestana && <BotonAyuda key={temaPestana} tema={temaPestana} etiqueta />}
+        </div>
         <TabsContent value="equipo" className="mt-4">
           <Equipo />
         </TabsContent>
