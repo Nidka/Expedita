@@ -20,10 +20,19 @@ const VIGENCIAS: [string, string][] = [
 export const urlAvance = (token: string) => `${location.origin}/avance/${token}`
 
 /** RF-40: crea, copia y revoca enlaces privados para que el cliente vea el avance de su expediente. */
-export function CompartirAvance({ exp }: { exp: Expediente }) {
+export function CompartirAvance({
+  exp,
+  control,
+}: {
+  exp: Expediente
+  /** Si se pasa, el diálogo lo abre otro (p. ej. el menú «Más») y no se muestra el botón propio */
+  control?: { abierto: boolean; setAbierto: (v: boolean) => void }
+}) {
   const c = useContenedor()
   const { hoy } = useDatos()
-  const [abierto, setAbierto] = useState(false)
+  const [abiertoPropio, setAbiertoPropio] = useState(false)
+  const abierto = control?.abierto ?? abiertoPropio
+  const setAbierto = control?.setAbierto ?? setAbiertoPropio
   const [enlaces, setEnlaces] = useState<EnlaceCliente[] | null>(null)
   const [vigencia, setVigencia] = useState('90')
   const [ocupado, setOcupado] = useState(false)
@@ -80,9 +89,11 @@ export function CompartirAvance({ exp }: { exp: Expediente }) {
 
   return (
     <>
-      <Button variant="outline" onClick={() => setAbierto(true)}>
-        <ShareIcon aria-hidden /> Compartir avance
-      </Button>
+      {!control && (
+        <Button variant="outline" onClick={() => setAbierto(true)}>
+          <ShareIcon aria-hidden /> Compartir avance
+        </Button>
+      )}
       <Dialog open={abierto} onOpenChange={setAbierto}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>

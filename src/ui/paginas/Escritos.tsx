@@ -9,7 +9,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
-import { BooksIcon, CopyIcon, FileDocIcon, PencilIcon, PlusIcon, RefreshIcon, Trash2Icon } from '@/ui/iconos'
+import { CopyIcon, FileDocIcon, PencilIcon, PlusIcon, RefreshIcon, Trash2Icon } from '@/ui/iconos'
+import { Michi } from '../componentes/marca'
 import { puedeEliminar } from '@/domain/permisos'
 import { useContenedor, useDatos } from '../contexto'
 import { Campo, EncabezadoPagina, SelectNativo } from '../componentes/base'
@@ -175,9 +176,9 @@ export function Escritos() {
           </div>
 
           {!texto && !elegido ? (
-            <div className="grid justify-items-center gap-3 rounded-xl bg-card px-6 py-16 text-center shadow-[0_0_0_1px_var(--border)]">
-              <BooksIcon className="size-8 text-muted-foreground" aria-hidden />
-              <p className="font-medium">Elige un modelo de la biblioteca</p>
+            <div className="grid justify-items-center gap-3 rounded-xl bg-card px-6 py-14 text-center shadow-[0_0_0_1px_var(--border)]">
+              <Michi pose="laptop" className="mb-1 size-20" />
+              <p className="font-semibold">Elige un modelo de la biblioteca</p>
               <p className="max-w-sm text-sm text-muted-foreground">O escribe desde cero: el texto se descarga en Word con el membrete, Arial 12 e interlineado 1.5.</p>
               <Button variant="outline" size="sm" onClick={() => (setElegido({ origen: 'base', id: 'vacio', titulo: 'Escrito', contenido: '' }), setTexto(' '))}>
                 Empezar en blanco

@@ -6,7 +6,6 @@ import { Michi } from '../componentes/marca'
 import { RutaEtapas } from '../componentes/RutaEtapas'
 import { fecha, fechaLarga } from '../formato'
 import { Skeleton } from '@/components/ui/skeleton'
-import { CalendarDaysIcon } from '@/ui/iconos'
 
 const MODALIDAD = { virtual: 'Virtual', presencial: 'Presencial', mixta: 'Mixta' } as const
 
@@ -105,8 +104,9 @@ function Contenido({ a }: { a: AvanceCliente }) {
           <ul className="grid gap-2">
             {a.audiencias.map((x, i) => (
               <li key={i} className="flex items-start gap-4 rounded-xl bg-card p-5 shadow-[0_0_0_1px_var(--border)]">
-                <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-secondary text-azul-pj">
-                  <CalendarDaysIcon className="size-5" aria-hidden />
+                <span className="w-12 shrink-0 text-center leading-none" aria-hidden>
+                  <span className="block text-[0.6875rem] font-semibold tracking-wide text-primary uppercase">{new Date(x.fecha + 'T12:00').toLocaleDateString('es-PE', { month: 'short' }).replace('.', '')}</span>
+                  <span className="tabular mt-1 block text-2xl font-semibold">{Number(x.fecha.slice(8, 10))}</span>
                 </span>
                 <div className="grid gap-0.5">
                   <p className="font-medium">{x.tipo}</p>

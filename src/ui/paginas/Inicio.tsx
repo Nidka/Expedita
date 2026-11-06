@@ -131,34 +131,26 @@ export function Inicio() {
 
       <GuiaInicio />
 
-      {/* Resumen en una sola banda */}
-      <nav
-        aria-label="Resumen"
-        className="mb-10 grid grid-cols-2 overflow-hidden rounded-xl bg-card shadow-[0_0_0_1px_var(--border)] lg:grid-cols-4"
-      >
-        {resumen.map((v, i) => (
-          <Link
-            key={v.etiqueta}
-            to={v.a}
-            className={cn(
-              'group flex flex-col gap-2 px-5 py-5 outline-none transition-colors duration-200 hover:bg-muted/50 focus-visible:bg-muted sm:px-6',
-              i % 2 === 1 && 'border-l border-separator',
-              i >= 2 && 'border-t border-separator lg:border-t-0',
-              i === 2 && 'lg:border-l',
-            )}
-          >
-            <span className="text-sm text-muted-foreground transition-colors group-hover:text-foreground">{v.etiqueta}</span>
-            <Contador
-              valor={v.valor}
-              className={cn(
-                'tabular text-[2rem] leading-none font-semibold tracking-tight',
-                v.valor > 0 && v.tono === 'rojo' && 'text-destructive',
-                v.valor > 0 && v.tono === 'ambar' && 'text-warning-foreground',
-              )}
-            />
-          </Link>
-        ))}
-      </nav>
+      {/* Resumen: una línea discreta con enlaces, solo lo que tiene algo */}
+      {!d.cargando && resumen.some((v) => v.valor > 0) && (
+        <nav aria-label="Resumen" className="-mt-4 mb-10">
+          <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+            {resumen
+              .filter((v) => v.valor > 0)
+              .map((v) => (
+                <li key={v.etiqueta}>
+                  <Link to={v.a} className="group inline-flex items-baseline gap-1.5 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                    <Contador
+                      valor={v.valor}
+                      className={cn('tabular font-semibold', v.tono === 'rojo' && 'text-destructive', v.tono === 'ambar' && 'text-warning-foreground')}
+                    />
+                    <span className="text-muted-foreground group-hover:text-foreground group-hover:underline">{v.etiqueta.toLowerCase()}</span>
+                  </Link>
+                </li>
+              ))}
+          </ul>
+        </nav>
+      )}
 
       <section aria-labelledby="titulo-semana" className="mb-12 grid gap-3">
         <div className="flex items-baseline justify-between gap-2 px-1">
@@ -281,44 +273,36 @@ export function Inicio() {
   )
 }
 
-/** Sugerencia (descartable) de crear una contraseña: el correo gratuito tiene un límite de envíos por hora. */
 /** Tarjeta de la guía en Hoy: progreso y el siguiente paso, hasta completar lo obligatorio. */
 function GuiaInicio() {
   const g = useGuia()
   if (g.completo || g.oculta || !g.siguiente) return <AvisoClave />
   const t = TEXTO_PASO[g.siguiente.id]
   return (
-    <section aria-label="Primeros pasos" className="mb-8 grid animate-entrar gap-4 rounded-xl bg-card p-5 shadow-[0_0_0_1px_var(--border)] sm:grid-cols-[1fr_auto] sm:items-center sm:gap-6 sm:p-6">
-      <div className="grid min-w-0 gap-3">
-        <div className="flex items-baseline justify-between gap-3">
-          <p className="text-sm font-medium text-muted-foreground">
-            Primeros pasos · <span className="tabular">{g.hechos} de {g.total}</span>
-          </p>
-          <button type="button" onClick={() => g.ocultar()} className="text-xs text-muted-foreground hover:text-foreground hover:underline sm:hidden">
-            Ocultar
-          </button>
-        </div>
+    <section
+      aria-label="Primeros pasos"
+      className="mb-10 flex animate-entrar flex-wrap items-center gap-x-5 gap-y-3 rounded-xl bg-card px-5 py-4 shadow-[0_0_0_1px_var(--border)]"
+    >
+      <div className="grid min-w-[12rem] flex-1 gap-2">
+        <p className="text-sm">
+          <span className="font-semibold">Siguiente: {t.titulo}</span>
+          <span className="tabular text-muted-foreground"> · paso {g.hechos + 1} de {g.total}</span>
+        </p>
         <BarraProgreso hechos={g.hechos} total={g.total} />
-        <div>
-          <p className="font-semibold">Siguiente: {t.titulo}</p>
-          <p className="mt-0.5 text-sm text-muted-foreground">{t.porQue}</p>
-        </div>
       </div>
-      <div className="flex flex-wrap items-center gap-2 sm:flex-col sm:items-stretch">
-        <BotonEnlace a={t.accion.a === '#recorrido' ? '/primeros-pasos' : t.accion.a}>
+      <div className="flex items-center gap-1">
+        <BotonEnlace a={t.accion.a === '#recorrido' ? '/primeros-pasos' : t.accion.a} size="sm">
           {t.accion.a === '#recorrido' ? 'Continuar' : t.accion.texto} <ArrowRightIcon aria-hidden />
         </BotonEnlace>
-        <BotonEnlace a="/primeros-pasos" variant="ghost">
-          Ver todos los pasos
-        </BotonEnlace>
-        <button type="button" onClick={() => g.ocultar()} className="hidden text-xs text-muted-foreground hover:text-foreground hover:underline sm:block">
-          Ocultar por ahora
-        </button>
+        <Button size="sm" variant="ghost" onClick={() => g.ocultar()}>
+          Ocultar
+        </Button>
       </div>
     </section>
   )
 }
 
+/** Sugerencia (descartable) de crear una contraseña: el correo gratuito tiene un límite de envíos por hora. */
 function AvisoClave() {
   const { sesion } = useDatos()
   const [visible, setVisible] = useState(() => {

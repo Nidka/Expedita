@@ -2,7 +2,8 @@ import { useId, type ComponentProps, type ReactNode, type SelectHTMLAttributes }
 import { BotonAyuda } from './Ayuda'
 import type { TemaId } from '../ayuda/temas'
 import { Link } from 'react-router-dom'
-import { ChevronDownIcon, ChevronRightIcon } from '@/ui/iconos'
+import { ChevronDownIcon, ChevronRightIcon, EllipsisIcon } from '@/ui/iconos'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import type { Severidad } from '@/domain/agenda/que-toca-hoy'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -92,8 +93,41 @@ export function EncabezadoPagina({
         </div>
         {descripcion && <div className="mt-1.5 text-[0.9375rem] text-muted-foreground">{descripcion}</div>}
       </div>
-      {acciones && <div className="flex flex-wrap gap-2">{acciones}</div>}
+      {acciones && <div className="flex flex-wrap items-center gap-2 sm:shrink-0 sm:flex-nowrap">{acciones}</div>}
     </header>
+  )
+}
+
+export interface OpcionMenu {
+  texto: string
+  icono?: ReactNode
+  alElegir: () => void
+  peligro?: boolean
+  oculta?: boolean
+}
+
+/** Acciones secundarias de una página agrupadas tras «Más», para que el encabezado tenga una sola acción principal. */
+export function MenuMas({ opciones, etiqueta = 'Más acciones' }: { opciones: OpcionMenu[]; etiqueta?: string }) {
+  const visibles = opciones.filter((o) => !o.oculta)
+  if (!visibles.length) return null
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button variant="outline" size="icon" aria-label={etiqueta} title={etiqueta}>
+            <EllipsisIcon aria-hidden weight="bold" />
+          </Button>
+        }
+      />
+      <DropdownMenuContent align="end" className="min-w-56">
+        {visibles.map((o) => (
+          <DropdownMenuItem key={o.texto} onClick={o.alElegir} variant={o.peligro ? 'destructive' : 'default'} className="gap-2.5 py-2 [&_svg]:text-muted-foreground">
+            {o.icono}
+            {o.texto}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 
@@ -169,7 +203,7 @@ export function Fila({
       {a && <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground/60 transition-transform duration-200 ease-(--ease-apple) group-hover:translate-x-0.5 group-hover:text-muted-foreground" aria-hidden />}
     </>
   )
-  const base = 'flex min-h-14 items-center gap-4 px-5 py-3.5'
+  const base = 'flex min-h-14 items-center gap-3 px-4 py-3.5 sm:gap-4 sm:px-5'
   return (
     <li className={cn('border-b border-separator last:border-b-0', className)}>
       {a ? (
@@ -217,7 +251,7 @@ export function Severo({ severidad, children, className }: { severidad: Severida
   return (
     <span
       className={cn(
-        'inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap',
+        'inline-flex shrink-0 items-center justify-self-start rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap',
         ESTILO_SEVERIDAD[severidad],
         className,
       )}

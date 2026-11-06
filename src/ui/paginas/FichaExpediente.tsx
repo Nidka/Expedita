@@ -1,7 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { ArchiveIcon, ArchiveRestoreIcon, CalendarPlusIcon, CopyIcon, ExternalLinkIcon, FileDocIcon, PencilIcon, PenLineIcon, SearchCheckIcon, Trash2Icon } from '@/ui/iconos'
+import { ShareIcon, ArchiveIcon, ArchiveRestoreIcon, CalendarPlusIcon, CopyIcon, ExternalLinkIcon, FileDocIcon, PencilIcon, PenLineIcon, SearchCheckIcon, Trash2Icon } from '@/ui/iconos'
 import type { Accion, Expediente } from '@/domain/entidades'
 import { EditarAccion, EliminarAccion } from '../componentes/EditarAccion'
 import { SeccionDocumentos } from '../componentes/Documentos'
@@ -17,7 +17,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useContenedor, useDatos } from '../contexto'
-import { BotonEnlace, Campo, EncabezadoPagina, EstadoVacio, Mono, SelectNativo, Severo } from '../componentes/base'
+import { BotonEnlace, Campo, EncabezadoPagina, EstadoVacio, MenuMas, Mono, SelectNativo, Severo } from '../componentes/base'
 import { fecha, partes, soles } from '../formato'
 
 const URL_CEJ = 'https://cej.pj.gob.pe/cej/forms/busquedaform.html'
@@ -182,6 +182,7 @@ export function FichaExpediente() {
   const d = useDatos()
   const exp = id ? d.expPorId.get(id) : undefined
   const [editando, setEditando] = useState(false)
+  const [compartir, setCompartir] = useState(false)
   const [editandoAccion, setEditandoAccion] = useState<Accion>()
   const [borrandoAccion, setBorrandoAccion] = useState<Accion>()
   const navegar = useNavigate()
@@ -253,29 +254,26 @@ export function FichaExpediente() {
             <BotonEnlace a={`/registrar?exp=${exp.id}`}>
               <PenLineIcon aria-hidden /> Registrar acción
             </BotonEnlace>
-            <BotonEnlace a={`/agenda?audiencia=${exp.id}`} variant="outline">
-              <CalendarPlusIcon aria-hidden /> Audiencia
-            </BotonEnlace>
-            <BotonEnlace a={`/escritos?exp=${exp.id}`} variant="outline">
-              <FileDocIcon aria-hidden /> Escrito
-            </BotonEnlace>
-            <CompartirAvance exp={exp} />
-            <Button variant="outline" size="icon" onClick={() => setEditando(true)} aria-label="Editar expediente" title="Editar expediente">
-              <PencilIcon />
+            <Button variant="outline" onClick={() => setCompartir(true)}>
+              <ShareIcon aria-hidden /> <span className="max-sm:sr-only">Compartir avance</span>
             </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={archivar}
-              aria-label={exp.estado === 'activo' ? 'Archivar expediente' : 'Reactivar expediente'}
-              title={exp.estado === 'activo' ? 'Archivar expediente' : 'Reactivar expediente'}
-            >
-              {exp.estado === 'activo' ? <ArchiveIcon /> : <ArchiveRestoreIcon />}
-            </Button>
+            <MenuMas
+              opciones={[
+                { texto: 'Programar audiencia', icono: <CalendarPlusIcon aria-hidden />, alElegir: () => navegar(`/agenda?audiencia=${exp.id}`) },
+                { texto: 'Redactar escrito', icono: <FileDocIcon aria-hidden />, alElegir: () => navegar(`/escritos?exp=${exp.id}`) },
+                { texto: 'Editar datos', icono: <PencilIcon aria-hidden />, alElegir: () => setEditando(true) },
+                {
+                  texto: exp.estado === 'activo' ? 'Archivar expediente' : 'Reactivar expediente',
+                  icono: exp.estado === 'activo' ? <ArchiveIcon aria-hidden /> : <ArchiveRestoreIcon aria-hidden />,
+                  alElegir: archivar,
+                },
+              ]}
+            />
           </>
         }
       />
 
+      <CompartirAvance exp={exp} control={{ abierto: compartir, setAbierto: setCompartir }} />
       <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
         <div className="grid min-w-0 gap-6">
           <Card>

@@ -1,7 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { PlusIcon, RotateCcwIcon } from '@/ui/iconos'
+import { CheckIcon, PlusIcon, RotateCcwIcon } from '@/ui/iconos'
 import { previsualizarPlazo, registrarNotificacion } from '@/application/casos-uso/notificaciones'
 import { extraerDeCorreo } from '@/domain/notificaciones/extraer'
 import { parsearNumeroExpediente } from '@/domain/expediente/numero-expediente'
@@ -265,11 +265,14 @@ export function Bandeja() {
           const exp = n.expedienteId ? d.expPorId.get(n.expedienteId) : undefined
           const sev = estado === 'atendida' ? 'info' : restantes === undefined ? 'proximo' : restantes < 0 ? 'vencido' : restantes <= 3 ? 'urgente' : 'proximo'
           return (
-            <li key={n.id} className="border-b border-separator px-5 py-5 last:border-b-0">
-              <div className="flex items-start gap-4">
+            <li key={n.id} className="border-b border-separator px-4 py-5 last:border-b-0 sm:px-5">
+              <div className="flex items-start gap-3 sm:gap-4">
                 <span className={cn('mt-2 size-2 shrink-0 rounded-full', FRANJA_SEVERIDAD[sev])} aria-hidden />
                 <div className="min-w-0 flex-1">
-                  <p className="font-semibold">
+                  {estado === 'pendiente' && n.vencimiento && restantes !== undefined && (
+                    <Vence fecha={n.vencimiento} hoy={d.hoy} habiles={restantes} className="mb-1.5 flex-row items-baseline gap-2 text-left sm:hidden" />
+                  )}
+                  <p className="font-semibold text-pretty">
                     {n.asunto}
                     {n.origen === 'gmail' && (
                       <span className="ml-2 inline-block rounded bg-secondary px-1.5 py-0.5 align-middle text-[0.6875rem] font-semibold text-secondary-foreground">
@@ -301,8 +304,8 @@ export function Bandeja() {
                         <BotonEnlace a={`/registrar?notificacion=${n.id}`} size="sm">
                           Registrar acción
                         </BotonEnlace>
-                        <Button size="sm" variant="ghost" onClick={() => void marcarAtendida(n.id)}>
-                          Marcar atendida
+                        <Button size="sm" variant="outline" onClick={() => void marcarAtendida(n.id)}>
+                          <CheckIcon aria-hidden /> Atendida
                         </Button>
                       </>
                     ) : (
@@ -312,7 +315,9 @@ export function Bandeja() {
                     )}
                   </div>
                 </div>
-                {estado === 'pendiente' && n.vencimiento && restantes !== undefined && <Vence fecha={n.vencimiento} hoy={d.hoy} habiles={restantes} />}
+                {estado === 'pendiente' && n.vencimiento && restantes !== undefined && (
+                  <Vence fecha={n.vencimiento} hoy={d.hoy} habiles={restantes} className="max-sm:hidden" />
+                )}
               </div>
             </li>
           )

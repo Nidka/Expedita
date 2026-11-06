@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
-import { ArrowRightIcon, ChevronDownIcon, CompassIcon, ListChecksIcon, SearchIcon } from '@/ui/iconos'
+import { ArrowRightIcon, ChevronDownIcon, CompassIcon, SearchIcon } from '@/ui/iconos'
 import { TEXTO_PASO } from '../ayuda/pasos'
 import { TEMAS, type Tema } from '../ayuda/temas'
 import { ContenidoTema } from '../componentes/Ayuda'
@@ -66,7 +66,6 @@ export function CentroAyuda() {
                 {g.completo || !g.siguiente ? 'Completado. Puedes repasar cualquier paso.' : `${g.hechos} de ${g.total} listos. Siguiente: ${TEXTO_PASO[g.siguiente.id].titulo.toLowerCase()}.`}
               </p>
             </div>
-            <ListChecksIcon className="size-6 shrink-0 text-ocre" aria-hidden />
           </div>
           <BarraProgreso hechos={g.hechos} total={g.total} />
           <BotonEnlace a="/primeros-pasos" className="mt-auto self-start">

@@ -22,10 +22,19 @@ const PASOS: [string, string[]][] = [
 ]
 
 /** RF-30: plazos, audiencias y próximas acciones en el calendario de cada abogado, sin conectar cuentas. */
-export function SuscribirCalendario({ abrirAlInicio = false }: { abrirAlInicio?: boolean }) {
+export function SuscribirCalendario({
+  abrirAlInicio = false,
+  control,
+}: {
+  abrirAlInicio?: boolean
+  /** Si se pasa, el diálogo lo abre otro (p. ej. el menú «Más») y no se muestra el botón propio */
+  control?: { abierto: boolean; setAbierto: (v: boolean) => void }
+}) {
   const c = useContenedor()
   const d = useDatos()
-  const [abierto, setAbierto] = useState(abrirAlInicio)
+  const [abiertoPropio, setAbiertoPropio] = useState(abrirAlInicio)
+  const abierto = control?.abierto ?? abiertoPropio
+  const setAbierto = control?.setAbierto ?? setAbiertoPropio
   const [cambiando, setCambiando] = useState(false)
   const token = d.config.tokenCalendario
   const url = token ? `${location.origin}/calendario/${token}.ics` : ''
@@ -56,9 +65,11 @@ export function SuscribirCalendario({ abrirAlInicio = false }: { abrirAlInicio?:
 
   return (
     <>
-      <Button variant="outline" onClick={() => setAbierto(true)}>
-        <CalendarDaysIcon aria-hidden /> Suscribirse
-      </Button>
+      {!control && (
+        <Button variant="outline" onClick={() => setAbierto(true)}>
+          <CalendarDaysIcon aria-hidden /> Suscribirse
+        </Button>
+      )}
       <Dialog open={abierto} onOpenChange={setAbierto}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>

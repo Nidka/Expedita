@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { CalendarPlusIcon, ChevronLeftIcon, ChevronRightIcon, DownloadIcon, ExternalLinkIcon, PencilIcon } from '@/ui/iconos'
+import { CalendarDaysIcon, CalendarPlusIcon, ChevronLeftIcon, ChevronRightIcon, DownloadIcon, ExternalLinkIcon, PencilIcon } from '@/ui/iconos'
 import { descargar, enlaceGoogleCalendar, generarICS, type EventoAgenda } from '@/application/exportar'
 import { TIPOS_AUDIENCIA, type Audiencia, type EstadoAudiencia, type ModalidadAudiencia, type TipoAudiencia } from '@/domain/entidades'
 import { aDate, aISO, diaSemana, sumarDias, type FechaISO } from '@/domain/shared/fecha'
@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 import { useContenedor, useDatos, type Datos } from '../contexto'
-import { Campo, EncabezadoPagina, EstadoVacio, SelectNativo } from '../componentes/base'
+import { Campo, EncabezadoPagina, EstadoVacio, MenuMas, SelectNativo } from '../componentes/base'
 import { SelectorExpediente } from '../componentes/SelectorExpediente'
 import { SuscribirCalendario } from '../componentes/SuscribirCalendario'
 import { etiquetaExp, fecha, fechaLarga, mes } from '../formato'
@@ -326,6 +326,7 @@ export function Agenda() {
   const [params, setParams] = useSearchParams()
   const items = useMemo(() => eventos(d), [d])
   const [editando, setEditando] = useState<{ id?: string; inicial: FormAudiencia } | null>(null)
+  const [suscribir, setSuscribir] = useState(() => params.get('suscribir') === '1')
   // ?audiencia=<expediente> (o vacío) abre el formulario, también si ya estás en la Agenda (atajo «A»)
   useEffect(() => {
     const pedida = params.get('audiencia')
@@ -352,16 +353,19 @@ export function Agenda() {
         descripcion="Plazos, audiencias y visitas. Los días inhábiles no cuentan para el cómputo."
         acciones={
           <>
-            <SuscribirCalendario abrirAlInicio={params.get('suscribir') === '1'} />
-            <Button variant="outline" onClick={exportar}>
-              <DownloadIcon aria-hidden /> Exportar .ics
-            </Button>
+            <MenuMas
+              opciones={[
+                { texto: 'Ver en mi calendario…', icono: <CalendarDaysIcon aria-hidden />, alElegir: () => setSuscribir(true) },
+                { texto: 'Descargar archivo .ics', icono: <DownloadIcon aria-hidden />, alElegir: exportar },
+              ]}
+            />
             <Button onClick={() => setEditando({ inicial: nueva('', d.hoy, d.sesion.miembro.nombre) })}>
               <CalendarPlusIcon aria-hidden /> Programar audiencia
             </Button>
           </>
         }
       />
+      <SuscribirCalendario control={{ abierto: suscribir, setAbierto: setSuscribir }} />
       <div className="grid gap-10">
         <Calendario items={items} />
         <section aria-labelledby="titulo-audiencias">

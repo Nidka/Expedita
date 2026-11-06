@@ -197,7 +197,7 @@ export function Expedientes() {
         }}
         aria-pressed={activa}
         className={cn(
-          'flex min-h-10 shrink-0 items-center gap-2 rounded-full px-3.5 text-sm outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/25 lg:min-h-9 lg:w-full lg:rounded-lg lg:px-3',
+          'flex min-h-10 shrink-0 snap-start items-center gap-2 rounded-full px-3.5 text-sm outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/25 lg:min-h-9 lg:w-full lg:rounded-lg lg:px-3',
           activa
             ? 'bg-primary font-medium text-primary-foreground'
             : 'bg-card text-foreground shadow-[0_0_0_1px_var(--border)] hover:bg-muted lg:bg-transparent lg:shadow-none',
@@ -223,8 +223,8 @@ export function Expedientes() {
         }
       />
 
-      <div className="mb-5 grid gap-3 sm:grid-cols-[1fr_10rem_12rem] xl:grid-cols-[1fr_10rem_12rem_13rem]">
-        <div className="relative">
+      <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-[1fr_10rem_12rem] xl:grid-cols-[1fr_10rem_12rem_13rem]">
+        <div className="relative col-span-2 sm:col-span-1">
           <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
           <Input
             type="search"
@@ -246,7 +246,7 @@ export function Expedientes() {
             <option key={x}>{x}</option>
           ))}
         </SelectNativo>
-        <SelectNativo aria-label="Ordenar" value={orden} onChange={(e) => setOrden(e.target.value as Orden)} className="sm:col-span-3 xl:col-span-1">
+        <SelectNativo aria-label="Ordenar" value={orden} onChange={(e) => setOrden(e.target.value as Orden)} className="col-span-2 sm:col-span-3 xl:col-span-1">
           {(Object.keys(ORDENES) as Orden[]).map((k) => (
             <option key={k} value={k}>
               {ORDENES[k].texto}
@@ -257,7 +257,7 @@ export function Expedientes() {
 
       <div className="grid gap-6 lg:grid-cols-[15rem_minmax(0,1fr)]">
         <nav aria-label="Carpetas por materia" className="-mx-4 lg:sticky lg:top-20 lg:mx-0 lg:self-start">
-          <div className="flex gap-2 overflow-x-auto px-4 pb-1 lg:max-h-[calc(100dvh-7rem)] lg:flex-col lg:gap-0.5 lg:overflow-y-auto lg:px-0">
+          <div className="flex snap-x scroll-px-4 gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] lg:max-h-[calc(100dvh-7rem)] lg:flex-col lg:gap-0.5 lg:overflow-y-auto lg:px-0">
             {chip('', 'Todas', base.length)}
             {carpetas.map(([c, n]) => chip(c, c, n))}
           </div>
@@ -290,13 +290,13 @@ export function Expedientes() {
                     <Fila
                       key={e.id}
                       a={`/expedientes/${e.id}`}
-                      titulo={
-                        <span className="flex items-center gap-2">
+                      titulo={partes(e)}
+                      detalle={
+                        <span className="flex min-w-0 items-center gap-2 text-[0.8125rem] text-muted-foreground">
                           {e.codigo && <Codigo>{e.codigo}</Codigo>}
-                          <Mono>{e.numero}</Mono>
+                          <Mono className="truncate">{e.numero}</Mono>
                         </span>
                       }
-                      subtitulo={`${partes(e)}${e.organo ? ` · ${e.organo}` : ''}`}
                       fin={
                         <span className="hidden flex-col items-end gap-1 text-xs text-muted-foreground sm:flex">
                           {e.etapa && <span>{e.etapa}</span>}
