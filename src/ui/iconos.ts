@@ -97,3 +97,6 @@ export {
   GavelIcon,
   ChartBarIcon,
 } from '@phosphor-icons/react'
+
+// Herramientas
+export { CalculatorIcon, ArrowBendUpRightIcon as SkipIcon, ClockCountdownIcon as SnoozeIcon, ListMagnifyingGlassIcon as RondaIcon } from '@phosphor-icons/react'

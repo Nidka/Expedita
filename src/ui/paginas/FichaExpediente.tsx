@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { ShareIcon, ArchiveIcon, ArchiveRestoreIcon, CalendarPlusIcon, CopyIcon, ExternalLinkIcon, FileDocIcon, PencilIcon, PenLineIcon, SearchCheckIcon, Trash2Icon } from '@/ui/iconos'
 import type { Accion, Expediente } from '@/domain/entidades'
+import { registrarAccion } from '@/application/casos-uso/acciones'
+import { URL_CEJ } from '@/domain/agenda/seguimiento'
 import { EditarAccion, EliminarAccion } from '../componentes/EditarAccion'
 import { SeccionDocumentos } from '../componentes/Documentos'
 import { RutaEtapas } from '../componentes/RutaEtapas'
@@ -20,7 +22,6 @@ import { useContenedor, useDatos } from '../contexto'
 import { BotonEnlace, Campo, EncabezadoPagina, EstadoVacio, MenuMas, Mono, SelectNativo, Severo } from '../componentes/base'
 import { fecha, partes, soles } from '../formato'
 
-const URL_CEJ = 'https://cej.pj.gob.pe/cej/forms/busquedaform.html'
 
 function DesgloseCej({ numero, onRevision }: { numero: string; onRevision: () => void }) {
   const n = parsearNumeroExpediente(numero)
@@ -261,6 +262,23 @@ export function FichaExpediente() {
               opciones={[
                 { texto: 'Programar audiencia', icono: <CalendarPlusIcon aria-hidden />, alElegir: () => navegar(`/agenda?audiencia=${exp.id}`) },
                 { texto: 'Redactar escrito', icono: <FileDocIcon aria-hidden />, alElegir: () => navegar(`/escritos?exp=${exp.id}`) },
+                {
+                  texto: 'Revisado en CEJ: sin novedad',
+                  icono: <SearchCheckIcon aria-hidden />,
+                  alElegir: () =>
+                    void registrarAccion(c, {
+                      expedienteId: exp.id,
+                      fecha: d.hoy,
+                      tipo: 'Revisión en CEJ',
+                      descripcion: 'Revisión en CEJ: sin novedad.',
+                      responsable: d.sesion.miembro.nombre,
+                      origen: 'cej',
+                      cumplirProximas: false,
+                    }).then(
+                      () => toast.success('Revisión registrada'),
+                      (e: Error) => toast.error(e.message),
+                    ),
+                },
                 { texto: 'Editar datos', icono: <PencilIcon aria-hidden />, alElegir: () => setEditando(true) },
                 {
                   texto: exp.estado === 'activo' ? 'Archivar expediente' : 'Reactivar expediente',

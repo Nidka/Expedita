@@ -6,6 +6,7 @@ import { normalizarCodigo } from '@/domain/expediente/importacion'
 import { parsearNumeroExpediente } from '@/domain/expediente/numero-expediente'
 import { filtrarMensajes, leerChat, type MensajeChat } from '@/domain/whatsapp/chat'
 import { sumarDias } from '@/domain/shared/fecha'
+import { proponerSeguimiento } from '@/domain/agenda/seguimiento'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -115,7 +116,9 @@ export function ImportarWhatsApp({ abierto, cerrar }: { abierto: boolean; cerrar
       for (const p of elegidas) {
         const fechaAccion = p.fecha ?? p.mensaje.fecha
         const tipo = (TIPOS_ACCION as readonly string[]).includes(p.tipo ?? '') ? (p.tipo as TipoAccion) : 'Otra'
-        const proximaFecha = p.proximaFecha ?? (p.proximaDiasHabiles ? d.calendario.sumarHabiles(fechaAccion, p.proximaDiasHabiles) : undefined)
+        const auto = proponerSeguimiento(tipo, fechaAccion, d.calendario)
+        const proximaFecha =
+          p.proximaFecha ?? (p.proximaDiasHabiles ? d.calendario.sumarHabiles(fechaAccion, p.proximaDiasHabiles) : p.proxima ? undefined : auto?.proximaFecha)
         await registrarAccion(c, {
           expedienteId: p.expediente!.id,
           fecha: fechaAccion,
@@ -123,7 +126,7 @@ export function ImportarWhatsApp({ abierto, cerrar }: { abierto: boolean; cerrar
           descripcion: p.descripcion!,
           responsable: p.mensaje.autor,
           cargo: p.cargo,
-          proxima: proximaFecha ? (p.proxima ?? 'Revisar si el juzgado proveyó') : p.proxima,
+          proxima: proximaFecha ? (p.proxima ?? auto?.proxima ?? 'Revisar si el juzgado proveyó') : p.proxima,
           proximaFecha,
           origen: 'whatsapp',
         })

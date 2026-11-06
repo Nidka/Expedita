@@ -178,8 +178,11 @@ export function Fila({
   detalle,
   fin,
   estado,
+  rapidas,
   className,
 }: {
+  /** Botones de acción rápida, fuera del enlace (p. ej. «Hecho», «Posponer») */
+  rapidas?: ReactNode
   /** Franja de estado a la izquierda (vencido, urgente…) */
   estado?: Severidad
   a?: string
@@ -200,22 +203,23 @@ export function Fila({
         {detalle && <span className="text-sm text-foreground/80">{detalle}</span>}
       </span>
       {fin && <span className="flex shrink-0 items-center gap-2">{fin}</span>}
-      {a && <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground/60 transition-transform duration-200 ease-(--ease-apple) group-hover:translate-x-0.5 group-hover:text-muted-foreground" aria-hidden />}
+      {a && !rapidas && <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground/60 transition-transform duration-200 ease-(--ease-apple) group-hover:translate-x-0.5 group-hover:text-muted-foreground" aria-hidden />}
     </>
   )
   const base = 'flex min-h-14 items-center gap-3 px-4 py-3.5 sm:gap-4 sm:px-5'
   return (
-    <li className={cn('border-b border-separator last:border-b-0', className)}>
+    <li className={cn('border-b border-separator last:border-b-0', rapidas && 'group/fila flex items-center', className)}>
       {a ? (
         <Link
           to={a}
-          className={cn(base, 'group outline-none transition-colors duration-150 hover:bg-muted/60 focus-visible:bg-muted focus-visible:outline-none active:bg-muted')}
+          className={cn(base, rapidas && 'min-w-0 flex-1 pr-2 sm:pr-3', 'group outline-none transition-colors duration-150 hover:bg-muted/60 focus-visible:bg-muted focus-visible:outline-none active:bg-muted')}
         >
           {contenido}
         </Link>
       ) : (
-        <div className={base}>{contenido}</div>
+        <div className={cn(base, rapidas && 'min-w-0 flex-1')}>{contenido}</div>
       )}
+      {rapidas && <div className="flex shrink-0 items-center gap-1 pr-3 sm:pr-4">{rapidas}</div>}
     </li>
   )
 }

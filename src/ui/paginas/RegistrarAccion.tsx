@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { registrarAccion } from '@/application/casos-uso/acciones'
 import { TIPOS_ACCION, type TipoAccion } from '@/domain/entidades'
 import { VIAS } from '@/domain/plazos/catalogo'
+import { FRASES_POR_TIPO, proponerSeguimiento } from '@/domain/agenda/seguimiento'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -43,6 +44,8 @@ export function RegistrarAccion() {
   const [etapa, setEtapa] = useState('')
   const [proxima, setProxima] = useState('')
   const [proximaFecha, setProximaFecha] = useState('')
+  /** La próxima acción se propone sola según el tipo, hasta que el usuario la toca */
+  const [proximaManual, setProximaManual] = useState(false)
   const [errores, setErrores] = useState<Record<string, string>>({})
   const [guardando, setGuardando] = useState(false)
 
@@ -51,8 +54,17 @@ export function RegistrarAccion() {
   }, [notificacion?.expedienteId])
 
   const exp = expId ? d.expPorId.get(expId) : undefined
+  const propuesta = proponerSeguimiento(tipo, fecha || d.hoy, d.calendario)
+  const automatica = !proximaManual && Boolean(propuesta)
+
+  useEffect(() => {
+    if (proximaManual) return
+    setProxima(propuesta?.proxima ?? '')
+    setProximaFecha(propuesta?.proximaFecha ?? '')
+  }, [proximaManual, propuesta?.proxima, propuesta?.proximaFecha])
 
   const sumarHabiles = (n: number) => {
+    setProximaManual(true)
     setProximaFecha(d.calendario.sumarHabiles(fecha || d.hoy, n))
     if (!proxima) setProxima(tipo === 'Revisión en CEJ' ? 'Volver a revisar el CEJ' : 'Revisar si el juzgado proveyó')
   }
@@ -139,6 +151,20 @@ export function RegistrarAccion() {
                 />
               )}
             </Campo>
+            {(FRASES_POR_TIPO[tipo]?.length ?? 0) > 0 && (
+              <div className="-mt-3 flex flex-wrap gap-2 sm:col-span-2" role="group" aria-label="Frases frecuentes">
+                {FRASES_POR_TIPO[tipo]!.map((f) => (
+                  <button
+                    key={f}
+                    type="button"
+                    onClick={() => setDescripcion((x) => (x.trim() ? `${x.trim()} ${f}` : f))}
+                    className="rounded-full bg-muted px-3 py-1 text-left text-xs text-foreground/85 outline-none transition-colors hover:bg-secondary focus-visible:ring-3 focus-visible:ring-ring/25"
+                  >
+                    {f}
+                  </button>
+                ))}
+              </div>
+            )}
             <Campo etiqueta="Responsable" requerido error={errores.responsable} ayuda="Se recuerda en este dispositivo.">
               {(p) => <Input {...p} value={responsable} onChange={(e) => setResponsable(e.target.value)} autoComplete="name" />}
             </Campo>
@@ -155,14 +181,32 @@ export function RegistrarAccion() {
             </Campo>
 
             <fieldset className="grid gap-5 border-t border-separator pt-6 sm:col-span-2 sm:grid-cols-2">
-              <legend className="float-left mb-1 w-full text-[0.9375rem] font-semibold sm:col-span-2">Próxima acción</legend>
+              <legend className="float-left mb-1 flex w-full flex-wrap items-baseline justify-between gap-x-3 sm:col-span-2">
+                <span className="text-[0.9375rem] font-semibold">Próxima acción</span>
+                {automatica && (
+                  <span className="text-xs text-muted-foreground">
+                    Propuesta según el tipo ({propuesta!.dias} {propuesta!.dias === 1 ? 'día hábil' : 'días hábiles'}).{' '}
+                    <button
+                      type="button"
+                      className="font-medium text-primary hover:underline"
+                      onClick={() => {
+                        setProximaManual(true)
+                        setProxima('')
+                        setProximaFecha('')
+                      }}
+                    >
+                      Quitar
+                    </button>
+                  </span>
+                )}
+              </legend>
               <Campo opcional etiqueta="¿Qué sigue?" error={errores.proxima}>
-                {(p) => <Input {...p} value={proxima} onChange={(e) => setProxima(e.target.value)} placeholder="Ej.: Revisar CEJ" />}
+                {(p) => <Input {...p} value={proxima} onChange={(e) => (setProximaManual(true), setProxima(e.target.value))} placeholder="Ej.: Revisar CEJ" />}
               </Campo>
               <Campo opcional etiqueta="Fecha límite" ayuda={proximaFecha ? fmtFecha(proximaFecha) : 'Atajos en días hábiles'}>
                 {(p) => (
                   <div className="grid gap-2">
-                    <Input {...p} type="date" value={proximaFecha} onChange={(e) => setProximaFecha(e.target.value)} />
+                    <Input {...p} type="date" value={proximaFecha} onChange={(e) => (setProximaManual(true), setProximaFecha(e.target.value))} />
                     <div className="flex gap-2" role="group" aria-label="Sumar días hábiles">
                       {[5, 10, 15].map((n) => (
                         <Button key={n} type="button" size="sm" variant="outline" onClick={() => sumarHabiles(n)}>

@@ -1,4 +1,7 @@
-import { ArrowRightIcon } from '@/ui/iconos'
+import { ArrowRightIcon, CheckIcon, PenLineIcon, SnoozeIcon } from '@/ui/iconos'
+import { toast } from 'sonner'
+import { editarAccion } from '@/application/casos-uso/acciones'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useMemo, useState } from 'react'
 import { TEXTO_PASO } from '../ayuda/pasos'
 import { BotonAyuda } from '../componentes/Ayuda'
@@ -6,12 +9,13 @@ import { useGuia } from '../guia'
 import { BarraProgreso } from './PrimerosPasos'
 import { Link } from 'react-router-dom'
 import { calcularPendientes, type Pendiente } from '@/domain/agenda/que-toca-hoy'
+import { colaRonda } from '@/domain/agenda/seguimiento'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { modoDemo } from '@/infrastructure/composicion'
 import { CLAVE_DEFINIDA } from './Cuenta'
 import { cn } from '@/lib/utils'
-import { useDatos } from '../contexto'
+import { useContenedor, useDatos } from '../contexto'
 import { BotonEnlace, EstadoVacio, Fila, Lista, Seccion, Vence, fechaCorta } from '../componentes/base'
 import { Contador } from '../componentes/Contador'
 import { Semana } from '../componentes/Semana'
@@ -30,6 +34,60 @@ const TIPO: Record<Pendiente['tipo'], string> = {
 function saludo() {
   const h = new Date().getHours()
   return h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches'
+}
+
+/** Hecho y posponer para una próxima acción, sin abrir formularios. */
+function RapidasProxima({ accionId, fecha }: { accionId: string; fecha: string }) {
+  const c = useContenedor()
+  const d = useDatos()
+  const hecho = async () => {
+    try {
+      await editarAccion(c, accionId, { proximaCumplida: true })
+      toast.success('Marcada como hecha', {
+        action: { label: 'Deshacer', onClick: () => void editarAccion(c, accionId, { proximaCumplida: false }) },
+      })
+    } catch (e) {
+      toast.error((e as Error).message)
+    }
+  }
+  const posponer = async (n: number) => {
+    // Se pospone desde hoy si ya venció; si no, desde su fecha
+    const nueva = d.calendario.sumarHabiles(fecha < d.hoy ? d.hoy : fecha, n)
+    try {
+      await editarAccion(c, accionId, { proximaFecha: nueva })
+      toast.success(`Pospuesta al ${fechaCorta(nueva)}`, {
+        action: { label: 'Deshacer', onClick: () => void editarAccion(c, accionId, { proximaFecha: fecha }) },
+      })
+    } catch (e) {
+      toast.error((e as Error).message)
+    }
+  }
+  return (
+    <>
+      <Button size="icon-sm" variant="ghost" onClick={() => void hecho()} aria-label="Marcar como hecha" title="Marcar como hecha">
+        <CheckIcon aria-hidden />
+      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <Button size="icon-sm" variant="ghost" aria-label="Posponer" title="Posponer">
+              <SnoozeIcon aria-hidden />
+            </Button>
+          }
+        />
+        <DropdownMenuContent align="end" className="min-w-48">
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>Posponer</DropdownMenuLabel>
+            {[1, 3, 5, 10].map((n) => (
+              <DropdownMenuItem key={n} onClick={() => void posponer(n)} className="py-2">
+                {n === 1 ? '1 día hábil' : `${n} días hábiles`}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
+  )
 }
 
 /** Fila de pendiente: franja de estado, qué es y de qué expediente, y a la derecha cuándo vence. */
@@ -52,6 +110,21 @@ function FilaPendiente({ p }: { p: Pendiente }) {
       titulo={p.titulo}
       subtitulo={conPlazo || !p.fecha ? `${TIPO[p.tipo]} · ${p.detalle}` : p.detalle}
       fin={fin}
+      rapidas={
+        p.tipo === 'proxima' && p.fecha ? (
+          <RapidasProxima accionId={p.clave.slice(2)} fecha={p.fecha} />
+        ) : p.tipo === 'notificacion' ? (
+          <BotonEnlace
+            a={`/registrar?notificacion=${p.clave.slice(2)}`}
+            size="icon-sm"
+            variant="ghost"
+            aria-label="Registrar la acción que la atiende"
+            title="Registrar la acción que la atiende"
+          >
+            <PenLineIcon aria-hidden />
+          </BotonEnlace>
+        ) : undefined
+      }
     />
   )
 }
@@ -93,6 +166,7 @@ export function Inicio() {
     .sort((a, b) => a.fecha.localeCompare(b.fecha) || (a.hora ?? '').localeCompare(b.hora ?? ''))
     .slice(0, 5)
 
+  const porRevisar = useMemo(() => colaRonda(d.expedientes, d.hoy, 7).length, [d.expedientes, d.hoy])
   const urgentes = semana.filter((p) => p.severidad === 'urgente').length
   const estado: { pose: Pose; texto: string } = d.cargando
     ? { pose: 'corriendo', texto: 'Revisando expedientes…' }
@@ -109,6 +183,7 @@ export function Inicio() {
     { etiqueta: 'Plazos vencidos', valor: indicadores.plazosVencidos, a: '/agenda', tono: 'rojo' as const },
     { etiqueta: 'Vencen en 3 días hábiles', valor: indicadores.plazosPorVencer, a: '/agenda', tono: 'ambar' as const },
     { etiqueta: 'Sin movimiento', valor: indicadores.sinMovimiento, a: '/expedientes' },
+    { etiqueta: 'Por revisar en el CEJ', valor: porRevisar, a: '/ronda' },
   ]
 
   return (
@@ -144,7 +219,7 @@ export function Inicio() {
                       valor={v.valor}
                       className={cn('tabular font-semibold', v.tono === 'rojo' && 'text-destructive', v.tono === 'ambar' && 'text-warning-foreground')}
                     />
-                    <span className="text-muted-foreground group-hover:text-foreground group-hover:underline">{v.etiqueta.toLowerCase()}</span>
+                    <span className="text-muted-foreground group-hover:text-foreground group-hover:underline">{v.etiqueta.charAt(0).toLowerCase() + v.etiqueta.slice(1)}</span>
                   </Link>
                 </li>
               ))}

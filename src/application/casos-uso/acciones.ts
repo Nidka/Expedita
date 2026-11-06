@@ -16,6 +16,8 @@ export interface RegistrarAccionCmd {
   visitaId?: Id
   mensajeId?: Id
   origen?: OrigenAccion
+  /** Por defecto, la acción cumple las próximas abiertas. Una revisión «sin novedad» no las cumple. */
+  cumplirProximas?: boolean
 }
 
 /**
@@ -44,7 +46,7 @@ export async function registrarAccion(c: Contenedor, cmd: RegistrarAccionCmd): P
     origen: cmd.origen ?? 'manual',
   })
 
-  await c.acciones.cumplirProximasAbiertas(cmd.expedienteId, accion.id)
+  if (cmd.cumplirProximas !== false) await c.acciones.cumplirProximasAbiertas(cmd.expedienteId, accion.id)
 
   const cambiosExp: Parameters<Contenedor['expedientes']['actualizar']>[1] = {}
   if (cmd.etapaNueva) cambiosExp.etapa = cmd.etapaNueva

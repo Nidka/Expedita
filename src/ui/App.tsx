@@ -24,6 +24,8 @@ const Panel = lazy(() => import('./paginas/Panel').then((m) => ({ default: m.Pan
 const Cuenta = lazy(() => import('./paginas/Cuenta').then((m) => ({ default: m.Cuenta })))
 const Privacidad = lazy(() => import('./paginas/Privacidad').then((m) => ({ default: m.Privacidad })))
 const PaginaAvance = lazy(() => import('./paginas/Avance').then((m) => ({ default: m.PaginaAvance })))
+const Ronda = lazy(() => import('./paginas/Ronda').then((m) => ({ default: m.Ronda })))
+const Calculadora = lazy(() => import('./paginas/Calculadora').then((m) => ({ default: m.Calculadora })))
 const Ajustes = lazy(() => import('./paginas/Ajustes').then((m) => ({ default: m.Ajustes })))
 
 function Cargando() {
@@ -103,6 +105,8 @@ function AppPrivada() {
               <Route path="expedientes/:id" element={<FichaExpediente />} />
               <Route path="agenda" element={<Agenda />} />
               <Route path="visitas" element={<Visitas />} />
+              <Route path="ronda" element={<Ronda />} />
+              <Route path="calculadora" element={<Calculadora />} />
               <Route path="asistente" element={<Asistente />} />
               <Route path="ajustes" element={<Ajustes />} />
               <Route path="cuenta" element={<Cuenta />} />
