@@ -1,8 +1,9 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { ArchiveIcon, ArchiveRestoreIcon, CalendarPlusIcon, CheckIcon, CopyIcon, ExternalLinkIcon, PencilIcon, PenLineIcon, SearchCheckIcon } from '@/ui/iconos'
-import type { Expediente } from '@/domain/entidades'
+import { ArchiveIcon, ArchiveRestoreIcon, CalendarPlusIcon, CheckIcon, CopyIcon, ExternalLinkIcon, PencilIcon, PenLineIcon, SearchCheckIcon, Trash2Icon } from '@/ui/iconos'
+import type { Accion, Expediente } from '@/domain/entidades'
+import { EditarAccion, EliminarAccion } from '../componentes/EditarAccion'
 import { parsearNumeroExpediente, ESPECIALIDADES, INSTANCIAS } from '@/domain/expediente/numero-expediente'
 import { estadoMovimiento } from '@/domain/agenda/que-toca-hoy'
 import { SUGERENCIA_POR_ETAPA, VIAS, esViaId, type ViaId } from '@/domain/plazos/catalogo'
@@ -229,6 +230,8 @@ export function FichaExpediente() {
   const d = useDatos()
   const exp = id ? d.expPorId.get(id) : undefined
   const [editando, setEditando] = useState(false)
+  const [editandoAccion, setEditandoAccion] = useState<Accion>()
+  const [borrandoAccion, setBorrandoAccion] = useState<Accion>()
   const navegar = useNavigate()
 
   const historial = useMemo(() => {
@@ -245,6 +248,7 @@ export function FichaExpediente() {
             .filter(Boolean)
             .join(' · '),
           tipo: 'Acción',
+          accion: a,
         })),
       ...d.notificaciones
         .filter((n) => n.expedienteId === exp.id)
@@ -353,6 +357,16 @@ export function FichaExpediente() {
                     <p className="font-medium">{h.titulo}</p>
                     {h.texto && <p className="text-sm whitespace-pre-line">{h.texto}</p>}
                     {h.meta && <p className="text-xs text-muted-foreground">{h.meta}</p>}
+                    {'accion' in h && h.accion && (
+                      <div className="mt-1.5 flex gap-1">
+                        <Button variant="ghost" size="xs" onClick={() => setEditandoAccion(h.accion as Accion)}>
+                          <PencilIcon aria-hidden /> Editar
+                        </Button>
+                        <Button variant="ghost" size="xs" className="text-destructive hover:text-destructive" onClick={() => setBorrandoAccion(h.accion as Accion)}>
+                          <Trash2Icon aria-hidden /> Eliminar
+                        </Button>
+                      </div>
+                    )}
                   </li>
                 ))}
               </ol>
@@ -403,6 +417,8 @@ export function FichaExpediente() {
       </div>
 
       {editando && <EditarExpediente exp={exp} abierto={editando} cerrar={() => setEditando(false)} />}
+      {editandoAccion && <EditarAccion accion={editandoAccion} cerrar={() => setEditandoAccion(undefined)} />}
+      {borrandoAccion && <EliminarAccion accion={borrandoAccion} cerrar={() => setBorrandoAccion(undefined)} />}
     </>
   )
 }
