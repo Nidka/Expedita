@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 import { BooksIcon, CopyIcon, FileDocIcon, PencilIcon, PlusIcon, RefreshIcon, Trash2Icon } from '@/ui/iconos'
+import { puedeEliminar } from '@/domain/permisos'
 import { useContenedor, useDatos } from '../contexto'
 import { Campo, EncabezadoPagina, SelectNativo } from '../componentes/base'
 import { SelectorExpediente } from '../componentes/SelectorExpediente'
@@ -144,7 +145,7 @@ export function Escritos() {
                 activo={elegido?.id === m.id}
                 onUsar={() => (m.categoria === 'jurisprudencia' ? insertar(m.contenido) : usar({ origen: 'estudio', ...m }))}
                 onEditar={() => setEditor(m)}
-                onEliminar={() => eliminar(m)}
+                onEliminar={puedeEliminar(d.sesion.miembro, m) ? () => eliminar(m) : undefined}
               />
             ))}
             {pestana === 'jurisprudencia' && !propios.length && (

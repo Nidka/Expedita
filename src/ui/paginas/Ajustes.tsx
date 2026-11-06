@@ -142,7 +142,10 @@ function Equipo() {
             <Campo etiqueta="Nombre" requerido>
               {(p) => <Input {...p} value={nombre} onChange={(e) => setNombre(e.target.value)} />}
             </Campo>
-            <Campo etiqueta="Rol">
+            <Campo
+              etiqueta="Rol"
+              ayuda={rol === "admin" ? "Todo, incluidos ajustes, equipo, historial de cambios y eliminar registros." : "Registra y edita todo; solo elimina las acciones y modelos que creó."}
+            >
               {(p) => (
                 <SelectNativo {...p} value={rol} onChange={(e) => setRol(e.target.value as Rol)}>
                   <option value="abogado">Abogado</option>

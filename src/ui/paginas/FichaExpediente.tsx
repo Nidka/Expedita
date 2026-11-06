@@ -8,6 +8,7 @@ import { SeccionDocumentos } from '../componentes/Documentos'
 import { RutaEtapas } from '../componentes/RutaEtapas'
 import { CompartirAvance } from '../componentes/CompartirAvance'
 import { parsearNumeroExpediente, ESPECIALIDADES, INSTANCIAS } from '@/domain/expediente/numero-expediente'
+import { puedeEliminar } from '@/domain/permisos'
 import { estadoMovimiento } from '@/domain/agenda/que-toca-hoy'
 import { SUGERENCIA_POR_ETAPA, VIAS, esViaId } from '@/domain/plazos/catalogo'
 import { Button } from '@/components/ui/button'
@@ -317,9 +318,11 @@ export function FichaExpediente() {
                         <Button variant="ghost" size="xs" onClick={() => setEditandoAccion(h.accion as Accion)}>
                           <PencilIcon aria-hidden /> Editar
                         </Button>
-                        <Button variant="ghost" size="xs" className="text-destructive hover:text-destructive" onClick={() => setBorrandoAccion(h.accion as Accion)}>
-                          <Trash2Icon aria-hidden /> Eliminar
-                        </Button>
+                        {puedeEliminar(d.sesion.miembro, h.accion) && (
+                          <Button variant="ghost" size="xs" className="text-destructive hover:text-destructive" onClick={() => setBorrandoAccion(h.accion as Accion)}>
+                            <Trash2Icon aria-hidden /> Eliminar
+                          </Button>
+                        )}
                       </div>
                     )}
                   </li>

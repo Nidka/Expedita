@@ -8,6 +8,7 @@ export interface ModeloEscrito {
   titulo: string
   categoria: 'escrito' | 'jurisprudencia'
   contenido: string
+  creadoPor?: string
   creadoEn: string
   actualizadoEn: string
 }
