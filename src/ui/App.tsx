@@ -18,6 +18,7 @@ const Visitas = lazy(() => import('./paginas/Visitas').then((m) => ({ default: m
 const Asistente = lazy(() => import('./paginas/Asistente').then((m) => ({ default: m.Asistente })))
 const Reportes = lazy(() => import('./paginas/Reportes').then((m) => ({ default: m.Reportes })))
 const Cuenta = lazy(() => import('./paginas/Cuenta').then((m) => ({ default: m.Cuenta })))
+const PaginaAvance = lazy(() => import('./paginas/Avance').then((m) => ({ default: m.PaginaAvance })))
 const Ajustes = lazy(() => import('./paginas/Ajustes').then((m) => ({ default: m.Ajustes })))
 
 function Cargando() {
@@ -32,7 +33,21 @@ function Cargando() {
 
 type Estado = { tipo: 'cargando' } | { tipo: 'anonimo' } | { tipo: 'sin-estudio'; email: string } | { tipo: 'dentro'; sesion: Sesion }
 
+/** El enlace de avance para clientes (RF-40) es público: no pasa por el inicio de sesión. */
+const TOKEN_AVANCE = /^\/avance\/([\w-]{40,})\/?$/
+
 export function App() {
+  const token = TOKEN_AVANCE.exec(location.pathname)?.[1]
+  if (token)
+    return (
+      <Suspense fallback={null}>
+        <PaginaAvance token={token} />
+      </Suspense>
+    )
+  return <AppPrivada />
+}
+
+function AppPrivada() {
   const c = useContenedor()
   const [estado, setEstado] = useState<Estado>({ tipo: 'cargando' })
 

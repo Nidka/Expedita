@@ -1,4 +1,6 @@
 import type { Accion, ConfigOrg, Expediente, Id, Juzgado, Miembro, Notificacion, Rol, Visita, VisitaItem, Audiencia } from '@/domain/entidades'
+import { generarToken, type AvanceCliente, type EnlaceCliente } from '@/domain/avance/avance'
+import type { FechaISO } from '@/domain/shared/fecha'
 import type { Feriado } from '@/domain/plazos/feriados'
 import type {
   AccionRepo,
@@ -8,6 +10,7 @@ import type {
   ConfigRepo,
   AuditoriaRepo,
   EquipoRepo,
+  EnlacesClienteRepo,
   Invitacion,
   RegistroAuditoria,
   ExpedienteRepo,
@@ -242,5 +245,32 @@ export class AuditoriaSupabase implements AuditoriaRepo {
       .order('en', { ascending: false })
       .limit(limite)
     return (lanzarSiError(r) as Record<string, unknown>[]).map((f) => deFila<RegistroAuditoria>(f))
+  }
+}
+
+export class EnlacesClienteSupabase implements EnlacesClienteRepo {
+  constructor(private readonly org: OrgActual) {}
+  async delExpediente(expedienteId: Id): Promise<EnlaceCliente[]> {
+    const r = await supabase()
+      .from('enlaces_cliente')
+      .select('id, expediente_id, token, expira, revocado, creado_en')
+      .eq('expediente_id', expedienteId)
+      .order('creado_en', { ascending: false })
+    return (lanzarSiError(r) as Record<string, unknown>[]).map((f) => deFila<EnlaceCliente>(f))
+  }
+  async crear(expedienteId: Id, expira?: FechaISO): Promise<EnlaceCliente> {
+    const r = await supabase()
+      .from('enlaces_cliente')
+      .insert({ org_id: this.org(), expediente_id: expedienteId, token: generarToken(), expira: expira ?? null })
+      .select('id, expediente_id, token, expira, revocado, creado_en')
+      .single()
+    return deFila<EnlaceCliente>(lanzarSiError(r) as Record<string, unknown>)
+  }
+  async revocar(id: Id): Promise<void> {
+    lanzarSiError(await supabase().from('enlaces_cliente').update({ revocado: true }).eq('id', id))
+  }
+  async avance(token: string): Promise<AvanceCliente> {
+    const r = await supabase().rpc('avance_cliente', { p_token: token })
+    return deFila<AvanceCliente>(lanzarSiError(r) as Record<string, unknown>)
   }
 }

@@ -80,5 +80,8 @@ export {
   ArrowClockwiseIcon as RefreshIcon,
   GoogleDriveLogoIcon as DriveIcon,
   LinkSimpleIcon as LinkIcon,
+  ShareNetworkIcon as ShareIcon,
+  WhatsappLogoIcon as WhatsappIcon,
+  ScalesIcon,
   ChartBarIcon,
 } from '@phosphor-icons/react'

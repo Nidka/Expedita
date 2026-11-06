@@ -16,6 +16,7 @@ import type {
   Visita,
   VisitaItem,
 } from '@/domain/entidades'
+import type { AvanceCliente, EnlaceCliente } from '@/domain/avance/avance'
 import type { CatalogoDrive } from '@/domain/documentos/drive'
 import type { Feriado } from '@/domain/plazos/feriados'
 import type { FechaISO } from '@/domain/shared/fecha'
@@ -126,6 +127,14 @@ export interface AuthPort {
   recuperarClave(email: string): Promise<void>
   /** Crea el estudio y deja al usuario actual como administrador. */
   crearEstudio(nombreEstudio: string, nombreUsuario: string): Promise<void>
+}
+
+/** Enlaces de avance para clientes (RF-40). `avance` es público: funciona sin sesión, solo con el token. */
+export interface EnlacesClienteRepo {
+  delExpediente(expedienteId: Id): Promise<EnlaceCliente[]>
+  crear(expedienteId: Id, expira?: FechaISO): Promise<EnlaceCliente>
+  revocar(id: Id): Promise<void>
+  avance(token: string): Promise<AvanceCliente>
 }
 
 // ---------- Asistente de IA ----------

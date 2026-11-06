@@ -6,6 +6,7 @@ import type {
   Cambios,
   ConfigRepo,
   EquipoRepo,
+  EnlacesClienteRepo,
   ExpedienteRepo,
   Invitacion,
   JuzgadoRepo,
@@ -16,8 +17,9 @@ import type {
 } from '@/application/ports'
 import type { Contenedor } from '@/application/contenedor'
 import type { Accion, Audiencia, ConfigOrg, Expediente, Id, Juzgado, Miembro, Notificacion, Visita, VisitaItem } from '@/domain/entidades'
+import { construirAvance, enlaceVigente, generarToken, type AvanceCliente, type EnlaceCliente } from '@/domain/avance/avance'
 import { FERIADOS_NACIONALES } from '@/domain/plazos/feriados'
-import { hoyEnLima } from '@/domain/shared/fecha'
+import { hoyEnLima, type FechaISO } from '@/domain/shared/fecha'
 import { driveDemo } from './drive-demo'
 import { gmailDemo } from './gmail-demo'
 
@@ -258,6 +260,41 @@ class IADemo implements AsistenteIA {
 }
 
 /** Contenedor completo en memoria. `persistir` = guardar en localStorage (modo demo). */
+class EnlacesMemoria implements EnlacesClienteRepo {
+  private filas: EnlaceCliente[]
+  constructor(
+    private readonly almacen: Almacen,
+    private readonly c: () => Contenedor,
+  ) {
+    this.filas = almacen.leer<EnlaceCliente>('enlaces', [])
+  }
+  private guardar() {
+    this.almacen.escribir('enlaces', this.filas)
+  }
+  async delExpediente(expedienteId: Id) {
+    return this.filas.filter((e) => e.expedienteId === expedienteId).sort((a, b) => b.creadoEn.localeCompare(a.creadoEn))
+  }
+  async crear(expedienteId: Id, expira?: FechaISO) {
+    const e: EnlaceCliente = { id: uid(), expedienteId, token: generarToken(), expira, revocado: false, creadoEn: ahora() }
+    this.filas.push(e)
+    this.guardar()
+    return e
+  }
+  async revocar(id: Id) {
+    this.filas = this.filas.map((e) => (e.id === id ? { ...e, revocado: true } : e))
+    this.guardar()
+  }
+  async avance(token: string): Promise<AvanceCliente> {
+    const c = this.c()
+    const hoy = c.reloj.hoy()
+    const e = this.filas.find((x) => x.token === token)
+    const exp = e && enlaceVigente(e, hoy) ? await c.expedientes.obtener(e.expedienteId) : null
+    if (!e || !exp) throw new Error('Enlace no válido o vencido')
+    const [acciones, audiencias, sesion] = await Promise.all([c.acciones.listar(), c.audiencias.listar(), c.auth.sesionActual()])
+    return construirAvance(sesion?.orgNombre ?? 'Estudio', exp, acciones, audiencias, hoy, e.expira)
+  }
+}
+
 export function contenedorMemoria(opciones: { persistir?: boolean; semilla?: (c: Contenedor) => Promise<void> } = {}): Contenedor {
   const bus = new Bus()
   const almacen = new Almacen(opciones.persistir ? 'expedita-demo' : null, bus)
@@ -271,6 +308,7 @@ export function contenedorMemoria(opciones: { persistir?: boolean; semilla?: (c:
     juzgados: new JuzgadosMemoria(almacen),
     config: new ConfigMemoria(almacen),
     equipo: new EquipoMemoria(),
+    enlaces: new EnlacesMemoria(almacen, () => c),
     auditoria: { recientes: async () => [] },
     cambios: { suscribir: (_t, cb) => bus.escuchar(cb) } satisfies CanalCambios,
     ia: new IADemo(),

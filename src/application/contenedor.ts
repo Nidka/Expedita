@@ -7,6 +7,7 @@ import type {
   CanalCambios,
   ConfigRepo,
   DrivePort,
+  EnlacesClienteRepo,
   GmailPort,
   EquipoRepo,
   ExpedienteRepo,
@@ -28,6 +29,7 @@ export interface Contenedor {
   juzgados: JuzgadoRepo
   config: ConfigRepo
   equipo: EquipoRepo
+  enlaces: EnlacesClienteRepo
   auditoria: AuditoriaRepo
   cambios: CanalCambios
   ia: AsistenteIA
