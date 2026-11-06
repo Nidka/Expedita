@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { CalendarPlusIcon, ChevronLeftIcon, ChevronRightIcon, DownloadIcon, ExternalLinkIcon, PencilIcon } from '@/ui/iconos'
@@ -325,10 +325,16 @@ export function Agenda() {
   const d = useDatos()
   const [params, setParams] = useSearchParams()
   const items = useMemo(() => eventos(d), [d])
-  const [editando, setEditando] = useState<{ id?: string; inicial: FormAudiencia } | null>(() => {
-    const expId = params.get('audiencia')
-    return expId ? { inicial: nueva(expId, d.hoy, d.sesion.miembro.nombre) } : null
-  })
+  const [editando, setEditando] = useState<{ id?: string; inicial: FormAudiencia } | null>(null)
+  // ?audiencia=<expediente> (o vacío) abre el formulario, también si ya estás en la Agenda (atajo «A»)
+  useEffect(() => {
+    const pedida = params.get('audiencia')
+    if (pedida === null) return
+    setEditando({ inicial: nueva(pedida, d.hoy, d.sesion.miembro.nombre) })
+    const p = new URLSearchParams(params)
+    p.delete('audiencia')
+    setParams(p, { replace: true })
+  }, [params]) // eslint-disable-line react-hooks/exhaustive-deps
   const proximas = d.audiencias.filter((a) => a.fecha >= d.hoy).sort((a, b) => a.fecha.localeCompare(b.fecha) || (a.hora ?? '').localeCompare(b.hora ?? ''))
 
   const exportar = () => {

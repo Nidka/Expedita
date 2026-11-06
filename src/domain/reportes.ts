@@ -36,7 +36,7 @@ export function lunesDe(f: FechaISO): FechaISO {
   return sumarDias(f, -((diaSemana(f) + 6) % 7))
 }
 
-function contar(valores: string[]): FilaConteo[] {
+export function contar(valores: string[]): FilaConteo[] {
   const m = new Map<string, number>()
   for (const v of valores) m.set(v, (m.get(v) ?? 0) + 1)
   return [...m.entries()].map(([clave, n]) => ({ clave, n })).sort((a, b) => b.n - a.n || a.clave.localeCompare(b.clave, 'es'))

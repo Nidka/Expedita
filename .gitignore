@@ -41,3 +41,6 @@ prototipo/
 
 # Archivos temporales de wrangler dev
 .wrangler/
+
+# Páginas de prueba locales (capturas): nunca se publican
+public/zz-*

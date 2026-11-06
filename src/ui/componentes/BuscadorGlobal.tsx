@@ -1,10 +1,13 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BellPlusIcon, FolderPlusIcon, ListChecksIcon, PenLineIcon, QuestionIcon } from '@/ui/iconos'
+import { BellPlusIcon, CalendarPlusIcon, FolderPlusIcon, ListChecksIcon, PenLineIcon, QuestionIcon } from '@/ui/iconos'
+import { ATAJOS_CREAR, Combinacion, Tecla } from '../atajos'
 import { TEMAS } from '../ayuda/temas'
-import { CommandDialog, Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from '@/components/ui/command'
+import { CommandDialog, Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, CommandShortcut } from '@/components/ui/command'
 import { useDatos } from '../contexto'
-import { NAVEGACION } from '../layout/navegacion'
+import { AYUDA, NAVEGACION } from '../layout/navegacion'
+
+const ICONOS = { r: PenLineIcon, n: BellPlusIcon, e: FolderPlusIcon, a: CalendarPlusIcon } as const
 import { Michi } from './marca'
 
 /** Búsqueda global (Ctrl/⌘ + K): expedientes, secciones y acciones rápidas. */
@@ -41,22 +44,29 @@ export function BuscadorGlobal({ abierto, setAbierto }: { abierto: boolean; setA
               No hay coincidencias.
             </span>
           </CommandEmpty>
-          <CommandGroup heading="Acciones">
-            <CommandItem value="registrar acción impulso" onSelect={() => ir('/registrar')}>
-              <PenLineIcon aria-hidden /> Registrar acción
-            </CommandItem>
-            <CommandItem value="nueva notificación sinoe correo" onSelect={() => ir('/bandeja?nueva=1')}>
-              <BellPlusIcon aria-hidden /> Nueva notificación
-            </CommandItem>
-            <CommandItem value="agregar expediente nuevo" onSelect={() => ir('/expedientes?nuevo=1')}>
-              <FolderPlusIcon aria-hidden /> Agregar expediente
-            </CommandItem>
+          <CommandGroup heading="Crear">
+            {ATAJOS_CREAR.map((x) => {
+              const Icono = ICONOS[x.tecla]
+              return (
+                <CommandItem key={x.tecla} value={`crear nuevo ${x.texto}`} onSelect={() => ir(x.a)}>
+                  <Icono aria-hidden /> {x.texto}
+                  <CommandShortcut>
+                    <Tecla>{x.tecla}</Tecla>
+                  </CommandShortcut>
+                </CommandItem>
+              )
+            })}
           </CommandGroup>
           <CommandSeparator />
           <CommandGroup heading="Ir a">
-            {NAVEGACION.filter((n) => !n.soloAdmin || sesion.miembro.rol === 'admin').map(({ a, texto, icono: Icono }) => (
+            {[...NAVEGACION.filter((n) => !n.soloAdmin || sesion.miembro.rol === 'admin'), AYUDA].map(({ a, texto, icono: Icono, tecla }) => (
               <CommandItem key={a} value={`ir ${texto}`} onSelect={() => ir(a)}>
                 <Icono aria-hidden /> {texto}
+                {tecla && (
+                  <CommandShortcut>
+                    <Combinacion teclas={['G', tecla]} separador="" />
+                  </CommandShortcut>
+                )}
               </CommandItem>
             ))}
           </CommandGroup>

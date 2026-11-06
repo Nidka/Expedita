@@ -109,6 +109,12 @@ function Enlace({ children, onClick }: { children: ReactNode; onClick: () => voi
   )
 }
 
+/**
+ * Acceso por enlace de correo: oculto mientras se use el correo gratuito de Supabase (2 envíos por hora).
+ * Para activarlo, definir VITE_ENLACE_CORREO=si en las variables de compilación (tras conectar un SMTP propio).
+ */
+const ENLACE_POR_CORREO = import.meta.env.VITE_ENLACE_CORREO === 'si'
+
 type Paso = 'correo' | 'metodo' | 'clave' | 'crear' | 'enviado'
 
 export function IniciarSesion({ alEntrar }: { alEntrar: () => void }) {
@@ -317,16 +323,18 @@ export function IniciarSesion({ alEntrar }: { alEntrar: () => void }) {
               {error}
             </p>
           )}
-          <div className="mt-8 flex flex-col items-center gap-1 text-center">
-            <button
-              type="button"
-              onClick={() => void enviarEnlace()}
-              disabled={cargando}
-              className="rounded text-[0.9375rem] text-primary outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/25 disabled:text-muted-foreground"
-            >
-              {cargando ? 'Enviando enlace…' : 'Prefiero recibir un enlace por correo'}
-            </button>
-          </div>
+          {ENLACE_POR_CORREO && (
+            <div className="mt-8 flex flex-col items-center gap-1 text-center">
+              <button
+                type="button"
+                onClick={() => void enviarEnlace()}
+                disabled={cargando}
+                className="rounded text-[0.9375rem] text-primary outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/25 disabled:text-muted-foreground"
+              >
+                {cargando ? 'Enviando enlace…' : 'Prefiero recibir un enlace por correo'}
+              </button>
+            </div>
+          )}
         </div>
       )}
 

@@ -90,5 +90,10 @@ export {
   CircleDashedIcon,
   LifebuoyIcon,
   CompassIcon,
+  SquaresFourIcon,
+  KeyboardIcon,
+  MoonIcon,
+  SunIcon,
+  GavelIcon,
   ChartBarIcon,
 } from '@phosphor-icons/react'

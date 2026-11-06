@@ -16,6 +16,8 @@ export type TemaId =
   | 'escritos'
   | 'avance-cliente'
   | 'reportes'
+  | 'panel'
+  | 'atajos'
   | 'asistente'
   | 'equipo'
   | 'importar'
@@ -289,6 +291,43 @@ export const TEMAS: Tema[] = [
           '«Exportar CSV» descarga cada acción del periodo para abrirla en Excel.',
         ],
       },
+    ],
+  },
+  {
+    id: 'panel',
+    titulo: 'Panel del estudio',
+    grupo: 'Expedientes y escritos',
+    resumen: 'El estado de toda la cartera de un vistazo: cuánto se impulsa, qué está quieto y dónde se concentra el trabajo.',
+    secciones: [
+      {
+        lista: [
+          'Impulsados en 30 días: expedientes activos con al menos una acción en el último mes. Lo ideal es que suba.',
+          'Días desde el último movimiento: cuántos expedientes llevan 0–15, 16–30, 31–60, 61–90 o más de 90 días sin impulso.',
+          'Más tiempo sin impulso: los primeros que conviene revisar; cada uno abre su ficha.',
+          'Por etapa y por materia: dónde está concentrada la cartera.',
+          'Actividad del equipo: acciones de cada persona en los últimos 30 días.',
+        ],
+      },
+      { texto: 'Cada indicador de arriba lleva a la pantalla donde se trabaja. Para periodos y filtros a medida, usa Reportes.' },
+    ],
+    enlaces: [{ texto: 'Ir a Reportes', a: '/reportes' }],
+  },
+  {
+    id: 'atajos',
+    titulo: 'Atajos de teclado',
+    grupo: 'Día a día',
+    resumen: 'Trabaja más rápido sin soltar el teclado.',
+    secciones: [
+      {
+        lista: [
+          'Ctrl + K o /: buscar expedientes, secciones y temas de ayuda.',
+          'R: registrar acción · N: nueva notificación · E: nuevo expediente · A: programar audiencia.',
+          'G y luego una letra: ir a una sección (G H Hoy, G N Notificaciones, G E Expedientes, G A Agenda, G P Panel…).',
+          'T: cambiar entre tema claro y oscuro.',
+          '?: ver la lista completa de atajos.',
+        ],
+      },
+      { texto: 'Los atajos no se activan mientras escribes en un campo. El menú «Nuevo» de arriba muestra la tecla de cada opción.' },
     ],
   },
   {

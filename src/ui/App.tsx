@@ -20,6 +20,7 @@ const Reportes = lazy(() => import('./paginas/Reportes').then((m) => ({ default:
 const Escritos = lazy(() => import('./paginas/Escritos').then((m) => ({ default: m.Escritos })))
 const PrimerosPasos = lazy(() => import('./paginas/PrimerosPasos').then((m) => ({ default: m.PrimerosPasos })))
 const CentroAyuda = lazy(() => import('./paginas/CentroAyuda').then((m) => ({ default: m.CentroAyuda })))
+const Panel = lazy(() => import('./paginas/Panel').then((m) => ({ default: m.Panel })))
 const Cuenta = lazy(() => import('./paginas/Cuenta').then((m) => ({ default: m.Cuenta })))
 const PaginaAvance = lazy(() => import('./paginas/Avance').then((m) => ({ default: m.PaginaAvance })))
 const Ajustes = lazy(() => import('./paginas/Ajustes').then((m) => ({ default: m.Ajustes })))
@@ -99,6 +100,7 @@ function AppPrivada() {
               <Route path="ajustes" element={<Ajustes />} />
               <Route path="cuenta" element={<Cuenta />} />
               <Route path="reportes" element={<Reportes />} />
+              <Route path="panel" element={<Panel />} />
               <Route path="escritos" element={<Escritos />} />
               <Route path="primeros-pasos" element={<PrimerosPasos />} />
               <Route path="ayuda" element={<CentroAyuda />} />
