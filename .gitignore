@@ -38,3 +38,6 @@ supabase/.branches
 docs/traspaso.md
 # Prototipo de claude.ai (contiene datos de la cuenta): solo local
 prototipo/
+
+# Archivos temporales de wrangler dev
+.wrangler/
