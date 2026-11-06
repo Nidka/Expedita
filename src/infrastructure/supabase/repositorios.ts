@@ -2,7 +2,7 @@ import type { Accion, ConfigOrg, Expediente, Id, Juzgado, Miembro, Notificacion,
 import { generarToken, type AvanceCliente, type EnlaceCliente } from '@/domain/avance/avance'
 import type { FechaISO } from '@/domain/shared/fecha'
 import type { ModeloEscrito } from '@/domain/escritos/plantilla'
-import type { Feriado } from '@/domain/plazos/feriados'
+import { FERIADOS_NACIONALES, unirFeriados, type Feriado } from '@/domain/plazos/feriados'
 import type {
   AccionRepo,
   AudienciaRepo,
@@ -193,8 +193,9 @@ export class ConfigSupabase implements ConfigRepo {
     }
   }
   async feriados(): Promise<Feriado[]> {
+    // Los calculados cubren todos los años; la tabla suma los extraordinarios que declare el Gobierno
     const r = await supabase().from('feriados').select('fecha, nombre').order('fecha')
-    return lanzarSiError(r) as Feriado[]
+    return unirFeriados(lanzarSiError(r) as Feriado[], FERIADOS_NACIONALES)
   }
 }
 
