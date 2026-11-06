@@ -14,6 +14,11 @@ import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { useContenedor, useDatos } from '../contexto'
+import { useSinoe } from '../sinoe'
+import { DefinirPlazo } from '../componentes/DefinirPlazo'
+import type { Notificacion } from '@/domain/entidades'
+
+const HORA = new Intl.DateTimeFormat('es-PE', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Lima' })
 import { BotonEnlace, Campo, EncabezadoPagina, EstadoVacio, FRANJA_SEVERIDAD, Lista, Mono, SelectNativo, Vence } from '../componentes/base'
 import { cn } from '@/lib/utils'
 import { etiquetaExp, fecha } from '../formato'
@@ -172,6 +177,8 @@ function NuevaNotificacion({ abierto, cerrar }: { abierto: boolean; cerrar: () =
 export function Bandeja() {
   const c = useContenedor()
   const d = useDatos()
+  const sinoe = useSinoe()
+  const [definiendo, setDefiniendo] = useState<Notificacion>()
   const [params, setParams] = useSearchParams()
   const nueva = params.get('nueva') === '1'
   const setNueva = (v: boolean) => setParams(v ? { nueva: '1' } : {}, { replace: true })
@@ -216,7 +223,14 @@ export function Bandeja() {
               <span className={cn('absolute inset-y-4 left-0 w-[3px] rounded-r-full', FRANJA_SEVERIDAD[sev])} aria-hidden />
               <div className="flex items-start gap-4">
                 <div className="min-w-0 flex-1">
-                  <p className="font-semibold">{n.asunto}</p>
+                  <p className="font-semibold">
+                    {n.asunto}
+                    {n.origen === 'gmail' && (
+                      <span className="ml-2 inline-block rounded bg-secondary px-1.5 py-0.5 align-middle text-[0.6875rem] font-semibold text-secondary-foreground">
+                        SINOE
+                      </span>
+                    )}
+                  </p>
                   <p className="mt-0.5 text-sm text-muted-foreground">
                     {exp ? (
                       <Link to={`/expedientes/${exp.id}`} className="font-medium text-foreground underline-offset-2 hover:underline">
@@ -233,6 +247,11 @@ export function Bandeja() {
                   <div className="mt-4 flex flex-wrap gap-2">
                     {estado === 'pendiente' ? (
                       <>
+                        {!n.vencimiento && (
+                          <Button size="sm" variant="outline" onClick={() => setDefiniendo(n)}>
+                            Definir plazo
+                          </Button>
+                        )}
                         <BotonEnlace a={`/registrar?notificacion=${n.id}`} size="sm">
                           Registrar acción
                         </BotonEnlace>
@@ -268,6 +287,17 @@ export function Bandeja() {
           </Button>
         }
       />
+      {sinoe.configurado && (
+        <p className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground" aria-live="polite">
+          <span>
+            Correo del SINOE: {sinoe.revisando ? 'revisando…' : sinoe.ultima ? `revisado a las ${HORA.format(sinoe.ultima)}` : 'pendiente de revisar'}
+            {sinoe.error && <span className="text-destructive"> · {sinoe.error}</span>}
+          </span>
+          <Button variant="ghost" size="sm" onClick={() => void sinoe.revisar(true)} disabled={sinoe.revisando}>
+            <RotateCcwIcon aria-hidden /> Revisar ahora
+          </Button>
+        </p>
+      )}
       <Tabs defaultValue="pendiente">
         <TabsList>
           <TabsTrigger value="pendiente">Pendientes · {pendientes}</TabsTrigger>
@@ -281,6 +311,7 @@ export function Bandeja() {
         </TabsContent>
       </Tabs>
       {nueva && <NuevaNotificacion abierto cerrar={() => setNueva(false)} />}
+      {definiendo && <DefinirPlazo notificacion={definiendo} cerrar={() => setDefiniendo(undefined)} />}
     </>
   )
 }

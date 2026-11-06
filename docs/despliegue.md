@@ -121,3 +121,14 @@ El correo incluido en Supabase solo envía **2 correos por hora**. Para enviar d
 4. Supabase → **Authentication → Rate Limits** → *Rate limit for sending emails*: súbelo a **30** por hora.
 
 Además, cada persona puede crear su contraseña en **Mi cuenta** (clic en su nombre, abajo a la izquierda) y entrar con «Usar mi contraseña» sin depender del correo.
+
+## 9. Avisos del SINOE desde Gmail y documentos del Drive
+
+Ambos se conectan desde la app (**Ajustes → SINOE** y **Ajustes → Drive**), cada uno con un script de Google
+que se instala una sola vez en la cuenta correspondiente. La app muestra los pasos y el botón «Copiar script».
+
+- **SINOE**: con la app abierta por cualquier miembro, el correo se revisa cada 10 minutos y cada aviso entra a la
+  bandeja con su expediente (sin duplicados). Luego se usa «Definir plazo» para elegir el acto y calcular el vencimiento.
+- **Drive**: cada expediente muestra los archivos de la carpeta de su cliente (se empareja por nombre).
+
+Los scripts están en `scripts/google/`. Solo leen; no envían, borran ni copian archivos.

@@ -110,6 +110,8 @@ export interface Notificacion {
   estado: EstadoNotificacion
   atendidaEn?: FechaISO
   origen: OrigenNotificacion
+  /** Identificador del correo de origen (Gmail), para no registrarlo dos veces */
+  origenRef?: string
   creadoEn: string
 }
 
@@ -187,6 +189,9 @@ export interface ConfigOrg {
   /** Dirección del script de Google que lista el Drive del estudio */
   driveUrl?: string
   driveToken?: string
+  /** Script de Google que lee los avisos del SINOE en Gmail */
+  gmailUrl?: string
+  gmailToken?: string
 }
 
 export const TIPOS_ESCRITO = [

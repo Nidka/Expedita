@@ -24,6 +24,7 @@ import { BotonEnlace } from '../componentes/base'
 import { BuscadorGlobal } from '../componentes/BuscadorGlobal'
 import { Logo, Michi } from '../componentes/marca'
 import { NAVEGACION, type ItemNavegacion } from './navegacion'
+import { ProveedorSinoe } from '../sinoe'
 
 function usePendientes() {
   const { notificaciones } = useDatos()
@@ -249,6 +250,7 @@ export function Shell() {
   const enRegistrar = pathname.startsWith('/registrar') || /^\/expedientes\/[^/]+/.test(pathname)
 
   return (
+    <ProveedorSinoe>
     <SidebarProvider>
       <a
         href="#contenido"
@@ -295,5 +297,6 @@ export function Shell() {
       <HojaMas abierta={mas} cerrar={() => setMas(false)} />
       <BuscadorGlobal abierto={buscar} setAbierto={setBuscar} />
     </SidebarProvider>
+    </ProveedorSinoe>
   )
 }

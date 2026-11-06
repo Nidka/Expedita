@@ -7,6 +7,8 @@ import type { Invitacion, RegistroAuditoria } from '@/application/ports'
 import { describirCambio } from '@/domain/auditoria'
 import { emparejar, type CatalogoDrive } from '@/domain/documentos/drive'
 import scriptDrive from '../../../scripts/google/expedita-drive.gs?raw'
+import scriptGmail from '../../../scripts/google/expedita-gmail.gs?raw'
+import { extraerDeCorreo } from '@/domain/notificaciones/extraer'
 import { Link, useSearchParams } from 'react-router-dom'
 import type { Miembro, Rol } from '@/domain/entidades'
 import { importarCuadro, type ResultadoImportacion } from '@/domain/expediente/importacion'
@@ -592,6 +594,145 @@ function Actividad() {
   )
 }
 
+/** Ajustes → SINOE: conexión con el Gmail que recibe los avisos de notificación. */
+function Sinoe() {
+  const c = useContenedor()
+  const { config } = useDatos()
+  const [url, setUrl] = useState(config.gmailUrl && config.gmailUrl !== 'demo' ? config.gmailUrl : '')
+  const [clave, setClave] = useState(config.gmailToken && config.gmailToken !== 'demo' ? config.gmailToken : '')
+  const [probando, setProbando] = useState(false)
+  const [error, setError] = useState<string>()
+  const [prueba, setPrueba] = useState<{ total: number; conNumero: number; ejemplos: string[] } | null>(null)
+
+  const copiarScript = async () => {
+    try {
+      await navigator.clipboard.writeText(scriptGmail)
+      toast.success('Script copiado', { description: 'Pégalo en script.google.com.' })
+    } catch {
+      toast.error('No se pudo copiar')
+    }
+  }
+
+  const guardarYProbar = async (ev: FormEvent) => {
+    ev.preventDefault()
+    setError(undefined)
+    setPrueba(null)
+    setProbando(true)
+    try {
+      const mensajes = await c.gmail.mensajes(url.trim(), clave.trim())
+      await c.config.guardar({ gmailUrl: url.trim(), gmailToken: clave.trim() })
+      const conNumero = mensajes.filter((m) => extraerDeCorreo(`${m.asunto}\n${m.texto}`).numero).length
+      setPrueba({ total: mensajes.length, conNumero, ejemplos: mensajes.slice(0, 5).map((m) => m.asunto) })
+      exito('Correo del SINOE conectado', {
+        pose: 'documento',
+        descripcion: `${mensajes.length} avisos de los últimos 15 días; se registrarán solos en la bandeja.`,
+      })
+    } catch (e) {
+      setError((e as Error).message)
+    } finally {
+      setProbando(false)
+    }
+  }
+
+  const conectado = Boolean(config.gmailUrl && config.gmailToken && config.gmailUrl !== 'demo')
+  const codigo = 'rounded bg-muted px-1 font-mono text-xs'
+
+  return (
+    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-[1.0625rem] font-semibold">Avisos del SINOE desde Gmail</CardTitle>
+          <CardDescription>
+            Mientras alguien del estudio tenga Expedita abierta, cada 10 minutos se revisa el correo y cada aviso nuevo entra a la bandeja con su
+            expediente. El script solo lee; no envía ni borra correos, y no se guarda ninguna contraseña del SINOE.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ol className="grid list-decimal gap-3 pl-5 text-sm leading-relaxed marker:font-semibold marker:text-muted-foreground">
+            <li>
+              Con la cuenta de Gmail que recibe los avisos, entra a{' '}
+              <a className="text-primary underline-offset-2 hover:underline" href="https://script.google.com/home/projects/create" target="_blank" rel="noreferrer">
+                script.google.com
+              </a>{' '}
+              y crea un proyecto nuevo.
+            </li>
+            <li>
+              Borra lo que aparece, pega el script{' '}
+              <Button variant="outline" size="xs" onClick={copiarScript} className="align-middle">
+                <CopyIcon aria-hidden /> Copiar script
+              </Button>{' '}
+              y guarda.
+            </li>
+            <li>
+              Si los avisos no llegan desde una dirección <code className={codigo}>@pj.gob.pe</code>, ajusta la línea <code className={codigo}>CONSULTA</code> (se escribe igual
+              que en el buscador de Gmail).
+            </li>
+            <li>
+              Elige la función <strong>configurar</strong>, pulsa <strong>Ejecutar</strong> y autoriza. En el registro aparece la <strong>CLAVE</strong>.
+            </li>
+            <li>
+              <strong>Implementar → Nueva implementación → Aplicación web</strong>: «Ejecutar como: Yo» y «Quién tiene acceso: Cualquier usuario». Copia la
+              URL que termina en <code className={codigo}>/exec</code>.
+            </li>
+            <li>Pega la URL y la clave aquí y pulsa «Guardar y probar».</li>
+          </ol>
+        </CardContent>
+      </Card>
+
+      <div className="grid content-start gap-8">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-[1.0625rem] font-semibold">{conectado ? 'Conexión' : 'Datos de conexión'}</CardTitle>
+            {conectado && <CardDescription>El correo está conectado y se revisa automáticamente.</CardDescription>}
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={guardarYProbar} noValidate className="grid gap-4">
+              <Campo etiqueta="URL del script (termina en /exec)">
+                {(p) => <Input {...p} type="url" placeholder="https://script.google.com/macros/s/…/exec" value={url} onChange={(e) => setUrl(e.target.value)} />}
+              </Campo>
+              <Campo etiqueta="Clave" ayuda="La que aparece en el registro al ejecutar «configurar».">
+                {(p) => <Input {...p} className="font-mono" autoComplete="off" value={clave} onChange={(e) => setClave(e.target.value)} />}
+              </Campo>
+              {error && (
+                <p role="alert" className="text-sm font-medium text-destructive">
+                  {error}
+                </p>
+              )}
+              <Button type="submit" disabled={probando || !url.trim() || !clave.trim()} className="justify-self-start">
+                {probando ? 'Leyendo el correo…' : 'Guardar y probar'}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        {prueba && (
+          <Card className="animate-entrar">
+            <CardHeader>
+              <CardTitle className="text-[1.0625rem] font-semibold">Resultado</CardTitle>
+              <CardDescription>
+                {prueba.total} correos encontrados · {prueba.conNumero} con número de expediente
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-sm">
+              {prueba.total === 0 ? (
+                <p className="text-muted-foreground">No hay avisos en los últimos 15 días con esa búsqueda. Revisa la línea CONSULTA del script.</p>
+              ) : (
+                <ul className="grid gap-1 text-muted-foreground">
+                  {prueba.ejemplos.map((a, i) => (
+                    <li key={i} className="truncate">
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </div>
+  )
+}
+
 /** Ajustes → Drive: conexión con el script de Google del estudio. */
 function Drive() {
   const c = useContenedor()
@@ -743,7 +884,7 @@ function Drive() {
   )
 }
 
-const PESTANAS = ['equipo', 'plazos', 'importar', 'exportar', 'drive', 'actividad']
+const PESTANAS = ['equipo', 'plazos', 'importar', 'exportar', 'sinoe', 'drive', 'actividad']
 
 export function Ajustes() {
   const { sesion } = useDatos()
@@ -759,6 +900,7 @@ export function Ajustes() {
           <TabsTrigger value="plazos">Plazos</TabsTrigger>
           <TabsTrigger value="importar">Importar</TabsTrigger>
           <TabsTrigger value="exportar">Exportar</TabsTrigger>
+          <TabsTrigger value="sinoe">SINOE</TabsTrigger>
           <TabsTrigger value="drive">Drive</TabsTrigger>
           <TabsTrigger value="actividad">Actividad</TabsTrigger>
         </TabsList>
@@ -773,6 +915,9 @@ export function Ajustes() {
         </TabsContent>
         <TabsContent value="exportar" className="mt-4">
           <Exportar />
+        </TabsContent>
+        <TabsContent value="sinoe" className="mt-4">
+          <Sinoe />
         </TabsContent>
         <TabsContent value="drive" className="mt-4">
           <Drive />

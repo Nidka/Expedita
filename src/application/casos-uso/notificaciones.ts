@@ -22,6 +22,7 @@ export interface RegistrarNotificacionCmd {
   resumen?: string
   texto?: string
   origen?: OrigenNotificacion
+  origenRef?: string
 }
 
 /** Previsualiza el cómputo sin guardar (para el formulario). */
@@ -67,6 +68,7 @@ export async function registrarNotificacion(
     texto: cmd.texto?.slice(0, 20_000),
     estado: 'pendiente',
     origen: cmd.origen ?? 'manual',
+    origenRef: cmd.origenRef,
   })
   return { notificacion, expedienteCreado }
 }

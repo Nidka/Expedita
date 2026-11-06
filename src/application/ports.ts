@@ -181,6 +181,20 @@ export interface LectorExcel {
   hojas(archivo: File): Promise<string[]>
 }
 
+/** Correo de aviso (SINOE) leído por el script de Gmail del estudio */
+export interface MensajeCorreo {
+  id: string
+  /** Fecha y hora ISO */
+  fecha: string
+  de: string
+  asunto: string
+  texto: string
+}
+
+export interface GmailPort {
+  mensajes(url: string, clave: string): Promise<MensajeCorreo[]>
+}
+
 /** Catálogo del Drive del estudio (solo metadatos de carpetas y archivos). */
 export interface DrivePort {
   catalogo(url: string, clave: string, fresco?: boolean): Promise<CatalogoDrive>

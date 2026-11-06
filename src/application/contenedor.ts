@@ -7,6 +7,7 @@ import type {
   CanalCambios,
   ConfigRepo,
   DrivePort,
+  GmailPort,
   EquipoRepo,
   ExpedienteRepo,
   JuzgadoRepo,
@@ -32,5 +33,6 @@ export interface Contenedor {
   ia: AsistenteIA
   excel: LectorExcel
   drive: DrivePort
+  gmail: GmailPort
   reloj: Reloj
 }
