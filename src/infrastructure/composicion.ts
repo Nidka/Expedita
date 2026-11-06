@@ -6,6 +6,7 @@ import { hojasDelLibro, leerHojaCuadro } from './excel/leer-cuadro'
 import { generadorWord } from './word/docx'
 import { driveDemo } from './memoria/drive-demo'
 import { AsistenteClaude } from './ia/asistente-claude'
+import { conCambiosLocales } from './cambios-locales'
 import { contenedorMemoria } from './memoria/repositorios'
 import { sembrarDemo } from './memoria/semilla-demo'
 import { AuthSupabase } from './supabase/auth'
@@ -49,7 +50,7 @@ export async function crearContenedor(): Promise<Contenedor> {
   }
   const auth = new AuthSupabase()
   const org = auth.orgId
-  return {
+  return conCambiosLocales({
     auth,
     expedientes: new ExpedientesSupabase(org),
     acciones: new AccionesSupabase(org),
@@ -69,5 +70,5 @@ export async function crearContenedor(): Promise<Contenedor> {
     drive: driveAppsScript,
     gmail: gmailAppsScript,
     reloj: { hoy: () => hoyEnLima() },
-  }
+  })
 }

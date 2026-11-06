@@ -83,16 +83,31 @@ export function ProveedorDatos({ sesion, children }: { sesion: Sesion; children:
 
   useEffect(() => {
     recargar().finally(() => setCargando(false))
-    // Cambios de otros usuarios: se agrupan 300 ms para no recargar en ráfaga.
-    return c.cambios.suscribir(Object.keys(CARGADORES), (tabla) => {
+    // Cambios propios (al instante) y de otros usuarios (Realtime): se agrupan para no recargar en ráfaga.
+    const quitar = c.cambios.suscribir(Object.keys(CARGADORES), (tabla) => {
       pendientes.current.add(tabla === 'config_org' ? 'config' : tabla)
       window.clearTimeout(temporizador.current)
       temporizador.current = window.setTimeout(() => {
         const lote = [...pendientes.current]
         pendientes.current.clear()
-        lote.forEach((t) => void recargar(t))
-      }, 300)
+        lote.forEach((t) => void recargar(t).catch(() => undefined))
+      }, 120)
     })
+    // Al volver a la pestaña (o recuperar internet) se refresca todo: Realtime pudo perder eventos mientras tanto.
+    let ultima = Date.now()
+    const alVolver = () => {
+      if (document.visibilityState !== 'visible' || Date.now() - ultima < 15_000) return
+      ultima = Date.now()
+      void recargar().catch(() => undefined)
+    }
+    document.addEventListener('visibilitychange', alVolver)
+    window.addEventListener('online', alVolver)
+    return () => {
+      quitar()
+      window.clearTimeout(temporizador.current)
+      document.removeEventListener('visibilitychange', alVolver)
+      window.removeEventListener('online', alVolver)
+    }
   }, [c, recargar])
 
   const valor = useMemo<Datos>(() => {
