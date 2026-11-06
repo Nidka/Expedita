@@ -95,6 +95,10 @@ export interface AuthPort {
   alCambiar(cb: () => void): () => void
   /** Usuario autenticado que todavía no pertenece a ningún estudio (primer ingreso). */
   usuarioSinEstudio(): Promise<{ email: string } | null>
+  /**
+   * Crea la cuenta con contraseña (sin correo). Devuelve false si Supabase aún exige confirmar el correo.
+   */
+  registrar(email: string, password: string): Promise<boolean>
   /** Define o cambia la contraseña del usuario actual (para no depender del enlace por correo). */
   cambiarClave(nueva: string): Promise<void>
   /** Crea el estudio y deja al usuario actual como administrador. */

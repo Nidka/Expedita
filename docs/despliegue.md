@@ -95,7 +95,13 @@ pg_restore --no-owner --dbname '<SUPABASE_DB_URL>' respaldo.dump
 - **Dominio propio** (`expedita.pe`): se compra en punto.pe (~S/ 100 al año) y se conecta en Cloudflare Pages → Custom domains.
 - **Correos en español**: Supabase → Authentication → Email Templates.
 
-## 7. Correo propio para los enlaces de acceso (recomendado)
+## 7. Acceso sin correos (recomendado)
+
+En Supabase → **Authentication → Sign In / Providers → Email** desactiva **Confirm email** y guarda.
+Cada persona entra en la web con su correo → **Primera vez: crear mi contraseña** y queda dentro al instante.
+Es seguro: solo ve datos quien fue invitado al estudio (Ajustes → Equipo); el resto no ve nada.
+
+## 8. Correo propio para los enlaces de acceso (opcional)
 
 El correo incluido en Supabase solo envía **2 correos por hora**. Para enviar desde Gmail (hasta 500 al día, gratis):
 

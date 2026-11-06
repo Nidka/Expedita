@@ -227,6 +227,9 @@ class AuthDemo implements AuthPort {
   }
   async crearEstudio() {}
   async cambiarClave() {}
+  async registrar() {
+    return true
+  }
 }
 
 class IADemo implements AsistenteIA {

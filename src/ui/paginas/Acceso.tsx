@@ -109,13 +109,14 @@ function Enlace({ children, onClick }: { children: ReactNode; onClick: () => voi
   )
 }
 
-type Paso = 'correo' | 'metodo' | 'clave' | 'enviado'
+type Paso = 'correo' | 'metodo' | 'clave' | 'crear' | 'enviado'
 
 export function IniciarSesion({ alEntrar }: { alEntrar: () => void }) {
   const c = useContenedor()
   const [paso, setPaso] = useState<Paso>('correo')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [repetir, setRepetir] = useState('')
   const [verClave, setVerClave] = useState(false)
   const [cargando, setCargando] = useState(false)
   const [error, setError] = useState<string>()
@@ -168,9 +169,37 @@ export function IniciarSesion({ alEntrar }: { alEntrar: () => void }) {
     }
   }
 
+  const crearCuenta = async (ev: FormEvent) => {
+    ev.preventDefault()
+    if (password.length < 10) return setError('Usa al menos 10 caracteres.')
+    if (password !== repetir) return setError('Las contraseñas no coinciden.')
+    setCargando(true)
+    setError(undefined)
+    try {
+      const conSesion = await c.auth.registrar(email.trim(), password)
+      if (conSesion) {
+        try {
+          localStorage.setItem('expedita.clave-definida', '1')
+        } catch {
+          /* sin almacenamiento */
+        }
+        alEntrar()
+      } else {
+        // Supabase aún exige confirmar el correo: se envió un mensaje de confirmación.
+        setPaso('enviado')
+        setEspera(60)
+      }
+    } catch (e) {
+      setError(mensaje(e))
+    } finally {
+      setCargando(false)
+    }
+  }
+
   const volver = () => {
     setPaso('correo')
     setPassword('')
+    setRepetir('')
     setError(undefined)
   }
 
@@ -242,32 +271,96 @@ export function IniciarSesion({ alEntrar }: { alEntrar: () => void }) {
       {paso === 'metodo' && (
         <div className="animate-entrar">
           {correoElegido}
-          <button
-            type="button"
-            onClick={() => void enviarEnlace()}
-            disabled={cargando}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary text-[1.0625rem] font-medium text-primary-foreground outline-none transition-[background-color,transform] duration-150 hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/30 active:scale-[0.98] disabled:opacity-70"
-          >
-            {cargando && <Loader2Icon className="size-5 animate-spin" />}
-            {cargando ? 'Enviando…' : 'Enviarme un enlace de acceso'}
-          </button>
-          <p className="mt-3 text-center text-[0.8125rem] text-muted-foreground">Entras sin contraseña desde tu correo.</p>
+          <div className="grid gap-3">
+            <button
+              type="button"
+              autoFocus
+              onClick={() => {
+                setError(undefined)
+                setPaso('clave')
+              }}
+              className="flex h-12 w-full items-center justify-center rounded-xl bg-primary text-[1.0625rem] font-medium text-primary-foreground outline-none transition-[background-color,transform] duration-150 hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/30 active:scale-[0.98]"
+            >
+              Entrar con mi contraseña
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setError(undefined)
+                setPaso('crear')
+              }}
+              className="flex h-12 w-full items-center justify-center rounded-xl bg-card text-[1.0625rem] font-medium shadow-[0_0_0_1px_var(--input)] outline-none transition-[background-color,transform] duration-150 hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/25 active:scale-[0.98]"
+            >
+              Primera vez: crear mi contraseña
+            </button>
+          </div>
           {error && (
             <p role="alert" className="mt-3 text-center text-[0.8125rem] text-destructive">
               {error}
             </p>
           )}
+          <div className="mt-8 flex flex-col items-center gap-1 text-center">
+            <button
+              type="button"
+              onClick={() => void enviarEnlace()}
+              disabled={cargando}
+              className="rounded text-[0.9375rem] text-primary outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/25 disabled:text-muted-foreground"
+            >
+              {cargando ? 'Enviando enlace…' : 'Prefiero recibir un enlace por correo'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {paso === 'crear' && (
+        <form onSubmit={crearCuenta} noValidate className="animate-entrar">
+          {correoElegido}
+          <div className="grid gap-3">
+            <CampoFlotante
+              etiqueta="Crea una contraseña"
+              type="password"
+              autoComplete="new-password"
+              autoFocus
+              conBoton={false}
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value)
+                setError(undefined)
+              }}
+            />
+            <CampoFlotante
+              etiqueta="Repítela"
+              type="password"
+              autoComplete="new-password"
+              conBoton={false}
+              value={repetir}
+              onChange={(e) => {
+                setRepetir(e.target.value)
+                setError(undefined)
+              }}
+              error={error}
+            />
+          </div>
+          <p className="mt-3 px-1 text-[0.8125rem] text-muted-foreground">Al menos 10 caracteres. Mejor una frase que puedas recordar.</p>
+          <button
+            type="submit"
+            disabled={cargando}
+            className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary text-[1.0625rem] font-medium text-primary-foreground outline-none transition-[background-color,transform] duration-150 hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/30 active:scale-[0.98] disabled:opacity-70"
+          >
+            {cargando && <Loader2Icon className="size-5 animate-spin" />}
+            {cargando ? 'Creando cuenta…' : 'Crear cuenta y entrar'}
+          </button>
           <div className="mt-8 text-center">
             <Enlace
               onClick={() => {
                 setError(undefined)
-                setPaso('clave')
+                setPaso('metodo')
               }}
             >
-              Usar mi contraseña
+              Ya tengo contraseña
             </Enlace>
           </div>
-        </div>
+        </form>
       )}
 
       {paso === 'clave' && (
@@ -304,7 +397,7 @@ export function IniciarSesion({ alEntrar }: { alEntrar: () => void }) {
                 setPaso('metodo')
               }}
             >
-              Mejor envíame un enlace
+              Otras formas de entrar
             </Enlace>
           </div>
         </form>

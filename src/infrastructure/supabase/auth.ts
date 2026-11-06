@@ -50,6 +50,21 @@ export class AuthSupabase implements AuthPort {
     if (error) throw new Error(error.message)
   }
 
+  async registrar(email: string, password: string): Promise<boolean> {
+    const { data, error } = await supabase().auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } })
+    if (error) {
+      if (/already registered|already exists/i.test(error.message)) throw new Error('Ese correo ya tiene cuenta. Entra con tu contraseña o pide un enlace por correo.')
+      if (/weak|short|least/i.test(error.message)) throw new Error('La contraseña es muy débil: usa al menos 10 caracteres.')
+      throw new Error(error.message)
+    }
+    // Con la confirmación por correo activada, Supabase no devuelve sesión (y oculta si el correo ya existía).
+    if (!data.session) {
+      if (data.user && data.user.identities?.length === 0) throw new Error('Ese correo ya tiene cuenta. Entra con tu contraseña o pide un enlace por correo.')
+      return false
+    }
+    return true
+  }
+
   async cambiarClave(nueva: string): Promise<void> {
     const { error } = await supabase().auth.updateUser({ password: nueva })
     if (error) throw new Error(/weak|short|least/i.test(error.message) ? 'La contraseña es muy débil: usa al menos 10 caracteres.' : /same/i.test(error.message) ? 'La nueva contraseña debe ser distinta de la actual.' : error.message)
