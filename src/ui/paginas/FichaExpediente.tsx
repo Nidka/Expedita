@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { ArchiveIcon, ArchiveRestoreIcon, CalendarPlusIcon, CheckIcon, CopyIcon, ExternalLinkIcon, PencilIcon, PenLineIcon, SearchCheckIcon, Trash2Icon } from '@/ui/iconos'
 import type { Accion, Expediente } from '@/domain/entidades'
 import { EditarAccion, EliminarAccion } from '../componentes/EditarAccion'
+import { SeccionDocumentos } from '../componentes/Documentos'
 import { parsearNumeroExpediente, ESPECIALIDADES, INSTANCIAS } from '@/domain/expediente/numero-expediente'
 import { estadoMovimiento } from '@/domain/agenda/que-toca-hoy'
 import { SUGERENCIA_POR_ETAPA, VIAS, esViaId, type ViaId } from '@/domain/plazos/catalogo'
@@ -372,6 +373,8 @@ export function FichaExpediente() {
               </ol>
             )}
           </section>
+
+          <SeccionDocumentos exp={exp} />
 
           <DesgloseCej
             numero={exp.numero}

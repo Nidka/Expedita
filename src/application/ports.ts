@@ -16,6 +16,7 @@ import type {
   Visita,
   VisitaItem,
 } from '@/domain/entidades'
+import type { CatalogoDrive } from '@/domain/documentos/drive'
 import type { Feriado } from '@/domain/plazos/feriados'
 import type { FechaISO } from '@/domain/shared/fecha'
 
@@ -178,6 +179,11 @@ export interface LectorExcel {
   leerHoja(archivo: File, hoja: string): Promise<Record<string, unknown>[]>
   /** Nombres de las hojas del libro, sin leer su contenido */
   hojas(archivo: File): Promise<string[]>
+}
+
+/** Catálogo del Drive del estudio (solo metadatos de carpetas y archivos). */
+export interface DrivePort {
+  catalogo(url: string, clave: string, fresco?: boolean): Promise<CatalogoDrive>
 }
 
 export interface Reloj {

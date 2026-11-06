@@ -1,10 +1,13 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { toast } from 'sonner'
-import { DownloadIcon, FileSpreadsheetIcon, Trash2Icon, UserPlusIcon } from '@/ui/iconos'
+import { CopyIcon, DownloadIcon, FileSpreadsheetIcon, Trash2Icon, UserPlusIcon } from '@/ui/iconos'
 import { importarExpedientes } from '@/application/casos-uso/importar'
 import { descargar, generarCSV } from '@/application/exportar'
 import type { Invitacion, RegistroAuditoria } from '@/application/ports'
 import { describirCambio } from '@/domain/auditoria'
+import { emparejar, type CatalogoDrive } from '@/domain/documentos/drive'
+import scriptDrive from '../../../scripts/google/expedita-drive.gs?raw'
+import { Link, useSearchParams } from 'react-router-dom'
 import type { Miembro, Rol } from '@/domain/entidades'
 import { importarCuadro, type ResultadoImportacion } from '@/domain/expediente/importacion'
 import { esFechaISO } from '@/domain/shared/fecha'
@@ -589,18 +592,174 @@ function Actividad() {
   )
 }
 
+/** Ajustes → Drive: conexión con el script de Google del estudio. */
+function Drive() {
+  const c = useContenedor()
+  const { config, expedientes } = useDatos()
+  const [url, setUrl] = useState(config.driveUrl && config.driveUrl !== 'demo' ? config.driveUrl : '')
+  const [clave, setClave] = useState(config.driveToken && config.driveToken !== 'demo' ? config.driveToken : '')
+  const [probando, setProbando] = useState(false)
+  const [error, setError] = useState<string>()
+  const [prueba, setPrueba] = useState<{ catalogo: CatalogoDrive; r: ReturnType<typeof emparejar> } | null>(null)
+
+  const copiarScript = async () => {
+    try {
+      await navigator.clipboard.writeText(scriptDrive)
+      toast.success('Script copiado', { description: 'Pégalo en script.google.com.' })
+    } catch {
+      toast.error('No se pudo copiar')
+    }
+  }
+
+  const guardarYProbar = async (ev: FormEvent) => {
+    ev.preventDefault()
+    setError(undefined)
+    setPrueba(null)
+    setProbando(true)
+    try {
+      const catalogo = await c.drive.catalogo(url.trim(), clave.trim(), true)
+      await c.config.guardar({ driveUrl: url.trim(), driveToken: clave.trim() })
+      setPrueba({ catalogo, r: emparejar(expedientes, catalogo) })
+      exito('Drive conectado', { pose: 'feliz', descripcion: `${catalogo.carpetas.length} carpetas en «${catalogo.raiz}».` })
+    } catch (e) {
+      setError((e as Error).message)
+    } finally {
+      setProbando(false)
+    }
+  }
+
+  const conectado = Boolean(config.driveUrl && config.driveToken && config.driveUrl !== 'demo')
+  const codigo = 'rounded bg-muted px-1 font-mono text-xs'
+
+  return (
+    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-[1.0625rem] font-semibold">Conectar el Drive del estudio</CardTitle>
+          <CardDescription>
+            Expedita muestra en cada expediente los archivos de la carpeta del cliente. Solo lee nombres y enlaces: los archivos se quedan en el Drive con
+            sus permisos de siempre.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ol className="grid list-decimal gap-3 pl-5 text-sm leading-relaxed marker:font-semibold marker:text-muted-foreground">
+            <li>
+              Con la cuenta dueña del Drive, entra a{' '}
+              <a className="text-primary underline-offset-2 hover:underline" href="https://script.google.com/home/projects/create" target="_blank" rel="noreferrer">
+                script.google.com
+              </a>{' '}
+              y crea un proyecto nuevo.
+            </li>
+            <li>
+              Borra lo que aparece, pega el script{' '}
+              <Button variant="outline" size="xs" onClick={copiarScript} className="align-middle">
+                <CopyIcon aria-hidden /> Copiar script
+              </Button>{' '}
+              y guarda.
+            </li>
+            <li>
+              En la línea <code className={codigo}>CARPETA_RAIZ</code> pega el ID de la carpeta de clientes: lo que va después de{' '}
+              <code className={codigo}>/folders/</code> en la dirección de la carpeta.
+            </li>
+            <li>
+              Elige la función <strong>configurar</strong>, pulsa <strong>Ejecutar</strong> y autoriza. En el registro aparece la <strong>CLAVE</strong>.
+            </li>
+            <li>
+              <strong>Implementar → Nueva implementación → Aplicación web</strong>: «Ejecutar como: Yo» y «Quién tiene acceso: Cualquier usuario». Copia la
+              URL que termina en <code className={codigo}>/exec</code>.
+            </li>
+            <li>Pega la URL y la clave aquí y pulsa «Guardar y probar».</li>
+          </ol>
+        </CardContent>
+      </Card>
+
+      <div className="grid content-start gap-8">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-[1.0625rem] font-semibold">{conectado ? 'Conexión' : 'Datos de conexión'}</CardTitle>
+            {conectado && <CardDescription>El Drive está conectado. Puedes cambiar la dirección o la clave y volver a probar.</CardDescription>}
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={guardarYProbar} noValidate className="grid gap-4">
+              <Campo etiqueta="URL del script (termina en /exec)">
+                {(p) => <Input {...p} type="url" placeholder="https://script.google.com/macros/s/…/exec" value={url} onChange={(e) => setUrl(e.target.value)} />}
+              </Campo>
+              <Campo etiqueta="Clave" ayuda="La que aparece en el registro al ejecutar «configurar».">
+                {(p) => <Input {...p} className="font-mono" autoComplete="off" value={clave} onChange={(e) => setClave(e.target.value)} />}
+              </Campo>
+              {error && (
+                <p role="alert" className="text-sm font-medium text-destructive">
+                  {error}
+                </p>
+              )}
+              <Button type="submit" disabled={probando || !url.trim() || !clave.trim()} className="justify-self-start">
+                {probando ? 'Leyendo el Drive…' : 'Guardar y probar'}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        {prueba && (
+          <Card className="animate-entrar">
+            <CardHeader>
+              <CardTitle className="text-[1.0625rem] font-semibold">Resultado</CardTitle>
+              <CardDescription>
+                {prueba.catalogo.carpetas.length} carpetas en «{prueba.catalogo.raiz}» · {prueba.r.porExpediente.size} de {expedientes.length} expedientes
+                con carpeta
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4 text-sm">
+              {prueba.r.sinCarpeta.length > 0 && (
+                <details>
+                  <summary className="cursor-pointer font-medium">Expedientes sin carpeta ({prueba.r.sinCarpeta.length})</summary>
+                  <p className="mt-2 text-muted-foreground">Asígnales su carpeta desde la sección Documentos de cada expediente.</p>
+                  <ul className="mt-2 grid gap-1">
+                    {prueba.r.sinCarpeta.slice(0, 30).map((e) => (
+                      <li key={e.id}>
+                        <Link to={`/expedientes/${e.id}`} className="text-primary underline-offset-2 hover:underline">
+                          {etiquetaExp(e)}
+                        </Link>{' '}
+                        · {e.cliente ?? e.demandante ?? 'sin cliente'}
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
+              {prueba.r.carpetasSinExpediente.length > 0 && (
+                <details>
+                  <summary className="cursor-pointer font-medium">Carpetas sin expediente ({prueba.r.carpetasSinExpediente.length})</summary>
+                  <ul className="mt-2 grid gap-1 text-muted-foreground">
+                    {prueba.r.carpetasSinExpediente.slice(0, 30).map((cp) => (
+                      <li key={cp.id}>{cp.nombre}</li>
+                    ))}
+                  </ul>
+                </details>
+              )}
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </div>
+  )
+}
+
+const PESTANAS = ['equipo', 'plazos', 'importar', 'exportar', 'drive', 'actividad']
+
 export function Ajustes() {
   const { sesion } = useDatos()
+  const [params] = useSearchParams()
+  const inicial = PESTANAS.includes(params.get('pestana') ?? '') ? params.get('pestana')! : 'equipo'
   if (sesion.miembro.rol !== 'admin') return <EstadoVacio titulo="Solo los administradores pueden cambiar los ajustes" />
   return (
     <>
       <EncabezadoPagina titulo="Ajustes" descripcion={sesion.orgNombre} />
-      <Tabs defaultValue="equipo">
+      <Tabs defaultValue={inicial}>
         <TabsList className="flex-wrap">
           <TabsTrigger value="equipo">Equipo</TabsTrigger>
           <TabsTrigger value="plazos">Plazos</TabsTrigger>
           <TabsTrigger value="importar">Importar</TabsTrigger>
           <TabsTrigger value="exportar">Exportar</TabsTrigger>
+          <TabsTrigger value="drive">Drive</TabsTrigger>
           <TabsTrigger value="actividad">Actividad</TabsTrigger>
         </TabsList>
         <TabsContent value="equipo" className="mt-4">
@@ -614,6 +773,9 @@ export function Ajustes() {
         </TabsContent>
         <TabsContent value="exportar" className="mt-4">
           <Exportar />
+        </TabsContent>
+        <TabsContent value="drive" className="mt-4">
+          <Drive />
         </TabsContent>
         <TabsContent value="actividad" className="mt-4">
           <Actividad />

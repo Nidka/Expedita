@@ -6,6 +6,7 @@ import type {
   AuthPort,
   CanalCambios,
   ConfigRepo,
+  DrivePort,
   EquipoRepo,
   ExpedienteRepo,
   JuzgadoRepo,
@@ -30,5 +31,6 @@ export interface Contenedor {
   cambios: CanalCambios
   ia: AsistenteIA
   excel: LectorExcel
+  drive: DrivePort
   reloj: Reloj
 }

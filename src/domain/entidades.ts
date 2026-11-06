@@ -184,6 +184,9 @@ export interface ConfigOrg {
   diasInhabiles: FechaISO[]
   /** Teléfonos autorizados para WhatsApp: últimos 9 dígitos → nombre */
   equipoWhatsapp: { telefono: string; nombre: string }[]
+  /** Dirección del script de Google que lista el Drive del estudio */
+  driveUrl?: string
+  driveToken?: string
 }
 
 export const TIPOS_ESCRITO = [

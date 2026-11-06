@@ -18,6 +18,7 @@ import type { Contenedor } from '@/application/contenedor'
 import type { Accion, Audiencia, ConfigOrg, Expediente, Id, Juzgado, Miembro, Notificacion, Visita, VisitaItem } from '@/domain/entidades'
 import { FERIADOS_NACIONALES } from '@/domain/plazos/feriados'
 import { hoyEnLima } from '@/domain/shared/fecha'
+import { driveDemo } from './drive-demo'
 
 /**
  * Adaptadores en memoria (con copia en localStorage) para el modo demo y las pruebas.
@@ -177,7 +178,7 @@ class JuzgadosMemoria implements JuzgadoRepo {
 class ConfigMemoria implements ConfigRepo {
   private cfg: ConfigOrg
   constructor(private readonly almacen: Almacen) {
-    this.cfg = almacen.leer<ConfigOrg>('config', [{ orgId: ORG, diasSinMovimiento: 30, diasInhabiles: [], equipoWhatsapp: [] }])[0]
+    this.cfg = almacen.leer<ConfigOrg>('config', [{ orgId: ORG, diasSinMovimiento: 30, diasInhabiles: [], equipoWhatsapp: [], driveUrl: 'demo', driveToken: 'demo' }])[0]
   }
   async obtener() {
     return structuredClone(this.cfg)
@@ -275,6 +276,7 @@ export function contenedorMemoria(opciones: { persistir?: boolean; semilla?: (c:
       },
       hojas: async () => [],
     },
+    drive: driveDemo,
     reloj: { hoy: () => hoyEnLima() },
   }
   return c

@@ -1,6 +1,8 @@
 import type { Contenedor } from '@/application/contenedor'
 import { hoyEnLima } from '@/domain/shared/fecha'
+import { driveAppsScript } from './drive/apps-script'
 import { hojasDelLibro, leerHojaCuadro } from './excel/leer-cuadro'
+import { driveDemo } from './memoria/drive-demo'
 import { AsistenteClaude } from './ia/asistente-claude'
 import { contenedorMemoria } from './memoria/repositorios'
 import { sembrarDemo } from './memoria/semilla-demo'
@@ -26,7 +28,7 @@ export async function crearContenedor(): Promise<Contenedor> {
   const excel = { leerHoja: leerHojaCuadro, hojas: hojasDelLibro }
   if (modoDemo) {
     // Si cambia la semilla de demostración, se descarta la copia guardada en el navegador.
-    const VERSION_SEMILLA = '2'
+    const VERSION_SEMILLA = '3'
     try {
       if (localStorage.getItem('expedita-demo:version') !== VERSION_SEMILLA) {
         Object.keys(localStorage)
@@ -37,7 +39,7 @@ export async function crearContenedor(): Promise<Contenedor> {
     } catch {
       /* sin almacenamiento: la demo vive solo en memoria */
     }
-    const c = { ...contenedorMemoria({ persistir: true }), excel }
+    const c = { ...contenedorMemoria({ persistir: true }), excel, drive: driveDemo }
     await sembrarDemo(c)
     return c
   }
@@ -57,6 +59,7 @@ export async function crearContenedor(): Promise<Contenedor> {
     cambios: new CambiosSupabase(org),
     ia: new AsistenteClaude(),
     excel,
+    drive: driveAppsScript,
     reloj: { hoy: () => hoyEnLima() },
   }
 }

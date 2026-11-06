@@ -68,3 +68,16 @@ export {
   ArrowLeftIcon,
   ArrowRightIcon,
 } from '@phosphor-icons/react'
+
+// Documentos (Drive)
+export {
+  FilePdfIcon,
+  FileDocIcon,
+  FileImageIcon,
+  FileXlsIcon,
+  FileIcon,
+  FolderOpenIcon,
+  ArrowClockwiseIcon as RefreshIcon,
+  GoogleDriveLogoIcon as DriveIcon,
+  LinkSimpleIcon as LinkIcon,
+} from '@phosphor-icons/react'
