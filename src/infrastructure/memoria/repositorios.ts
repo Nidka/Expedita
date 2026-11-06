@@ -189,6 +189,9 @@ class ConfigMemoria implements ConfigRepo {
     this.almacen.escribir('config', [this.cfg])
     return structuredClone(this.cfg)
   }
+  async datosIntegracion() {
+    return { supabaseUrl: 'https://demo.supabase.co', clavePublica: 'demo', claveEstudio: 'demo' }
+  }
   async feriados() {
     return [...FERIADOS_NACIONALES]
   }

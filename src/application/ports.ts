@@ -60,6 +60,8 @@ export interface ConfigRepo {
   obtener(): Promise<ConfigOrg>
   guardar(cambios: Partial<Omit<ConfigOrg, 'orgId'>>): Promise<ConfigOrg>
   feriados(): Promise<Feriado[]>
+  /** Datos para conectar scripts externos (recordatorio). Solo administradores. */
+  datosIntegracion(): Promise<{ supabaseUrl: string; clavePublica: string; claveEstudio: string }>
 }
 
 export interface Invitacion {

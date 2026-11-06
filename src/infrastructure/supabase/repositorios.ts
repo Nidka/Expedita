@@ -176,6 +176,14 @@ export class ConfigSupabase implements ConfigRepo {
     lanzarSiError(await supabase().from('config_org').update(aFila(cambios, 'actualizar')).eq('org_id', this.org()))
     return this.obtener()
   }
+  async datosIntegracion() {
+    const r = await supabase().rpc('token_integracion', { p_org: this.org() })
+    return {
+      supabaseUrl: import.meta.env.VITE_SUPABASE_URL as string,
+      clavePublica: import.meta.env.VITE_SUPABASE_ANON_KEY as string,
+      claveEstudio: lanzarSiError(r) as string,
+    }
+  }
   async feriados(): Promise<Feriado[]> {
     const r = await supabase().from('feriados').select('fecha, nombre').order('fecha')
     return lanzarSiError(r) as Feriado[]

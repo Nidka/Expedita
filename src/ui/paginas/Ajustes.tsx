@@ -8,6 +8,7 @@ import { describirCambio } from '@/domain/auditoria'
 import { emparejar, type CatalogoDrive } from '@/domain/documentos/drive'
 import scriptDrive from '../../../scripts/google/expedita-drive.gs?raw'
 import scriptGmail from '../../../scripts/google/expedita-gmail.gs?raw'
+import scriptRecordatorio from '../../../scripts/google/expedita-recordatorio.gs?raw'
 import { extraerDeCorreo } from '@/domain/notificaciones/extraer'
 import { Link, useSearchParams } from 'react-router-dom'
 import type { Miembro, Rol } from '@/domain/entidades'
@@ -594,6 +595,77 @@ function Actividad() {
   )
 }
 
+/** Ajustes → Recordatorio: correo diario de lo urgente (RF-42), enviado por un script de Google del estudio. */
+function Recordatorio() {
+  const c = useContenedor()
+  const [copiando, setCopiando] = useState(false)
+
+  const copiar = async () => {
+    setCopiando(true)
+    try {
+      const d = await c.config.datosIntegracion()
+      const texto = scriptRecordatorio
+        .replace('__SUPABASE_URL__', d.supabaseUrl)
+        .replace('__CLAVE_PUBLICA__', d.clavePublica)
+        .replace('__CLAVE_ESTUDIO__', d.claveEstudio)
+        .replace('__APP_URL__', window.location.origin)
+      await navigator.clipboard.writeText(texto)
+      toast.success('Script copiado con los datos del estudio', { description: 'Pégalo en script.google.com y ejecuta «activar».' })
+    } catch (e) {
+      toast.error((e as Error).message)
+    } finally {
+      setCopiando(false)
+    }
+  }
+
+  return (
+    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-[1.0625rem] font-semibold">Recordatorio diario por correo</CardTitle>
+          <CardDescription>
+            De lunes a viernes a las 8:00 (hora de Lima) llega a todo el equipo un correo con lo vencido, lo que vence en los próximos 7 días y las
+            audiencias de los próximos 3 días. Si no hay nada pendiente, no se envía. Lo envía el Gmail del estudio, sin límites de Supabase.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-5">
+          <ol className="grid list-decimal gap-3 pl-5 text-sm leading-relaxed marker:font-semibold marker:text-muted-foreground">
+            <li>
+              Pulsa{' '}
+              <Button variant="outline" size="xs" onClick={copiar} disabled={copiando} className="align-middle">
+                <CopyIcon aria-hidden /> {copiando ? 'Preparando…' : 'Copiar script'}
+              </Button>{' '}
+              (ya incluye los datos del estudio).
+            </li>
+            <li>
+              Con el Gmail del estudio entra a{' '}
+              <a className="text-primary underline-offset-2 hover:underline" href="https://script.google.com/home/projects/create" target="_blank" rel="noreferrer">
+                script.google.com
+              </a>
+              , crea un proyecto nuevo, pega el script y guarda.
+            </li>
+            <li>
+              Elige la función <strong>activar</strong>, pulsa <strong>Ejecutar</strong> y autoriza. Queda programado.
+            </li>
+            <li>
+              Para probarlo al momento, ejecuta <strong>enviarAhora</strong>: llega el correo a todo el equipo.
+            </li>
+          </ol>
+          <p className="rounded-lg bg-warning-soft px-4 py-3 text-sm text-warning-foreground">
+            El script lleva la clave secreta del estudio: no lo compartas fuera del estudio. Para quitar el recordatorio, ejecuta <strong>desactivar</strong>.
+          </p>
+        </CardContent>
+      </Card>
+      <Card className="self-start">
+        <CardHeader>
+          <CardTitle className="text-[1.0625rem] font-semibold">Quién lo recibe</CardTitle>
+          <CardDescription>Todas las personas del equipo (Ajustes → Equipo), en el correo con el que entran a Expedita.</CardDescription>
+        </CardHeader>
+      </Card>
+    </div>
+  )
+}
+
 /** Ajustes → SINOE: conexión con el Gmail que recibe los avisos de notificación. */
 function Sinoe() {
   const c = useContenedor()
@@ -884,7 +956,7 @@ function Drive() {
   )
 }
 
-const PESTANAS = ['equipo', 'plazos', 'importar', 'exportar', 'sinoe', 'drive', 'actividad']
+const PESTANAS = ['equipo', 'plazos', 'importar', 'exportar', 'sinoe', 'drive', 'recordatorio', 'actividad']
 
 export function Ajustes() {
   const { sesion } = useDatos()
@@ -902,6 +974,7 @@ export function Ajustes() {
           <TabsTrigger value="exportar">Exportar</TabsTrigger>
           <TabsTrigger value="sinoe">SINOE</TabsTrigger>
           <TabsTrigger value="drive">Drive</TabsTrigger>
+          <TabsTrigger value="recordatorio">Recordatorio</TabsTrigger>
           <TabsTrigger value="actividad">Actividad</TabsTrigger>
         </TabsList>
         <TabsContent value="equipo" className="mt-4">
@@ -921,6 +994,9 @@ export function Ajustes() {
         </TabsContent>
         <TabsContent value="drive" className="mt-4">
           <Drive />
+        </TabsContent>
+        <TabsContent value="recordatorio" className="mt-4">
+          <Recordatorio />
         </TabsContent>
         <TabsContent value="actividad" className="mt-4">
           <Actividad />
