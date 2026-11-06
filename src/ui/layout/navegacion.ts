@@ -1,4 +1,4 @@
-import { BellIcon, BotIcon, CalendarDaysIcon, FolderIcon, MapIcon, PenLineIcon, SettingsIcon, SunriseIcon, type Icono } from '@/ui/iconos'
+import { BellIcon, BotIcon, ChartBarIcon, CalendarDaysIcon, FolderIcon, MapIcon, PenLineIcon, SettingsIcon, SunriseIcon, type Icono } from '@/ui/iconos'
 
 export interface ItemNavegacion {
   a: string
@@ -19,6 +19,7 @@ export const NAVEGACION: ItemNavegacion[] = [
   { a: '/agenda', texto: 'Agenda', icono: CalendarDaysIcon, pestana: true },
   { a: '/visitas', texto: 'Visitas', icono: MapIcon },
   { a: '/registrar', texto: 'Registrar acción', icono: PenLineIcon },
+  { a: '/reportes', texto: 'Reportes', icono: ChartBarIcon },
   { a: '/asistente', texto: 'Asistente', icono: BotIcon },
   { a: '/ajustes', texto: 'Ajustes', icono: SettingsIcon, soloAdmin: true },
 ]

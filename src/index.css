@@ -30,6 +30,7 @@
     --color-separator: var(--separator);
     --color-berry: var(--berry);
     --color-guinda: var(--guinda);
+    --color-grafico: var(--grafico);
     --color-ocre: var(--ocre);
     --color-ocre-texto: var(--ocre-texto);
     --color-azul-pj: var(--azul-pj);
@@ -78,6 +79,8 @@
 
 :root {
     --guinda: #8C1D2B;
+    /* Marcas de gráficos (validado con dataviz: banda de luminosidad, croma y contraste ≥ 3:1 sobre la superficie) */
+    --grafico: #A8323F;
     --ocre: #C9963A;
     --ocre-texto: #8A5F17;
     --azul-pj: #264769;
@@ -130,6 +133,7 @@
 
 .dark {
     --guinda: #E98A90;
+    --grafico: #D9707A;
     --ocre: #E1B65C;
     --ocre-texto: #E1B65C;
     --azul-pj: #6E95BD;
@@ -240,6 +244,9 @@
   }
   @keyframes llenar {
     from { transform: scaleX(0); }
+  }
+  @keyframes crecer {
+    from { transform: scaleY(0); }
   }
   @keyframes flotar {
     0%, 100% { transform: translateY(0); }
