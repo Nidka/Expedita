@@ -1,12 +1,21 @@
-// Despliegue en Cloudflare Workers (recursos estáticos). Gratis y con uso comercial permitido.
+// Despliegue en Cloudflare Workers. Gratis y con uso comercial permitido.
 // La compilación (npm run build) genera dist/; Cloudflare la publica tal cual.
+// El worker (worker/index.ts) solo atiende /calendario/*; todo lo demás se sirve directo como estático.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "expedita",
+  "main": "worker/index.ts",
   "compatibility_date": "2026-10-01",
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
     // Aplicación de una sola página: cualquier ruta (/expedientes/123) abre index.html
-    "not_found_handling": "single-page-application"
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/calendario/*"]
+  },
+  // Valores públicos (los mismos que usa el navegador); la seguridad la ponen RLS y la clave del calendario.
+  "vars": {
+    "SUPABASE_URL": "https://apalpiswwmrpxkzswjss.supabase.co",
+    "SUPABASE_ANON_KEY": "sb_publishable_l9xIfYniwWbTgytdxrBQ-A_rxs_vh9d"
   }
 }

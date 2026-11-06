@@ -1,5 +1,5 @@
-import type { FechaISO } from '@/domain/shared/fecha'
-import { sumarDias } from '@/domain/shared/fecha'
+import type { FechaISO } from '../domain/shared/fecha'
+import { sumarDias } from '../domain/shared/fecha'
 
 export interface EventoAgenda {
   uid: string

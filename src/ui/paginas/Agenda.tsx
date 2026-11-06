@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils'
 import { useContenedor, useDatos, type Datos } from '../contexto'
 import { Campo, EncabezadoPagina, EstadoVacio, SelectNativo } from '../componentes/base'
 import { SelectorExpediente } from '../componentes/SelectorExpediente'
+import { SuscribirCalendario } from '../componentes/SuscribirCalendario'
 import { etiquetaExp, fecha, fechaLarga, mes } from '../formato'
 import { exito } from '../notificar'
 
@@ -344,6 +345,7 @@ export function Agenda() {
         descripcion="Plazos, audiencias y visitas. Los días inhábiles no cuentan para el cómputo."
         acciones={
           <>
+            <SuscribirCalendario />
             <Button variant="outline" onClick={exportar}>
               <DownloadIcon aria-hidden /> Exportar .ics
             </Button>

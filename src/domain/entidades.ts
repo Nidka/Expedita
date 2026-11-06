@@ -196,6 +196,8 @@ export interface ConfigOrg {
   membreteTitulo?: string
   membreteDetalle?: string
   ciudad?: string
+  /** Clave de la dirección del calendario por suscripción (.ics) */
+  tokenCalendario?: string
 }
 
 export const TIPOS_ESCRITO = [

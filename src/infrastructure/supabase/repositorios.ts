@@ -175,7 +175,7 @@ export class ConfigSupabase implements ConfigRepo {
   async obtener(): Promise<ConfigOrg> {
     const r = await supabase()
       .from('config_org')
-      .select('org_id, dias_sin_movimiento, dias_inhabiles, equipo_whatsapp, drive_url, drive_token, gmail_url, gmail_token, membrete_titulo, membrete_detalle, ciudad')
+      .select('org_id, dias_sin_movimiento, dias_inhabiles, equipo_whatsapp, drive_url, drive_token, gmail_url, gmail_token, membrete_titulo, membrete_detalle, ciudad, token_calendario')
       .eq('org_id', this.org())
       .single()
     return deFila<ConfigOrg>(lanzarSiError(r) as Record<string, unknown>)
