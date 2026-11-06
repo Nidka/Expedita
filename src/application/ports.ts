@@ -17,6 +17,7 @@ import type {
   VisitaItem,
 } from '@/domain/entidades'
 import type { AvanceCliente, EnlaceCliente } from '@/domain/avance/avance'
+import type { ModeloEscrito } from '@/domain/escritos/plantilla'
 import type { CatalogoDrive } from '@/domain/documentos/drive'
 import type { Feriado } from '@/domain/plazos/feriados'
 import type { FechaISO } from '@/domain/shared/fecha'
@@ -136,6 +137,20 @@ export interface EnlacesClienteRepo {
   revocar(id: Id): Promise<void>
   avance(token: string): Promise<AvanceCliente>
 }
+
+/** Membrete del estudio para los escritos en Word (RF-36). */
+export interface Membrete {
+  titulo?: string
+  /** Dirección, teléfono, correo… una línea por renglón */
+  detalle?: string
+}
+
+export interface GeneradorWord {
+  generar(texto: string, membrete: Membrete, titulo?: string): Blob
+}
+
+/** Biblioteca de modelos de escritos y jurisprudencia del estudio (RF-37). */
+export type ModeloRepo = Repositorio<ModeloEscrito>
 
 // ---------- Asistente de IA ----------
 

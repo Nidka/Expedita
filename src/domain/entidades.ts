@@ -192,6 +192,10 @@ export interface ConfigOrg {
   /** Script de Google que lee los avisos del SINOE en Gmail */
   gmailUrl?: string
   gmailToken?: string
+  /** Membrete de los escritos en Word */
+  membreteTitulo?: string
+  membreteDetalle?: string
+  ciudad?: string
 }
 
 export const TIPOS_ESCRITO = [

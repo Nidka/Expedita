@@ -77,8 +77,8 @@ export function generarCSV(filas: Record<string, unknown>[]): string {
   return '\uFEFF' + [cols.join(','), ...filas.map((f) => cols.map((c) => celda(f[c])).join(','))].join('\r\n')
 }
 
-export function descargar(nombre: string, contenido: string, tipo: string) {
-  const url = URL.createObjectURL(new Blob([contenido], { type: tipo }))
+export function descargar(nombre: string, contenido: string | Blob, tipo = 'application/octet-stream') {
+  const url = URL.createObjectURL(contenido instanceof Blob ? contenido : new Blob([contenido], { type: tipo }))
   const a = Object.assign(document.createElement('a'), { href: url, download: nombre })
   document.body.append(a)
   a.click()

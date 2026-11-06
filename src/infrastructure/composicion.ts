@@ -3,6 +3,7 @@ import { hoyEnLima } from '@/domain/shared/fecha'
 import { driveAppsScript, gmailAppsScript } from './google/apps-script'
 import { gmailDemo } from './memoria/gmail-demo'
 import { hojasDelLibro, leerHojaCuadro } from './excel/leer-cuadro'
+import { generadorWord } from './word/docx'
 import { driveDemo } from './memoria/drive-demo'
 import { AsistenteClaude } from './ia/asistente-claude'
 import { contenedorMemoria } from './memoria/repositorios'
@@ -21,6 +22,7 @@ import {
   VisitasSupabase,
   audienciasSupabase,
   notificacionesSupabase,
+  modelosSupabase,
 } from './supabase/repositorios'
 
 export const modoDemo = !supabaseConfigurado
@@ -58,6 +60,8 @@ export async function crearContenedor(): Promise<Contenedor> {
     config: new ConfigSupabase(org),
     equipo: new EquipoSupabase(org),
     enlaces: new EnlacesClienteSupabase(org),
+    modelos: modelosSupabase(org),
+    word: generadorWord,
     auditoria: new AuditoriaSupabase(org),
     cambios: new CambiosSupabase(org),
     ia: new AsistenteClaude(),

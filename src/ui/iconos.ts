@@ -83,5 +83,7 @@ export {
   ShareNetworkIcon as ShareIcon,
   WhatsappLogoIcon as WhatsappIcon,
   ScalesIcon,
+  BooksIcon,
+  TextAlignLeftIcon,
   ChartBarIcon,
 } from '@phosphor-icons/react'

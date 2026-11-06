@@ -1,6 +1,7 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { CopyIcon } from '@/ui/iconos'
+import { CopyIcon, FileDocIcon } from '@/ui/iconos'
 import type { ResumenExpedienteIA } from '@/application/ports'
 import { calcularPendientes, estadoMovimiento } from '@/domain/agenda/que-toca-hoy'
 import { TIPOS_ESCRITO } from '@/domain/entidades'
@@ -14,7 +15,8 @@ import { Michi } from '../componentes/marca'
 import { SelectorExpediente } from '../componentes/SelectorExpediente'
 import { etiquetaExp } from '../formato'
 
-function Resultado({ texto, etiqueta }: { texto: string; etiqueta: string }) {
+function Resultado({ texto, etiqueta, expId }: { texto: string; etiqueta: string; expId?: string }) {
+  const navegar = useNavigate()
   const copiar = async () => {
     try {
       await navigator.clipboard.writeText(texto)
@@ -27,9 +29,16 @@ function Resultado({ texto, etiqueta }: { texto: string; etiqueta: string }) {
     <div className="grid gap-2">
       <div className="flex items-center justify-between">
         <p className="text-xs font-medium text-muted-foreground uppercase">{etiqueta} · borrador para revisar</p>
-        <Button variant="ghost" size="sm" onClick={copiar}>
-          <CopyIcon aria-hidden /> Copiar
-        </Button>
+        <div className="flex gap-1">
+          {etiqueta === "Escrito" && (
+            <Button variant="ghost" size="sm" onClick={() => navegar("/escritos", { state: { texto, expId } })}>
+              <FileDocIcon aria-hidden /> Llevar a Escritos
+            </Button>
+          )}
+          <Button variant="ghost" size="sm" onClick={copiar}>
+            <CopyIcon aria-hidden /> Copiar
+          </Button>
+        </div>
       </div>
       <div className="max-h-[60dvh] overflow-y-auto rounded-xl border bg-card p-5 font-serif text-[0.95rem] leading-relaxed whitespace-pre-wrap sm:p-8" tabIndex={0} aria-label={etiqueta}>
         {texto}
@@ -147,7 +156,7 @@ function Redactar() {
         <Button onClick={redactar} disabled={cargando} className="justify-self-start">
           {cargando ? 'Redactando…' : 'Redactar borrador'}
         </Button>
-        <div aria-live="polite">{cargando ? <Trabajando texto="Redactando el borrador…" /> : texto && <Resultado texto={texto} etiqueta="Escrito" />}</div>
+        <div aria-live="polite">{cargando ? <Trabajando texto="Redactando el borrador…" /> : texto && <Resultado texto={texto} etiqueta="Escrito" expId={expId} />}</div>
       </CardContent>
     </Card>
   )

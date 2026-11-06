@@ -1,7 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { ArchiveIcon, ArchiveRestoreIcon, CalendarPlusIcon, CopyIcon, ExternalLinkIcon, PencilIcon, PenLineIcon, SearchCheckIcon, Trash2Icon } from '@/ui/iconos'
+import { ArchiveIcon, ArchiveRestoreIcon, CalendarPlusIcon, CopyIcon, ExternalLinkIcon, FileDocIcon, PencilIcon, PenLineIcon, SearchCheckIcon, Trash2Icon } from '@/ui/iconos'
 import type { Accion, Expediente } from '@/domain/entidades'
 import { EditarAccion, EliminarAccion } from '../componentes/EditarAccion'
 import { SeccionDocumentos } from '../componentes/Documentos'
@@ -253,6 +253,9 @@ export function FichaExpediente() {
             </BotonEnlace>
             <BotonEnlace a={`/agenda?audiencia=${exp.id}`} variant="outline">
               <CalendarPlusIcon aria-hidden /> Audiencia
+            </BotonEnlace>
+            <BotonEnlace a={`/escritos?exp=${exp.id}`} variant="outline">
+              <FileDocIcon aria-hidden /> Escrito
             </BotonEnlace>
             <CompartirAvance exp={exp} />
             <Button variant="outline" size="icon" onClick={() => setEditando(true)} aria-label="Editar expediente" title="Editar expediente">

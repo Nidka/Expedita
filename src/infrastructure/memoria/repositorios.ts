@@ -18,6 +18,8 @@ import type {
 import type { Contenedor } from '@/application/contenedor'
 import type { Accion, Audiencia, ConfigOrg, Expediente, Id, Juzgado, Miembro, Notificacion, Visita, VisitaItem } from '@/domain/entidades'
 import { construirAvance, enlaceVigente, generarToken, type AvanceCliente, type EnlaceCliente } from '@/domain/avance/avance'
+import type { ModeloEscrito } from '@/domain/escritos/plantilla'
+import { generadorWord } from '../word/docx'
 import { FERIADOS_NACIONALES } from '@/domain/plazos/feriados'
 import { hoyEnLima, type FechaISO } from '@/domain/shared/fecha'
 import { driveDemo } from './drive-demo'
@@ -181,7 +183,7 @@ class JuzgadosMemoria implements JuzgadoRepo {
 class ConfigMemoria implements ConfigRepo {
   private cfg: ConfigOrg
   constructor(private readonly almacen: Almacen) {
-    this.cfg = almacen.leer<ConfigOrg>('config', [{ orgId: ORG, diasSinMovimiento: 30, diasInhabiles: [], equipoWhatsapp: [], driveUrl: 'demo', driveToken: 'demo', gmailUrl: 'demo', gmailToken: 'demo' }])[0]
+    this.cfg = almacen.leer<ConfigOrg>('config', [{ orgId: ORG, diasSinMovimiento: 30, diasInhabiles: [], equipoWhatsapp: [], driveUrl: 'demo', driveToken: 'demo', gmailUrl: 'demo', gmailToken: 'demo', membreteTitulo: 'Estudio de demostración', membreteDetalle: 'Av. Ejemplo 123, Lima · (01) 555-0000 · contacto@estudio.pe', ciudad: 'Lima' }])[0]
   }
   async obtener() {
     return structuredClone(this.cfg)
@@ -309,6 +311,8 @@ export function contenedorMemoria(opciones: { persistir?: boolean; semilla?: (c:
     config: new ConfigMemoria(almacen),
     equipo: new EquipoMemoria(),
     enlaces: new EnlacesMemoria(almacen, () => c),
+    modelos: new RepoMemoria<ModeloEscrito>('modelos', almacen),
+    word: generadorWord,
     auditoria: { recientes: async () => [] },
     cambios: { suscribir: (_t, cb) => bus.escuchar(cb) } satisfies CanalCambios,
     ia: new IADemo(),

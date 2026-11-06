@@ -1,6 +1,7 @@
 import type { Accion, ConfigOrg, Expediente, Id, Juzgado, Miembro, Notificacion, Rol, Visita, VisitaItem, Audiencia } from '@/domain/entidades'
 import { generarToken, type AvanceCliente, type EnlaceCliente } from '@/domain/avance/avance'
 import type { FechaISO } from '@/domain/shared/fecha'
+import type { ModeloEscrito } from '@/domain/escritos/plantilla'
 import type { Feriado } from '@/domain/plazos/feriados'
 import type {
   AccionRepo,
@@ -11,6 +12,7 @@ import type {
   AuditoriaRepo,
   EquipoRepo,
   EnlacesClienteRepo,
+  ModeloRepo,
   Invitacion,
   RegistroAuditoria,
   ExpedienteRepo,
@@ -122,6 +124,9 @@ export class AccionesSupabase extends RepoSupabase<Accion> implements AccionRepo
 export const notificacionesSupabase = (org: OrgActual): NotificacionRepo =>
   new RepoSupabase<Notificacion>('notificaciones', org, { columna: 'recibido', asc: false })
 
+export const modelosSupabase = (org: OrgActual): ModeloRepo =>
+  new RepoSupabase<ModeloEscrito>('modelos_escrito', org, { columna: 'titulo', asc: true })
+
 export const audienciasSupabase = (org: OrgActual): AudienciaRepo =>
   new RepoSupabase<Audiencia>('audiencias', org, { columna: 'fecha', asc: true })
 
@@ -170,7 +175,7 @@ export class ConfigSupabase implements ConfigRepo {
   async obtener(): Promise<ConfigOrg> {
     const r = await supabase()
       .from('config_org')
-      .select('org_id, dias_sin_movimiento, dias_inhabiles, equipo_whatsapp, drive_url, drive_token, gmail_url, gmail_token')
+      .select('org_id, dias_sin_movimiento, dias_inhabiles, equipo_whatsapp, drive_url, drive_token, gmail_url, gmail_token, membrete_titulo, membrete_detalle, ciudad')
       .eq('org_id', this.org())
       .single()
     return deFila<ConfigOrg>(lanzarSiError(r) as Record<string, unknown>)

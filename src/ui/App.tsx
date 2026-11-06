@@ -17,6 +17,7 @@ const Agenda = lazy(() => import('./paginas/Agenda').then((m) => ({ default: m.A
 const Visitas = lazy(() => import('./paginas/Visitas').then((m) => ({ default: m.Visitas })))
 const Asistente = lazy(() => import('./paginas/Asistente').then((m) => ({ default: m.Asistente })))
 const Reportes = lazy(() => import('./paginas/Reportes').then((m) => ({ default: m.Reportes })))
+const Escritos = lazy(() => import('./paginas/Escritos').then((m) => ({ default: m.Escritos })))
 const Cuenta = lazy(() => import('./paginas/Cuenta').then((m) => ({ default: m.Cuenta })))
 const PaginaAvance = lazy(() => import('./paginas/Avance').then((m) => ({ default: m.PaginaAvance })))
 const Ajustes = lazy(() => import('./paginas/Ajustes').then((m) => ({ default: m.Ajustes })))
@@ -96,6 +97,7 @@ function AppPrivada() {
               <Route path="ajustes" element={<Ajustes />} />
               <Route path="cuenta" element={<Cuenta />} />
               <Route path="reportes" element={<Reportes />} />
+              <Route path="escritos" element={<Escritos />} />
               <Route path="*" element={<EstadoVacio pose="espaldas" titulo="Esta página no existe">Revisa el enlace o vuelve a Hoy.</EstadoVacio>} />
             </Route>
           </Routes>

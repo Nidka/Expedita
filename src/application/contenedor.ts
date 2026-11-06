@@ -9,6 +9,8 @@ import type {
   DrivePort,
   EnlacesClienteRepo,
   GmailPort,
+  GeneradorWord,
+  ModeloRepo,
   EquipoRepo,
   ExpedienteRepo,
   JuzgadoRepo,
@@ -30,6 +32,8 @@ export interface Contenedor {
   config: ConfigRepo
   equipo: EquipoRepo
   enlaces: EnlacesClienteRepo
+  modelos: ModeloRepo
+  word: GeneradorWord
   auditoria: AuditoriaRepo
   cambios: CanalCambios
   ia: AsistenteIA
